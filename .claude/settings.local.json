@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm start)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill /F /PID 20716)",
+      "Bash(powershell -Command:*)",
+      "Bash(if exist \"%APPDATA%\\\\souverain\\\\GPUCache\" rmdir /S /Q \"%APPDATA%\\\\souverain\\\\GPUCache\")",
+      "Bash(npm run build:*)",
+      "Bash(node:*)"
+    ]
+  },
+  "enabledPlugins": {
+    "code-review@claude-code-plugins": true
+  }
+}
