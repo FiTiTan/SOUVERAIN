@@ -123,16 +123,29 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           overflow: 'hidden',
         }}
       >
-        {/* Placeholder - In production, load actual thumbnail */}
-        <div
-          style={{
-            fontSize: '3rem',
-            opacity: 0.3,
-            color: theme.text.secondary,
-          }}
-        >
-          🎨
-        </div>
+        {/* Template Thumbnail */}
+        {template.thumbnail_path ? (
+          <img
+            src={template.thumbnail_path}
+            alt={template.name}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              opacity: 0.8,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              fontSize: '3rem',
+              opacity: 0.3,
+              color: theme.text.secondary,
+            }}
+          >
+            🎨
+          </div>
+        )}
 
         {/* Preview Button Overlay */}
         <motion.button
