@@ -199,6 +199,26 @@ contextBridge.exposeInMainWorld('electron', {
   // ============================================================
 
   // ============================================================
+  // TEMPLATES (Portfolio Maître V2)
+  // ============================================================
+
+  templates: {
+    getAll: () => ipcRenderer.invoke('db-templates-get-all'),
+    getFree: () => ipcRenderer.invoke('db-templates-get-free'),
+    getOwned: () => ipcRenderer.invoke('db-templates-get-owned'),
+    getBoutique: () => ipcRenderer.invoke('db-templates-get-boutique'),
+    getById: (id) => ipcRenderer.invoke('db-templates-get-by-id', id),
+    getHTML: (id) => ipcRenderer.invoke('template-get-html', id),
+    purchase: (templateId, amountPaid, isPremiumDiscount) => ipcRenderer.invoke('template-purchase', { templateId, amountPaid, isPremiumDiscount }),
+  },
+
+  // ============================================================
+  // PORTFOLIO SAVE V2
+  // ============================================================
+
+  portfolioSaveV2: (data) => ipcRenderer.invoke('db-save-portfolio-v2', data),
+
+  // ============================================================
   // MEDIATHEQUE (Legacy/Hybrid)
   // ============================================================
 
