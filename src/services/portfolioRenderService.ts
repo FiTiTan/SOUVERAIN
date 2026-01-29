@@ -17,15 +17,24 @@ interface RenderOptions {
  */
 export const loadTemplateHTML = async (templateId: string): Promise<string> => {
   try {
+    console.log('[PortfolioRender] Loading template:', templateId);
+    console.log('[PortfolioRender] window.electron exists:', !!window.electron);
+    console.log('[PortfolioRender] window.electron.invoke exists:', !!(window.electron && window.electron.invoke));
+    
     // @ts-ignore
     const result = await window.electron.invoke('template-get-html', templateId);
+    console.log('[PortfolioRender] Result type:', typeof result);
+    console.log('[PortfolioRender] Result:', result);
+    
     // Ensure we return the HTML string, whether it's direct or wrapped
     if (typeof result === 'object' && result !== null && 'html' in result) {
+      console.log('[PortfolioRender] Returning result.html, length:', result.html?.length);
       return result.html || '';
     }
+    console.log('[PortfolioRender] Returning result as string, length:', result?.length);
     return typeof result === 'string' ? result : '';
   } catch (error) {
-    console.error(`Error loading template ${templateId}:`, error);
+    console.error(`[PortfolioRender] Error loading template ${templateId}:`, error);
     throw new Error(`Impossible de charger le template ${templateId}`);
   }
 };
