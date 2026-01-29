@@ -1,0 +1,23 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-kinetic" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#bg-kinetic)"/>
+
+  <!-- Large typography -->
+  <text x="200" y="130" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" fill="url(#text-gradient)" text-anchor="middle">KINETIC</text>
+  <text x="200" y="170" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="white" text-anchor="middle" opacity="0.7" letter-spacing="3">TYPOGRAPHY</text>
+
+  <!-- Accent elements -->
+  <rect x="150" y="200" width="100" height="3" fill="#667eea"/>
+</svg>

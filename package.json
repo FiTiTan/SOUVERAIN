@@ -1,0 +1,72 @@
+{
+  "name": "souverain",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Career-Coach : IA Souveraine et Gestion de Carrière Locale",
+  "type": "module",
+  "main": "main.cjs",
+  "author": "Jean-Louis",
+  "scripts": {
+    "start": "concurrently \"npm run vite:dev\" \"wait-on http://localhost:5173 && npm run electron:dev\"",
+    "vite:dev": "vite",
+    "electron:dev": "electron .",
+    "build": "vite build && electron-builder",
+    "postinstall": "electron-rebuild",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
+    "@mlc-ai/web-llm": "^0.2.80",
+    "@types/qrcode": "^1.5.6",
+    "better-sqlite3-multiple-ciphers": "^12.5.0",
+    "canvas": "^3.2.1",
+    "dotenv": "^17.2.3",
+    "framer-motion": "^12.29.0",
+    "jspdf": "^4.0.0",
+    "lucide-react": "^0.562.0",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^2.4.5",
+    "pdf.js-extract": "^0.2.1",
+    "pdfjs-dist": "^5.4.530",
+    "qrcode": "^1.5.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sharp": "^0.34.5",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.23",
+    "concurrently": "^9.2.1",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.5.0",
+    "electron-rebuild": "^2.0.3",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.souverain.careercoach",
+    "productName": "Souverain",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "main.cjs",
+      "src/workers/**/*"
+    ]
+  }
+}

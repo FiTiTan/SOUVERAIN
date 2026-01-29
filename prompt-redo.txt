@@ -1,0 +1,95 @@
+Ok il n'y a pas grand chose qui fonctionne. On va développer une a une les sections et je vais te guider sur ce que je veux.
+
+Dans la premiere section:
+
+1. L'utilisateur doit avoir la possibilité de créer son portfolio maître. Avec abonnement, on doit pouvoir créer plusieurs portfoliomètres. Le premier écran sert donc à les sélectionner si il y en  a ou à les créer. C''est également la page de présentation plus détaillée de la fonction Portfolio Maître : à quoi ça sert et quel et la plu value de l'outil.
+2. Pour la partie création de portfolio, il faut que l'utilisateur avance étape par étape dans les éléments constitutifs.
+Ce cheminement doit répondre à une mécanique d'entonnoir, en commençant par le plus large et en finissant par le plus précis. Si jamais je m'écarte de cette logique, il faut que tu reviennes vers moi et que tu reprennes ce point pour que nous soyons alignés. Sur le premier écran, il peut partir de zéro ou importer un design qu'il a déjà créé sur d'autres portfolio (fonction premium uniquement). 
+Ensuite, la première partie consiste en un chat conversationnel avec l'IA, qui pose des questions claires et précises pour créer un prompt final. Cela permet de générer le portfolio le plus en accord avec la volonté de l'utilisateur.
+Cette série de questions doit comprendre le but de la création de ce portfolio : s'agit-il d'un portfolio promotionnel d'une personne (à savoir l'utilisateur), d'une entité, d'une entreprise, d'une boutique, d'un restaurant, d'un cabinet, ou d'un freelance ou d'autre chose.
+La deuxième question doit porter sur l'élément le plus important pour l'utilisateur dans la construction de son portfolio. Cette question est volontairement ouverte, mais elle permettra de mettre en avant un critère fondamental que l'IA devra prendre en compte lors de la création du portfolio.
+La dernière question porte sur la volonté d'afficher ou non des informations pratiques à mettre en avant sur le portfolio, comme :
+1. Les horaires d'ouverture (si nous sommes dans le cadre d'une boutique)
+2. Les horaires de contact, la tarification
+3. Les coordonnées
+4. autres  si tu as des idées.
+
+LA seconde partie est l'import de projets à mettre en avant et créés dans la partie projet. Si cet élément est vide, l'utilisateur pourra injecter ses projets postérieurement à l'édit. Un import vers linkedin est également possible ici, si l'utilisateur veut mettre en avant des compétences ou projets. De l'import d'un Notion également possible ici pour les mêmes raisons.
+
+La troisième partie est relative à l'import de fichiers, images, textes, vidéos. 
+
+Enfin, L'IA doit préconiser un style et une tonalité  compte tenu des éléments à sa disposiition : 
+
+MODERNE (Digital Native)
+Layouts : bento_grid, cards_carousel, stats_band
+Typo : Inter, sans-serif moderne
+Couleurs : Vives, gradients, contrastes forts
+Espacements : Genereux, aeres
+Animations : Oui, subtiles
+Formes : Coins arrondis
+CLASSIQUE (Expert Etabli)
+Layouts : two_columns, sections_lineaires, sidebar_fixe
+Typo : Serif elegant type Georgia ou Playfair
+Couleurs : Neutres, bleu marine, bordeaux, or discret
+Espacements : Structures, grille stricte
+Animations : Non ou tres subtiles
+Formes : Coins droits ou legerement arrondis
+AUTHENTIQUE (Artisan)
+Layouts : hero_fullwidth, temoignages_band, galerie_terrain
+Typo : Rounded sans-serif chaleureux
+Couleurs : Terre, bois, vert, couleurs chaudes
+Espacements : Confortables, pas trop serres
+Animations : Non
+Formes : Coins arrondis, aspect manuel
+Photos : Mises en avant, terrain, humain
+ARTISTIQUE (Creatif)
+Layouts : masonry, fullscreen_gallery, minimal_nav
+Typo : Minimal, disparait au profit des images
+Couleurs : Noir blanc ou palette tres reduite
+Espacements : Images bord a bord ou tres aeres
+Animations : Transitions elegantes
+Formes : Epurees
+Focus : 90 pourcent images 10 pourcent texte
+VITRINE (Commerce Local)
+Layouts : hero_ambiance, infos_pratiques_sticky, galerie_produits, avis_clients
+Typo : Accessible, lisible, sympathique
+Couleurs : Selon ambiance du commerce
+Espacements : Clairs, hierarchises
+Animations : Non
+Priorite : Horaires, adresse, telephone, avis
+FORMEL (Institutionnel)
+Layouts : sections_numerotees, sidebar_navigation, certifications_band
+Typo : Serif traditionnel, tres lisible
+Couleurs : Bleu marine, gris, blanc, touches dorees
+Espacements : Stricts, alignes
+Animations : Non
+Formes : Coins droits, lignes fines
+Ton : Confiance, rigueur, tradition
+
+Comment l'IA suggere le style
+Basee sur :
+
+Reponses au formulaire d intention
+Type de contenu uploade
+Comptes externes lies
+Mots cles dans les textes
+
+Exemples :
+Beaucoup de photos chantier + Motivation "clients locaux"
+-> Suggestion : AUTHENTIQUE
+
+Lien GitHub + Dribbble + Motivation "missions freelance"
+-> Suggestion : MODERNE
+
+Contenu majoritairement photos artistiques + peu de texte
+-> Suggestion : ARTISTIQUE
+
+Mentions "cabinet" "etude" "expertise" dans les textes
+-> Suggestion : FORMEL ou CLASSIQUE
+
+Horaires + adresse + avis dans les intentions
+-> Suggestion : VITRINE
+
+L'utilisateur peut décliner la préco et choisir son style.
+
+Une fois tous ces éléments constitués, un bouton générer mon portfolio apparait. L'IA locale anonymise l'ensemble des données avant de créer un portfolio cohérent avec ces éléments. Nous afinerons le prompt ensemble dan sun second temps. 

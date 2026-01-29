@@ -1,0 +1,159 @@
+feat(portfolio): Phase C - Système de gestion des projets (base)
+
+Implémentation du système de création et gestion de projets pour organiser
+les assets du portfolio. Permet de regrouper les fichiers en projets cohérents
+avec titres, descriptions et tags.
+
+FONCTIONNALITÉS AJOUTÉES:
+
+• Affichage des projets
+  - Composant ProjectList avec grille responsive
+  - Tri automatique (featured first, puis displayOrder)
+  - État vide avec message
+
+• Carte de projet
+  - Composant ProjectCard avec titre, description, tags
+  - Badge "⭐ Mis en avant" pour projets featured
+  - Métadonnées: nombre d'éléments, date création
+  - Boutons éditer ✏️ et supprimer 🗑️ (au hover)
+  - Effet hover avec bordure accent
+
+• Création/Édition de projet
+  - Modal ProjectCreateModal full-screen
+  - Formulaire: titre (requis), description, tags, featured
+  - Ajout/suppression de tags dynamique
+  - Mode création ou édition
+  - Validation côté client + feedback toast
+
+• Système d'onglets dans Portfolio
+  - Onglet Assets (existant)
+  - Onglet Projets (nouveau)
+  - Compteur d'items par onglet
+  - Navigation fluide entre onglets
+
+• Gestion CRUD complète
+  - Création de projet
+  - Lecture/affichage projets
+  - Mise à jour projet
+  - Suppression projet
+  - Chargement automatique au mount
+  - Mapping snake_case → camelCase
+
+COMPOSANTS UI CRÉÉS:
+
+• ProjectCard.tsx (226 lignes)
+  - Carte projet avec métadonnées
+  - Actions édition/suppression
+  - Support tags colorés
+  - Badge featured
+
+• ProjectList.tsx (98 lignes)
+  - Grille responsive (min 320px/carte)
+  - Tri featured + displayOrder
+  - État vide personnalisé
+
+• ProjectCreateModal.tsx (449 lignes)
+  - Modal avec overlay semi-transparent
+  - Formulaire complet avec validation
+  - Gestion tags (ajout/suppression)
+  - Mode création/édition
+  - Intégration toast notifications
+
+INTÉGRATION:
+
+• PortfolioModule.tsx (modifié)
+  - Ajout imports: ProjectList, ProjectCreateModal, Project
+  - Nouveaux states: projects, isLoadingProjects, showProjectModal,
+    editingProject, activeTab
+  - Nouvelles fonctions: loadProjects, handleSaveProject,
+    handleDeleteProject, handleEditProject, handleCreateProject
+  - Système onglets remplaçant section assets
+  - Modal projet intégré
+
+API UTILISÉE:
+
+window.electron.portfolioV2.projects.{
+  create(data)             - Création projet
+  getByPortfolio(id)       - Récupération par portfolio
+  getById(id)              - Récupération par ID
+  update(id, updates)      - Mise à jour
+  delete(id)               - Suppression
+}
+
+BACKEND:
+
+Utilise handlers IPC existants (déjà implémentés):
+- portfolio-project-v2-create
+- portfolio-project-v2-get-by-portfolio
+- portfolio-project-v2-get-by-id
+- portfolio-project-v2-update
+- portfolio-project-v2-delete
+
+BASE DE DONNÉES:
+
+Table: portfolio_projects_v2
+Colonnes: id, portfolio_id, title, description, display_order,
+         is_featured, tags_json, created_at, updated_at
+
+Index:
+- idx_portfolio_projects_v2_portfolio (portfolio_id)
+- idx_portfolio_projects_v2_order (portfolio_id, display_order)
+
+DOCUMENTATION:
+
+• PHASE_C_IMPLEMENTATION.md
+  - Vue d'ensemble Phase C
+  - Structure de données
+  - API et handlers
+  - Interface utilisateur
+  - Flow utilisateur
+  - Tests de validation
+  - Fonctionnalités à venir
+
+• SOUVERAIN-BRIEF.md (mis à jour)
+  - Phase C marquée EN COURS
+  - Base terminée, assignation assets à faire
+  - Dernière implémentation documentée
+
+FICHIERS:
+
+Créés:
+- src/components/portfolio/ProjectCard.tsx
+- src/components/portfolio/ProjectList.tsx
+- src/components/portfolio/ProjectCreateModal.tsx
+- PHASE_C_IMPLEMENTATION.md
+- COMMIT_MESSAGE_PHASE_C.txt
+
+Modifiés:
+- src/components/portfolio/PortfolioModule.tsx (système onglets + CRUD projets)
+- SOUVERAIN-BRIEF.md (état Phase C)
+
+TESTS:
+
+✅ TypeScript: npx tsc --noEmit (0 erreurs)
+⏳ Tests manuels: Création/édition/suppression projets
+⏳ Tests manuels: Navigation onglets
+⏳ Tests manuels: Tri et affichage
+
+PHASE C - ÉTAT:
+
+✅ Terminé:
+  - Gestion de base des projets (CRUD)
+  - Interface utilisateur complète
+  - Système onglets Assets/Projets
+
+⏳ À venir:
+  - Assignation d'assets aux projets (drag & drop)
+  - Éditeur de projet complet (ProjectEditor)
+  - Classification IA avec Ollama
+
+MÉTRIQUES:
+
+- Composants créés: 3
+- Fichiers modifiés: 2
+- Lignes de code: ~773
+- Handlers IPC utilisés: 5
+- Erreurs TypeScript: 0
+- Temps implémentation: ~1h
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>

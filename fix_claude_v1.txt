@@ -1,0 +1,38 @@
+CONTEXTE
+Module Portfolio SOUVERAIN. Phase B et C en cours. Deux bugs bloquants sur la gestion des projets et assets.
+
+BUG 1 BOUTON CREER UN PROJET INACTIF
+Symptome : Le bouton Creer un projet ne fait rien au clic. Aucune action visible. Pas de log console.
+A verifier :
+- Le onClick est il bien lie au bouton
+- La fonction de creation est elle implementee ou juste un placeholder
+- Y a t il une erreur silencieuse
+Correction attendue : Au clic un nouveau projet vide doit etre cree et apparaitre dans la liste avec un titre par defaut type Nouveau projet
+
+BUG 2 IMPOSSIBLE D OUVRIR LES ASSETS
+Symptome : Je clique sur un asset dans la grille mais rien ne se passe. Je ne peux pas voir le fichier en grand ou l ouvrir.
+Correction attendue : Au clic sur un asset soit ouvrir une modale de preview soit ouvrir le fichier avec l application par defaut du systeme
+
+AMELIORATION UX CLARIFIER LA DIFFERENCE ASSETS ET PROJETS
+Probleme : L utilisateur ne comprend pas la difference entre Assets et Projets dans l interface.
+Explication metier :
+- ASSETS : Les fichiers bruts importes. Photos PDF videos. Ce sont les matieres premieres.
+- PROJETS : Des regroupements d assets avec un titre et une description. Un projet represente une realisation complete. Par exemple le projet Renovation cuisine Dupont contient 5 photos avant apres et 1 PDF du devis.
+Correction attendue : Ajouter des labels ou tooltips explicatifs dans l interface. Par exemple :
+- Section Assets avec sous titre Vos fichiers importes
+- Section Projets avec sous titre Regroupez vos fichiers en realisations
+- Tooltip ou texte d aide Glissez vos fichiers dans un projet pour creer une realisation
+
+FICHIERS PROBABLEMENT CONCERNES
+src components portfolio PortfolioEditor.tsx ou PortfolioDetail.tsx
+src components portfolio ProjectList.tsx ou ProjectOrganizer.tsx
+src components portfolio AssetGrid.tsx ou AssetCard.tsx
+
+CONSIGNE
+1 Trouve le bouton Creer un projet et verifie son onClick
+2 Implemente la creation de projet si c est un placeholder
+3 Ajoute la fonctionnalite d ouverture preview des assets au clic
+4 Ajoute des labels explicatifs pour clarifier Assets vs Projets
+5 Teste la creation d un projet et l ouverture d un asset
+
+Montre moi le code actuel des boutons concernes avant de corriger.

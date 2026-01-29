@@ -1,0 +1,158 @@
+feat(portfolio): Système complet de gestion des assets - Phase B
+
+Implémentation du système d'import et gestion des assets (images, PDFs, vidéos)
+pour le module Portfolio avec génération automatique de miniatures.
+
+FONCTIONNALITÉS AJOUTÉES:
+
+• Import de fichiers
+  - Bouton "Importer des fichiers" dans la vue détail portfolio
+  - Sélection multiple native Electron
+  - Support formats: JPG, JPEG, PNG, GIF, WEBP, PDF, MP4, MOV, WEBM
+  - Validation format et taille (max 100 Mo/fichier)
+  - Feedback toast (succès/erreur/warning)
+
+• Stockage local structuré
+  - Dossier assets/ pour fichiers originaux
+  - Dossier thumbnails/ pour miniatures
+  - Nommage unique: {baseName}_{timestamp}{extension}
+  - Structure: userData/portfolios/{id}/assets/
+
+• Génération de miniatures
+  - Automatique pour images (JPG, PNG, GIF, WEBP)
+  - Electron nativeImage API
+  - Max 300x300px, ratio préservé
+  - Format JPEG 80% qualité
+  - Handler IPC: portfolio-v2-generate-thumbnail
+
+• Base de données
+  - Table portfolio_assets avec FK vers portfolios_v2
+  - Champs: id, portfolio_id, source_type, source_path, local_path,
+    format, original_filename, file_size, metadata_json, thumbnail_path
+  - Index sur portfolio_id et format
+  - Mapping snake_case → camelCase dans getByPortfolioId
+
+• Affichage des assets
+  - Grille responsive (min 250px/carte)
+  - AssetCard avec miniature/icône selon type
+  - Badge format (JPG, PDF, MP4, etc.)
+  - Taille formatée (Ko/Mo)
+  - Bouton supprimer avec confirmation
+  - Effet hover (bordure accent + ombre)
+
+• Service assetService.ts
+  - importAsset() - Import complet avec miniature
+  - deleteAsset() - Suppression asset (TODO: fichier physique)
+  - getAssetsByPortfolioId() - Récupération
+  - getAssetIcon() - Icône selon format (🖼️ 📄 🎥)
+  - getAssetCategory() - Catégorie (image/document/video/other)
+  - formatFileSize() - Formatage taille
+
+COMPOSANTS UI CRÉÉS:
+
+• AssetImporter.tsx
+  - Bouton avec icône 📁
+  - Input file caché (multiple, accept formats)
+  - Validation et import async
+  - Notifications toast
+
+• AssetGrid.tsx
+  - Grille responsive (auto-fill 250px)
+  - État vide avec message
+  - Map sur AssetCard[]
+
+• AssetCard.tsx
+  - Thumbnail container (200px height)
+  - Image src: thumbnailPath || localPath
+  - Normalisation path Windows (file:///)
+  - Content: filename (ellipsis) + meta (badge + size)
+  - Delete button (hover, confirm)
+
+INTÉGRATION:
+
+• PortfolioModule.tsx
+  - Vue détail portfolio avec section "Assets du Portfolio"
+  - Header: titre + AssetImporter
+  - Body: AssetGrid avec loading state
+  - Auto-reload après import/suppression
+
+HANDLERS IPC (main.cjs):
+
+• portfolio-v2-save-file
+  - Copie fichier dans assets/
+  - Retourne path absolu + relatif
+
+• portfolio-v2-generate-thumbnail
+  - Génère miniature 300x300px
+  - Sauvegarde dans thumbnails/
+  - Retourne thumbnailPath + dimensions
+
+• portfolio-asset-create (existant)
+• portfolio-asset-get-by-portfolio (modifié: mapping camelCase)
+• portfolio-asset-delete (existant)
+
+API EXPOSÉE (preload.cjs):
+
+window.electron.portfolioV2.{
+  saveFile(portfolioId, fileName, buffer)
+  generateThumbnail(filePath, maxWidth, maxHeight)
+  assets.{
+    create(data)
+    getByPortfolio(portfolioId)
+    delete(id)
+  }
+}
+
+DOCUMENTATION:
+
+• PORTFOLIO_ASSETS_IMPLEMENTATION.md
+  - Vue d'ensemble technique
+  - Guide de test manuel
+  - Améliorations futures
+
+• PORTFOLIO_ASSETS_ARCHITECTURE.md
+  - Diagrammes de flux (import, suppression)
+  - Hiérarchie composants
+  - Types TypeScript
+  - Formats et contraintes
+
+• PHASE_B_COMPLETION_SUMMARY.md
+  - Résumé exécutif
+  - Métriques
+  - Checklist de tests
+
+FICHIERS:
+
+Créés:
+- src/services/assetService.ts
+- src/components/portfolio/AssetImporter.tsx
+- src/components/portfolio/AssetGrid.tsx
+- src/components/portfolio/AssetCard.tsx
+- PORTFOLIO_ASSETS_IMPLEMENTATION.md
+- PORTFOLIO_ASSETS_ARCHITECTURE.md
+- PHASE_B_COMPLETION_SUMMARY.md
+
+Modifiés:
+- src/components/portfolio/PortfolioModule.tsx (intégration assets)
+- main.cjs (handlers save-file + generate-thumbnail)
+- preload.cjs (API saveFile + generateThumbnail)
+- database.cjs (mapping camelCase dans getByPortfolioId)
+
+TESTS:
+
+✅ TypeScript: npx tsc --noEmit (0 erreurs)
+✅ Import image → miniature générée
+✅ Import PDF → icône 📄
+✅ Import vidéo → icône 🎥
+✅ Import multiple → tous importés
+✅ Suppression → asset retiré
+✅ Persistance → reload app OK
+
+TODO (hors scope Phase B):
+
+- Supprimer fichier physique lors de deleteAsset()
+- Génération miniatures pour vidéos (première frame)
+- Preview plein écran au clic
+- Drag & drop pour import
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>

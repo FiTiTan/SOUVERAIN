@@ -1,0 +1,214 @@
+feat(portfolio): Sélection asset de couverture fonctionnelle - Phase C
+
+Implémentation complète de la fonctionnalité de sélection d'asset de couverture
+pour les projets. Création du handler IPC update pour mettre à jour les éléments
+de projet (isCover, displayOrder). Logique exclusive: 1 seul asset de couverture
+par projet avec désactivation automatique de l'ancien cover.
+
+FONCTIONNALITÉS AJOUTÉES:
+
+• Handler IPC Update
+  - Nouveau handler `portfolio-project-element-update` dans main.cjs
+  - Fonction `portfolioProjectElement_update()` dans database.cjs
+  - Support update dynamique des champs: `display_order`, `is_cover`
+  - Mapping automatique camelCase → snake_case
+  - Validation champs autorisés
+  - Retour { success, error } standard
+
+• API Exposée
+  - Nouvelle méthode `updateElement(projectId, elementId, updates)` dans preload.cjs
+  - Appel IPC `portfolio-project-element-update`
+  - Paramètres: projectId, elementId, updates object
+  - Utilisable pour isCover ET displayOrder (futur drag & drop)
+
+• Sélection Asset de Couverture
+  - Implémentation complète `handleSetCover()` dans ProjectEditor
+  - Logique exclusive: 1 seul cover par projet
+    1. Retrait flag isCover sur tous les autres assets (Promise.all)
+    2. Définition nouvel asset comme couverture
+  - Toast de confirmation "Asset défini comme couverture"
+  - Rechargement automatique pour afficher badge
+  - Callback onProjectUpdate() pour sync ProjectCard
+
+• Visual Feedback
+  - Badge "Couverture" affiché sur asset de couverture
+  - Bouton "⭐ Couverture" caché si déjà cover
+  - Hover effects sur bouton Couverture (fond muted, bordure accent)
+  - Refresh automatique liste après sélection
+
+COMPOSANTS MODIFIÉS:
+
+• database.cjs (~35 lignes ajoutées)
+  - Fonction portfolioProjectElement_update(projectId, elementId, updates)
+  - Construction UPDATE dynamique selon champs fournis
+  - Boucle sur Object.keys(updates) avec validation
+  - Mapping camelCase → snake_case via regex
+  - Array fields + values pour requête préparée
+  - Error handling avec try/catch + log console
+
+• main.cjs (~7 lignes ajoutées)
+  - Handler IPC portfolio-project-element-update
+  - Destructuring { projectId, elementId, updates }
+  - Appel dbManager.portfolioProjectElement_update()
+  - Try/catch avec retour error standardisé
+
+• preload.cjs (~1 ligne ajoutée)
+  - Méthode updateElement dans projects API
+  - ipcRenderer.invoke avec params destructurés
+  - Ajoutée entre getElements et removeElement
+
+• ProjectEditor.tsx (~20 lignes modifiées)
+  - Fonction handleSetCover() complète
+  - Promise.all pour retirer isCover sur autres assets
+  - Filter assignedAssets.filter(asset => asset.isCover && asset.id !== assetId)
+  - Appel updateElement pour chaque ancien cover
+  - Appel updateElement pour nouveau cover
+  - Toast success + loadAssignedAssets() + onProjectUpdate()
+  - Suppression placeholder toast info
+  - Console.log pour debug
+
+API CRÉÉE:
+
+window.electron.portfolioV2.projects.{
+  updateElement(projectId, elementId, updates)
+    - Updates: { isCover: boolean, displayOrder: number }
+    - Returns: { success: boolean, error?: string }
+}
+
+DATABASE:
+
+Table: portfolio_project_elements
+Champs updatables: display_order, is_cover
+
+Query UPDATE dynamique:
+UPDATE portfolio_project_elements
+SET [champs dynamiques]
+WHERE project_id = ? AND element_id = ?
+
+DOCUMENTATION:
+
+• PHASE_C_PROJECT_EDITOR.md (mis à jour)
+  - Section "Sélection Asset de Couverture" complétée
+  - Status: ✅ IMPLÉMENTÉ
+  - Handler Créé avec exemples d'utilisation
+  - Fonctionnalités Futures: Priorité 1 marquée terminée
+  - Métriques: Fichiers modifiés 1 → 4
+  - Bugs connus: Placeholder retiré
+  - Dernière MAJ: 20/01/2025 20h15
+
+• SOUVERAIN-BRIEF.md (mis à jour)
+  - Phase C ProjectEditor: "Selection asset de couverture (IMPLEMENTEE)"
+  - Détail: "1 seul cover par projet"
+  - "Handler IPC updateElement" ajouté
+  - "Ce qui reste": Asset de couverture retiré
+  - Dernière implémentation documentée
+  - Date: 20/01/2025 20h15
+
+FICHIERS:
+
+Modifiés:
+- database.cjs
+- main.cjs
+- preload.cjs
+- src/components/portfolio/ProjectEditor.tsx
+- PHASE_C_PROJECT_EDITOR.md
+- SOUVERAIN-BRIEF.md
+
+Créés:
+- COMMIT_MESSAGE_COVER_ASSET.txt
+
+TESTS:
+
+✅ TypeScript: npx tsc --noEmit (0 erreurs)
+⏳ Tests manuels: Sélection cover
+⏳ Tests manuels: Exclusivité 1 cover par projet
+⏳ Tests manuels: Badge couverture
+⏳ Tests manuels: Persistance
+
+FLOW UTILISATEUR:
+
+1. Ouvrir ProjectEditor
+2. Plusieurs assets affichés
+3. Hover sur asset
+4. Clic "⭐ Couverture"
+5. Promise.all: Retrait isCover sur autres assets
+6. updateElement: Définition nouveau cover
+7. Toast "Asset défini comme couverture"
+8. loadAssignedAssets(): Refresh liste
+9. Badge "Couverture" affiché sur nouvel asset
+10. Ancien badge retiré
+11. Compteur ProjectCard sync (optionnel)
+
+FLOW TECHNIQUE:
+
+```javascript
+// 1. Retirer ancien cover
+const updatePromises = assignedAssets
+  .filter(asset => asset.isCover && asset.id !== assetId)
+  .map(asset =>
+    updateElement(project.id, asset.id, { isCover: false })
+  );
+await Promise.all(updatePromises);
+
+// 2. Définir nouveau cover
+const result = await updateElement(
+  project.id,
+  assetId,
+  { isCover: true }
+);
+
+// 3. Refresh + feedback
+if (result.success) {
+  toast.success('Asset défini comme couverture');
+  await loadAssignedAssets();
+  onProjectUpdate();
+}
+```
+
+DÉCISIONS TECHNIQUES:
+
+• Update Dynamique vs Spécialisé
+  - Choix: Handler updateElement générique
+  - Raison: Réutilisable pour displayOrder (futur drag & drop)
+  - Alternative: Handler setCover spécialisé (rejeté - moins flexible)
+
+• Logique Exclusive Cover
+  - Choix: Retrait automatique ancien cover
+  - Raison: Garantit contrainte 1 seul cover par projet
+  - Alternative: Validation côté DB (rejeté - plus complexe)
+
+• Promise.all pour Batch Update
+  - Choix: Parallel updates des anciens covers
+  - Raison: Performance (si plusieurs anciens covers par erreur)
+  - Alternative: Boucle séquentielle (plus lent)
+
+• Mapping camelCase → snake_case
+  - Choix: Regex automatique dans handler DB
+  - Raison: Cohérence API React (camelCase) et DB (snake_case)
+  - Alternative: Mapping manuel (verbeux, error-prone)
+
+PHASE C - ÉTAT:
+
+✅ Terminé:
+  - Gestion CRUD projets
+  - Système onglets Assets/Projets
+  - Assignation assets (drag & drop)
+  - ProjectEditor (vue détaillée + désassignation)
+  - Asset de couverture (sélection exclusive)
+
+⏳ À venir (optionnel):
+  - Réorganisation assets par drag & drop (displayOrder)
+  - Preview asset en grand au clic
+  - Copier/déplacer assets entre projets
+  - Classification IA avec Ollama
+
+MÉTRIQUES:
+
+- Fichiers créés: 0
+- Fichiers modifiés: 4 (database.cjs, main.cjs, preload.cjs, ProjectEditor.tsx)
+- Lignes ajoutées: ~65
+- Handlers IPC créés: 1
+- Erreurs TypeScript: 0
+- Temps implémentation: ~20 min
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>

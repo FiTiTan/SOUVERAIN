@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{NAME}} - Portfolio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #faf8f6;
+      color: #2c2c2c;
+      line-height: 1.6;
+    }
+
+    .wave-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      opacity: 0.3;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 6rem;
+      padding: 4rem 0;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 5rem);
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      color: #1a1a1a;
+      font-style: italic;
+    }
+
+    .tagline {
+      font-size: 1.5rem;
+      color: #666;
+      font-weight: 300;
+      max-width: 600px;
+      margin: 0 auto 3rem;
+    }
+
+    .section {
+      margin-bottom: 5rem;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 32px;
+      padding: 3rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 400;
+      margin-bottom: 2rem;
+      color: #1a1a1a;
+      font-style: italic;
+      border-bottom: 2px solid #fcb69f;
+      padding-bottom: 1rem;
+    }
+
+    .services-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .service-item {
+      font-size: 1.25rem;
+      padding: 1rem 0;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .service-item::before {
+      content: "✦";
+      color: #fcb69f;
+      font-size: 1.5rem;
+    }
+
+    .value-prop {
+      font-size: 1.5rem;
+      line-height: 1.8;
+      color: #333;
+      text-align: center;
+      font-style: italic;
+      padding: 2rem;
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      border-radius: 24px;
+      margin: 3rem 0;
+    }
+
+    .contact-grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .contact-item {
+      font-size: 1.15rem;
+      padding: 1rem;
+      background: rgba(252, 182, 159, 0.1);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .social-link {
+      padding: 0.75rem 1.5rem;
+      background: #fcb69f;
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+      background: #fa9c7f;
+      transform: translateY(-2px);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 3rem 0;
+      color: #999;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wave-bg"></div>
+
+  <div class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <h1>{{NAME}}</h1>
+      <p class="tagline">{{TAGLINE}}</p>
+    </section>
+
+    <!-- Services -->
+    <section class="section">
+      <h2 class="section-title">Ce que je propose</h2>
+      <div class="services-list">
+        {{SERVICES}}
+      </div>
+    </section>
+
+    <!-- Value Proposition -->
+    <div class="value-prop">
+      {{VALUE_PROP}}
+    </div>
+
+    <!-- Contact -->
+    <section class="section">
+      <h2 class="section-title">Prenons contact</h2>
+      <div class="contact-grid">
+        <div class="contact-item">✉️ {{EMAIL}}</div>
+        {{PHONE}}
+        {{ADDRESS}}
+      </div>
+      <div class="social-links">
+        {{SOCIAL_LINKS}}
+      </div>
+    </section>
+
+    <footer class="footer">
+      Portfolio créé avec SOUVERAIN
+    </footer>
+  </div>
+</body>
+</html>

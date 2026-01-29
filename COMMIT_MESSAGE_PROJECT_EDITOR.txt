@@ -1,0 +1,198 @@
+feat(portfolio): ProjectEditor pour gestion détaillée des projets - Phase C
+
+Implémentation du composant ProjectEditor permettant de visualiser et gérer
+les assets assignés à un projet. Modal plein écran avec affichage en grille,
+désassignation d'assets, et sélection de couverture (placeholder).
+
+FONCTIONNALITÉS AJOUTÉES:
+
+• Vue Détaillée du Projet
+  - Modal plein écran avec overlay semi-transparent
+  - Header: titre projet, compteur assets, badge featured
+  - Description du projet si présente
+  - Liste des tags du projet
+  - Bouton fermeture (✕) avec hover effect
+
+• Affichage Assets Assignés
+  - Grille responsive (auto-fill, min 200px par carte)
+  - Carte asset avec miniature (image) ou icône (PDF/vidéo)
+  - Badge "Couverture" si asset de couverture
+  - Nom fichier avec ellipsis si trop long
+  - État vide personnalisé si 0 assets (icône + message)
+  - Chargement automatique au mount du composant
+
+• Désassignation d'Assets
+  - Bouton "🗑️ Retirer" sur chaque carte asset
+  - Dialogue confirmation avant désassignation
+  - Appel IPC via removeElement(projectId, assetId)
+  - Toast "Asset retiré du projet" après succès
+  - Rechargement automatique liste après retrait
+  - Callback onProjectUpdate() pour maj compteur ProjectCard
+
+• Sélection Asset de Couverture
+  - Bouton "⭐ Couverture" visible si pas déjà couverture
+  - Placeholder: Toast info "Fonctionnalité à venir"
+  - TODO: Handler IPC update pour implémenter complètement
+
+• Intégration PortfolioModule
+  - État viewingProject pour tracker projet en visualisation
+  - Handler handleViewProject() pour ouvrir éditeur
+  - Handler handleCloseProjectEditor() pour fermer
+  - Callback onProjectUpdate connecté à loadProjects()
+  - Ouverture au clic sur ProjectCard (prop onProjectClick)
+  - Rendu conditionnel avec {viewingProject && <ProjectEditor />}
+
+COMPOSANT CRÉÉ:
+
+• ProjectEditor.tsx (500 lignes)
+  - Interface ProjectEditorProps avec project, onClose, onProjectUpdate
+  - Interface AssignedAsset extends Asset (displayOrder, isCover)
+  - État: assignedAssets, isLoading
+  - useEffect pour chargement auto au mount
+  - loadAssignedAssets(): Appel IPC + mapping snake_case → camelCase
+  - handleUnassign(): Désassignation avec confirmation
+  - handleSetCover(): Placeholder pour future implémentation
+  - getAssetIcon(): Helper pour icônes par format
+  - Styles inline complets avec theme tokens
+  - Grille responsive des assets
+  - Cards avec hover effects (bordure accent)
+
+COMPOSANT MODIFIÉ:
+
+• PortfolioModule.tsx (~15 lignes modifiées)
+  - Import ProjectEditor
+  - État viewingProject: Project | null
+  - handleViewProject(project): setViewingProject(project)
+  - handleCloseProjectEditor(): setViewingProject(null)
+  - Prop onProjectClick={handleViewProject} sur ProjectList
+  - Rendu conditionnel ProjectEditor après modals
+  - Callback onProjectUpdate={() => loadProjects(selectedPortfolioId)}
+
+API UTILISÉE:
+
+window.electron.portfolioV2.projects.{
+  getElements(projectId)              - Récupérer assets d'un projet
+  removeElement(projectId, elementId) - Désassigner un asset
+  // À créer:
+  updateElement(projectId, elementId, updates) - Maj isCover
+}
+
+BACKEND:
+
+Handlers IPC existants utilisés:
+- portfolio-project-element-get-by-project
+- portfolio-project-element-delete
+
+Handler à créer (futur):
+- portfolio-project-element-update (pour isCover)
+
+BASE DE DONNÉES:
+
+Table: portfolio_project_elements
+Colonnes utilisées: id, project_id, element_id, display_order, is_cover
+
+Query getByProjectId:
+- JOIN avec portfolio_elements
+- Retourne données asset + liaison
+- ORDER BY display_order ASC
+
+DOCUMENTATION:
+
+• PHASE_C_PROJECT_EDITOR.md
+  - Vue d'ensemble ProjectEditor
+  - Fonctionnalités implémentées
+  - Structure données AssignedAsset
+  - API et handlers IPC
+  - Flow technique (ouverture, chargement, désassignation)
+  - Tests de validation requis
+  - Fonctionnalités futures (couverture, réorganisation)
+
+• PHASE_C_IMPLEMENTATION.md (mis à jour)
+  - Section 6 ajoutée: ProjectEditor
+  - Status: Phase C Base + Assignation + ProjectEditor - TERMINÉE
+  - Priorités mises à jour (couverture, drag & drop réorganisation)
+
+• SOUVERAIN-BRIEF.md (mis à jour)
+  - Phase C: ProjectEditor ✅ marqué terminé
+  - Détails modal, grille, désassignation, placeholder couverture
+  - "Ce qui reste": Asset couverture fonctionnel, réorganisation
+  - Dernière implémentation documentée avec date/heure
+
+FICHIERS:
+
+Créés:
+- src/components/portfolio/ProjectEditor.tsx
+- PHASE_C_PROJECT_EDITOR.md
+- COMMIT_MESSAGE_PROJECT_EDITOR.txt
+
+Modifiés:
+- src/components/portfolio/PortfolioModule.tsx
+- PHASE_C_IMPLEMENTATION.md
+- SOUVERAIN-BRIEF.md
+
+TESTS:
+
+✅ TypeScript: npx tsc --noEmit (0 erreurs)
+⏳ Tests manuels: Ouverture ProjectEditor
+⏳ Tests manuels: Affichage assets
+⏳ Tests manuels: Désassignation
+⏳ Tests manuels: Persistance
+
+FLOW UTILISATEUR:
+
+1. Ouvrir portfolio
+2. Onglet Projets
+3. Clic sur ProjectCard
+4. ProjectEditor s'ouvre en modal
+5. Affichage:
+   - Titre, description, tags
+   - Grille des assets assignés
+6. Actions:
+   - Clic "Retirer" → Confirmation → Désassignation
+   - Clic "⭐ Couverture" → Toast info (placeholder)
+   - Clic overlay ou ✕ → Fermeture
+7. Compteur ProjectCard mis à jour après retrait
+
+DÉCISIONS TECHNIQUES:
+
+• Modal vs Page Séparée
+  - Choix: Modal overlay
+  - Raison: Pas de perte contexte, UX fluide, cohérent avec ProjectCreateModal
+
+• Chargement Automatique
+  - Choix: useEffect au mount + à chaque project.id change
+  - Raison: Données toujours fraîches, UX moderne, performance OK
+
+• Désassignation Immédiate
+  - Choix: Appel IPC + rechargement immédiat
+  - Raison: Feedback instantané, cohérent, évite erreurs
+
+• Couverture Placeholder
+  - Choix: Toast info + TODO code
+  - Raison: Montre fonctionnalité prévue, transparent, facile à activer
+
+PHASE C - ÉTAT:
+
+✅ Terminé:
+  - Gestion CRUD projets
+  - Système onglets Assets/Projets
+  - Assignation assets (drag & drop)
+  - ProjectEditor (vue détaillée + désassignation)
+
+⏳ À venir:
+  - Asset de couverture fonctionnel (handler IPC update)
+  - Réorganisation assets par drag & drop
+  - Preview asset en grand
+  - Classification IA avec Ollama
+
+MÉTRIQUES:
+
+- Fichiers créés: 1 (ProjectEditor.tsx)
+- Fichiers modifiés: 1 (PortfolioModule.tsx)
+- Lignes ajoutées: ~500
+- Lignes modifiées: ~15
+- Handlers IPC utilisés: 2
+- Erreurs TypeScript: 0
+- Temps implémentation: ~30 min
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{NAME}} - Portfolio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+      background: #ffffff;
+      color: #1d1d1f;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .hero {
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 4rem 0;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 5rem);
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      margin-bottom: 1rem;
+    }
+
+    .tagline {
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      color: #6e6e73;
+      font-weight: 400;
+      max-width: 700px;
+      margin-bottom: 3rem;
+    }
+
+    .section {
+      margin: 8rem 0;
+    }
+
+    .section-header {
+      font-size: 2.5rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .service-card {
+      padding: 2rem;
+      background: #f5f5f7;
+      border-radius: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .service-card:hover {
+      background: #e8e8ed;
+      transform: scale(1.02);
+    }
+
+    .service-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .value-section {
+      background: #000000;
+      color: #f5f5f7;
+      padding: 6rem 4rem;
+      border-radius: 24px;
+      text-align: center;
+      margin: 6rem 0;
+    }
+
+    .value-text {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      font-weight: 500;
+      line-height: 1.4;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .contact-section {
+      text-align: center;
+      padding: 4rem 0;
+    }
+
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 600px;
+      margin: 3rem auto;
+    }
+
+    .contact-item {
+      font-size: 1.25rem;
+      color: #1d1d1f;
+      padding: 1.5rem;
+      background: #f5f5f7;
+      border-radius: 16px;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 3rem;
+    }
+
+    .social-link {
+      padding: 1rem 2rem;
+      background: #0071e3;
+      color: white;
+      text-decoration: none;
+      border-radius: 980px;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+      background: #0077ed;
+      transform: scale(1.05);
+    }
+
+    .divider {
+      height: 1px;
+      background: #d2d2d7;
+      margin: 6rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .value-section {
+        padding: 3rem 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <h1>{{NAME}}</h1>
+      <p class="tagline">{{TAGLINE}}</p>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Services -->
+    <section class="section">
+      <h2 class="section-header">What I Do</h2>
+      <div class="services-grid">
+        {{SERVICES}}
+      </div>
+    </section>
+
+    <!-- Value Proposition -->
+    <section class="value-section">
+      <div class="value-text">
+        {{VALUE_PROP}}
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact-section">
+      <h2 class="section-header">Get in Touch</h2>
+      <div class="contact-info">
+        <div class="contact-item">{{EMAIL}}</div>
+        {{PHONE}}
+      </div>
+      <div class="social-links">
+        {{SOCIAL_LINKS}}
+      </div>
+    </section>
+  </div>
+</body>
+</html>

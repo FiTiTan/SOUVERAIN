@@ -1,0 +1,195 @@
+feat(portfolio): Assignation d'assets aux projets via drag & drop - Phase C
+
+Implémentation du système drag & drop HTML5 natif pour assigner des assets
+aux projets. Permet de glisser-déposer des fichiers depuis l'onglet Assets
+directement sur les cartes de projet avec feedback visuel complet.
+
+FONCTIONNALITÉS AJOUTÉES:
+
+• Drag & Drop d'Assets
+  - AssetCard devient draggable avec prop `draggable={true}`
+  - Feedback visuel: opacité 50%, curseur grab pendant drag
+  - Transfert données JSON: assetId + assetName
+  - État isDragging pour indication visuelle
+
+• Drop Zone dans ProjectCard
+  - Zone de drop active au survol pendant drag
+  - Bordure accent 2px + fond muted comme indication
+  - Message centré "📂 Ajouter ici" pendant survol
+  - Gestion propre événements: dragOver, dragLeave, drop
+  - Parsing sécurisé des données droppées
+
+• Gestion Assignation
+  - Handler `handleAssetDrop(projectId, assetId)` dans PortfolioModule
+  - Appel IPC via `window.electron.portfolioV2.projects.addElement()`
+  - Toast de confirmation "Asset ajouté au projet"
+  - Rechargement automatique projets après assignation
+  - Comptage dynamique des assets par projet
+
+• Compteur Assets Assignés
+  - Modification `loadProjects()` pour compter assets
+  - Promise.all + getElements() pour chaque projet
+  - Affichage "📁 X élément(s)" dans ProjectCard
+  - Mise à jour instantanée après drag & drop
+
+• Propagation Props
+  - AssetGrid: prop `enableDragToProjects` (activée sur onglet Assets)
+  - ProjectList: prop `onAssetDrop` propagée à toutes ProjectCards
+  - Connexion complète: Asset → Grid → Module → List → ProjectCard
+
+COMPOSANTS MODIFIÉS:
+
+• AssetCard.tsx (~15 lignes modifiées)
+  - Ajout prop `draggable?: boolean`
+  - État `isDragging`
+  - Handlers `handleDragStart()` et `handleDragEnd()`
+  - Attributes HTML5: draggable, onDragStart, onDragEnd
+  - Style: curseur grab, opacité pendant drag
+
+• AssetGrid.tsx (~5 lignes modifiées)
+  - Ajout prop `enableDragToProjects?: boolean`
+  - Propagation à tous les AssetCards
+
+• ProjectCard.tsx (~40 lignes ajoutées)
+  - Ajout prop `onAssetDrop?: (projectId, assetId) => void`
+  - État `isDropTarget`
+  - Handlers: handleDragOver, handleDragLeave, handleDrop
+  - Style `dropIndicator` avec message
+  - Style card dynamique (bordure + fond)
+  - Attributes HTML5: onDragOver, onDragLeave, onDrop
+
+• ProjectList.tsx (~3 lignes modifiées)
+  - Ajout prop `onAssetDrop`
+  - Propagation à toutes ProjectCards
+
+• PortfolioModule.tsx (~70 lignes modifiées/ajoutées)
+  - Handler `handleAssetDrop()` complet
+    - Création liaison via IPC addElement
+    - Toast confirmation
+    - Rechargement projets
+  - Modification `loadProjects()` pour comptage dynamique
+    - Promise.all sur tous les projets
+    - Appel getElements(projectId) pour chaque
+    - Calcul _elementCount précis
+  - Props activées: enableDragToProjects, onAssetDrop
+
+API UTILISÉE:
+
+window.electron.portfolioV2.projects.{
+  addElement(data)          - Créer liaison asset → projet
+  getElements(projectId)    - Récupérer assets d'un projet
+  removeElement(id, eid)    - Supprimer liaison (à venir)
+}
+
+BACKEND:
+
+Handlers IPC existants (déjà implémentés):
+- portfolio-project-element-create
+- portfolio-project-element-get-by-project
+- portfolio-project-element-delete
+
+BASE DE DONNÉES:
+
+Table: portfolio_project_elements
+Colonnes: id, project_id, element_id, display_order, is_cover
+
+Index:
+- idx_portfolio_project_elements_project (project_id)
+- idx_portfolio_project_elements_element (element_id)
+
+DOCUMENTATION:
+
+• PHASE_C_ASSET_ASSIGNMENT.md
+  - Vue d'ensemble assignation d'assets
+  - Flow technique détaillé (drag start → drop)
+  - Interface utilisateur et feedback visuel
+  - API et handlers IPC
+  - Décisions techniques (Assets vs Éléments)
+  - Tests de validation requis
+  - Fonctionnalités futures (ProjectEditor)
+
+• PHASE_C_IMPLEMENTATION.md (mis à jour)
+  - Section 5 ajoutée: Assignation d'Assets
+  - Status: Phase C Base + Assignation - TERMINÉE
+  - Priorités mises à jour
+
+• SOUVERAIN-BRIEF.md (mis à jour)
+  - Phase C: Assignation ✅ marquée terminée
+  - Détails drag & drop, comptage, toast
+  - Prochaines étapes: ProjectEditor
+  - Dernière implémentation documentée
+
+FICHIERS:
+
+Modifiés:
+- src/components/portfolio/AssetCard.tsx
+- src/components/portfolio/AssetGrid.tsx
+- src/components/portfolio/ProjectCard.tsx
+- src/components/portfolio/ProjectList.tsx
+- src/components/portfolio/PortfolioModule.tsx
+- PHASE_C_IMPLEMENTATION.md
+- SOUVERAIN-BRIEF.md
+
+Créés:
+- PHASE_C_ASSET_ASSIGNMENT.md
+- COMMIT_MESSAGE_PHASE_C_ASSIGNMENT.txt
+
+TESTS:
+
+✅ TypeScript: npx tsc --noEmit (0 erreurs)
+⏳ Tests manuels: Drag & drop assets → projets
+⏳ Tests manuels: Compteur éléments
+⏳ Tests manuels: Persistance après reload
+
+FLOW UTILISATEUR:
+
+1. Ouvrir portfolio
+2. Importer assets (onglet Assets)
+3. Créer projet (onglet Projets)
+4. Retour onglet Assets
+5. Cliquer-maintenir sur asset
+6. Drag vers onglet Projets
+7. Survoler ProjectCard → bordure accent + "📂 Ajouter ici"
+8. Relâcher → Toast "Asset ajouté au projet"
+9. Compteur projet incrémente (ex: "📁 1 élément(s)")
+
+DÉCISIONS TECHNIQUES:
+
+• HTML5 Drag & Drop natif
+  - Raison: Pas de dépendance externe, API simple, performance native
+  - Alternative rejetée: react-dnd, dnd-kit
+
+• Assets comme element_id
+  - Raison: Simplifie implémentation initiale
+  - Migration future: Créer portfolio_elements classifiés par IA
+
+• Comptage dynamique vs cache
+  - Raison: Garantit exactitude, simple, <100 projets OK
+  - Optimization future: Compteur cached si >100 projets
+
+PHASE C - ÉTAT:
+
+✅ Terminé:
+  - Gestion de base des projets (CRUD)
+  - Interface utilisateur complète
+  - Système onglets Assets/Projets
+  - Assignation d'assets (drag & drop)
+  - Comptage assets assignés
+
+⏳ À venir:
+  - ProjectEditor pour affichage détaillé
+  - Liste assets assignés avec miniatures
+  - Désassignation d'assets
+  - Réorganisation assets (drag & drop)
+  - Classification IA avec Ollama
+
+MÉTRIQUES:
+
+- Composants modifiés: 5
+- Lignes ajoutées: ~100
+- Lignes modifiées: ~50
+- Handlers IPC utilisés: 2 (addElement, getElements)
+- Erreurs TypeScript: 0
+- Temps implémentation: ~30 min
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>

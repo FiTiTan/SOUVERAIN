@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background-color: #F9FAFB;
+  /* Gris très clair type papier */
+  color: #111827;
+  /* Anthracite profond, plus doux que le noir pur */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overscroll-behavior: none; /* Prevents "rubber banding" / black borders on scroll */
+  overflow: hidden; /* Let the app handle scroll internally */
+}
+
+body {
+  margin: 0;
+  background-color: #F9FAFB;
+}
