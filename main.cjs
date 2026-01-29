@@ -3335,17 +3335,26 @@ ipcMain.handle('db-templates-get-by-id', async (event, id) => {
 // Get template HTML content
 ipcMain.handle('template-get-html', async (event, id) => {
   try {
+    console.log('[IPC] Loading template:', id);
     const template = dbManager.templates_getById(id);
     if (!template || !template.html_path) {
+      console.error('[IPC] Template not found in DB:', id);
       return { success: false, error: 'Template not found' };
     }
 
+    console.log('[IPC] Template DB path:', template.html_path);
+    console.log('[IPC] __dirname:', __dirname);
     const fullPath = path.join(__dirname, template.html_path);
+    console.log('[IPC] Full path:', fullPath);
+    console.log('[IPC] File exists:', fs.existsSync(fullPath));
+
     if (!fs.existsSync(fullPath)) {
-      return { success: false, error: 'Template HTML file not found' };
+      console.error('[IPC] Template HTML file not found at:', fullPath);
+      return { success: false, error: `Template HTML file not found at: ${fullPath}` };
     }
 
     const html = fs.readFileSync(fullPath, 'utf-8');
+    console.log('[IPC] Template loaded successfully, length:', html.length);
     return { success: true, html };
   } catch (error) {
     console.error('[IPC] template-get-html error:', error);
