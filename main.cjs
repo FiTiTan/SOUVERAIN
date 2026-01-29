@@ -2671,10 +2671,13 @@ ipcMain.handle('db-get-all-portfolios', async () => {
 // Créer un nouveau portfolio
 ipcMain.handle('db-create-portfolio', async (event, { name }) => {
   try {
+    console.log('[IPC] Creating portfolio:', name);
     const crypto = require('crypto');
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
-    return dbManager.portfolios_insert({ id, name, created_at: now });
+    const result = dbManager.portfolios_insert({ id, name, created_at: now });
+    console.log('[IPC] Portfolio created:', result);
+    return result;
   } catch (error) {
     console.error('[DB] Create portfolio error:', error);
     return { success: false, error: error.message };
