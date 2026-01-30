@@ -7,7 +7,7 @@ import { typography, borderRadius, transitions } from '../../design-system';
 // ============================================================
 
 interface BaseFieldProps {
-  label: string;
+  label?: string;
   error?: string;
   required?: boolean;
 }
@@ -27,16 +27,18 @@ export const GlassInput: React.FC<GlassInputProps> = ({ label, error, required, 
 
   return (
     <div style={{ marginBottom: '1.25rem', ...style }}>
-      <label style={{
-        display: 'block',
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.semibold,
-        color: theme.text.primary,
-        marginBottom: '0.5rem',
-        marginLeft: '4px'
-      }}>
-        {label} {required && <span style={{ color: theme.semantic.error }}>*</span>}
-      </label>
+      {label && (
+        <label style={{
+          display: 'block',
+          fontSize: typography.fontSize.sm,
+          fontWeight: typography.fontWeight.semibold,
+          color: theme.text.primary,
+          marginBottom: '0.5rem',
+          marginLeft: '4px'
+        }}>
+          {label} {required && <span style={{ color: theme.semantic.error }}>*</span>}
+        </label>
+      )}
       <input
         {...props}
         style={{
@@ -76,16 +78,18 @@ export const GlassTextArea: React.FC<GlassTextAreaProps> = ({ label, error, requ
 
   return (
     <div style={{ marginBottom: '1.25rem', ...style }}>
-      <label style={{
-        display: 'block',
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.semibold,
-        color: theme.text.primary,
-        marginBottom: '0.5rem',
-        marginLeft: '4px'
-      }}>
-        {label} {required && <span style={{ color: theme.semantic.error }}>*</span>}
-      </label>
+      {label && (
+        <label style={{
+          display: 'block',
+          fontSize: typography.fontSize.sm,
+          fontWeight: typography.fontWeight.semibold,
+          color: theme.text.primary,
+          marginBottom: '0.5rem',
+          marginLeft: '4px'
+        }}>
+          {label} {required && <span style={{ color: theme.semantic.error }}>*</span>}
+        </label>
+      )}
       <textarea
         rows={rows}
         {...props}
@@ -127,16 +131,18 @@ export const GlassSelect: React.FC<GlassSelectProps> = ({ label, error, required
 
   return (
     <div style={{ marginBottom: '1.25rem', ...style }}>
-      <label style={{
-        display: 'block',
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.semibold,
-        color: theme.text.primary,
-        marginBottom: '0.5rem',
-        marginLeft: '4px'
-      }}>
-        {label} {required && <span style={{ color: theme.semantic.error }}>*</span>}
-      </label>
+      {label && (
+        <label style={{
+          display: 'block',
+          fontSize: typography.fontSize.sm,
+          fontWeight: typography.fontWeight.semibold,
+          color: theme.text.primary,
+          marginBottom: '0.5rem',
+          marginLeft: '4px'
+        }}>
+          {label} {required && <span style={{ color: theme.semantic.error }}>*</span>}
+        </label>
+      )}
       <select
         {...props}
         style={{
