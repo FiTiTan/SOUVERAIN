@@ -2,8 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../../ThemeContext';
 import { GlassInput } from '../../ui/GlassForms';
-import { SOCIAL_PLATFORMS } from './types';
-import type { PortfolioFormData, SocialLink, SocialPlatform } from './types';
+import type { PortfolioFormData } from './types';
 
 interface Step3ContactProps {
   data: PortfolioFormData;
@@ -12,39 +11,6 @@ interface Step3ContactProps {
 
 export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) => {
   const { theme, mode } = useTheme();
-
-  const handleSocialChange = (platform: SocialPlatform, value: string, checked: boolean) => {
-    const existing = data.socialLinks.find(s => s.platform === platform);
-
-    if (!checked && existing) {
-      // Remove social link
-      onChange({
-        socialLinks: data.socialLinks.filter(s => s.platform !== platform),
-      });
-    } else if (checked) {
-      if (existing) {
-        // Update existing
-        onChange({
-          socialLinks: data.socialLinks.map(s =>
-            s.platform === platform ? { ...s, url: value } : s
-          ),
-        });
-      } else {
-        // Add new
-        onChange({
-          socialLinks: [...data.socialLinks, { platform, url: value }],
-        });
-      }
-    }
-  };
-
-  const getSocialValue = (platform: SocialPlatform): string => {
-    return data.socialLinks.find(s => s.platform === platform)?.url || '';
-  };
-
-  const isSocialEnabled = (platform: SocialPlatform): boolean => {
-    return data.socialLinks.some(s => s.platform === platform);
-  };
 
   return (
     <motion.div
@@ -73,7 +39,7 @@ export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) =>
           Comment vous contacter ?
         </h2>
         <p style={{ color: theme.text.secondary, fontSize: '0.95rem' }}>
-          Vos coordonnées et présence en ligne
+          Vos coordonnées professionnelles
         </p>
       </div>
 
@@ -176,64 +142,6 @@ export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) =>
               style={{ width: '100%' }}
             />
           </div>
-        </div>
-      </div>
-
-      {/* Social Networks */}
-      <div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            marginBottom: '1rem',
-            paddingBottom: '0.5rem',
-            borderBottom: `1px solid ${theme.border.light}`,
-          }}
-        >
-          <span style={{ color: theme.text.secondary, fontSize: '0.9rem', fontWeight: 500 }}>
-            Réseaux sociaux
-          </span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {SOCIAL_PLATFORMS.map((platform) => {
-            const enabled = isSocialEnabled(platform.id);
-            const value = getSocialValue(platform.id);
-
-            return (
-              <div key={platform.id} style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '0.75rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', paddingTop: '0.875rem', paddingBottom: '0.875rem' }}>
-                  <input
-                    type="checkbox"
-                    checked={enabled}
-                    onChange={(e) => handleSocialChange(platform.id, value, e.target.checked)}
-                    style={{
-                      width: '18px',
-                      height: '18px',
-                      marginRight: '0.5rem',
-                      cursor: 'pointer',
-                      accentColor: theme.accent.primary,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span style={{ color: theme.text.primary, fontSize: '0.9rem' }}>
-                    {platform.label}
-                  </span>
-                </label>
-                <GlassInput
-                  value={value}
-                  onChange={(e) => handleSocialChange(platform.id, e.target.value, true)}
-                  placeholder={platform.placeholder}
-                  disabled={!enabled}
-                  style={{
-                    width: '100%',
-                    opacity: enabled ? 1 : 0.5,
-                    marginBottom: 0,
-                  }}
-                />
-              </div>
-            );
-          })}
         </div>
       </div>
 
