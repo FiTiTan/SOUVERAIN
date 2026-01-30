@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, Check, Lock } from 'lucide-react';
+import { Eye, Check, Lock, Layout } from 'lucide-react';
 import { useTheme } from '../../../../ThemeContext';
 import { parseTemplateTags, isTemplateFree, isTemplateOwned, getTemplatePrice, getTemplateThumbnail } from '../../../../services/templateService';
 import type { Template } from '../../../../services/templateService';
@@ -148,12 +148,11 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
         ) : (
           <div
             style={{
-              fontSize: '3rem',
               opacity: 0.3,
               color: theme.text.secondary,
             }}
           >
-            🎨
+            <Layout size={64} />
           </div>
         )}
 
