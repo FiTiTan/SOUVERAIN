@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { PortfolioFormData } from './types';
+import { ImageIcon, LightbulbIcon } from './icons';
 
 interface Step6MediaProps {
   data: PortfolioFormData;
@@ -208,7 +209,9 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
           accept="image/*,video/*"
         />
         <label htmlFor="media-upload" style={{ cursor: 'pointer', display: 'block' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎬</div>
+          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <ImageIcon size={64} color={theme.text.tertiary} />
+          </div>
           <div
             style={{
               fontSize: typography.fontSize.lg,
@@ -260,7 +263,10 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
 
       <div
         style={{
-          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem',
           padding: '1rem',
           background: theme.bg.tertiary,
           borderRadius: borderRadius.lg,
@@ -268,7 +274,8 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
           color: theme.text.tertiary,
         }}
       >
-        💡 Les médias seront automatiquement optimisés pour le web
+        <LightbulbIcon size={18} color={theme.text.tertiary} />
+        <span>Les médias seront automatiquement optimisés pour le web</span>
       </div>
     </motion.div>
   );

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { PortfolioFormData } from './types';
+import { FileIcon, DocumentIcon, PresentationIcon, TextIcon, AttachmentIcon, UploadIcon } from './icons';
 
 interface Step4DocumentsProps {
   data: PortfolioFormData;
@@ -10,13 +11,13 @@ interface Step4DocumentsProps {
 }
 
 // Helper: Get file icon based on type
-const getFileIcon = (file: File): string => {
+const getFileIcon = (file: File, color: string) => {
   const type = file.type.toLowerCase();
-  if (type.includes('pdf')) return '📄';
-  if (type.includes('word') || type.includes('document')) return '📝';
-  if (type.includes('powerpoint') || type.includes('presentation')) return '📊';
-  if (type.includes('text')) return '📃';
-  return '📎';
+  if (type.includes('pdf')) return <FileIcon size={28} color={color} />;
+  if (type.includes('word') || type.includes('document')) return <DocumentIcon size={28} color={color} />;
+  if (type.includes('powerpoint') || type.includes('presentation')) return <PresentationIcon size={28} color={color} />;
+  if (type.includes('text')) return <TextIcon size={28} color={color} />;
+  return <AttachmentIcon size={28} color={color} />;
 };
 
 // Helper: Format file size
@@ -67,11 +68,10 @@ const DocumentPreviewCard: React.FC<{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '1.5rem',
           flexShrink: 0,
         }}
       >
-        {getFileIcon(file)}
+        {getFileIcon(file, theme.accent.primary)}
       </div>
 
       {/* File Info */}
@@ -227,7 +227,9 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
           accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
         />
         <label htmlFor="doc-upload" style={{ cursor: 'pointer', display: 'block' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📄</div>
+          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <UploadIcon size={64} color={theme.text.tertiary} />
+          </div>
           <div
             style={{
               fontSize: typography.fontSize.lg,
@@ -389,7 +391,9 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
               />
             ) : (
               <div style={{ textAlign: 'center', padding: '3rem' }}>
-                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>{getFileIcon(previewFile)}</div>
+                <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+                  {getFileIcon(previewFile, theme.text.secondary)}
+                </div>
                 <div style={{ fontSize: typography.fontSize.xl, fontWeight: typography.fontWeight.semibold, color: theme.text.primary, marginBottom: '1rem' }}>
                   {previewFile.name}
                 </div>

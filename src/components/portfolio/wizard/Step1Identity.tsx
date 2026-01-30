@@ -4,6 +4,7 @@ import { useTheme } from '../../../ThemeContext';
 import { GlassInput, GlassTextArea } from '../../ui/GlassForms';
 import { PROFILE_TYPES } from './types';
 import type { PortfolioFormData, ProfileType } from './types';
+import { LightbulbIcon } from './icons';
 
 interface Step1IdentityProps {
   data: PortfolioFormData;
@@ -180,8 +181,8 @@ export const Step1Identity: React.FC<Step1IdentityProps> = ({ data, onChange }) 
             marginTop: '0.5rem',
           }}
         >
-          <div style={{ fontSize: '0.85rem', color: theme.accent.primary, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span>💡</span>
+          <div style={{ fontSize: '0.85rem', color: theme.text.secondary, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <LightbulbIcon size={16} color={theme.text.secondary} />
             <span>Cette phrase sera votre accroche principale</span>
           </div>
           <div

@@ -5,6 +5,7 @@ import { useTheme } from '../../../ThemeContext';
 import { GlassInput, GlassTextArea } from '../../ui/GlassForms';
 import { getServiceLabel, getServicePlaceholder } from './types';
 import type { PortfolioFormData } from './types';
+import { LightbulbIcon } from './icons';
 
 interface Step2OfferProps {
   data: PortfolioFormData;
@@ -210,8 +211,8 @@ export const Step2Offer: React.FC<Step2OfferProps> = ({ data, onChange }) => {
             marginTop: '0.5rem',
           }}
         >
-          <div style={{ fontSize: '0.85rem', color: theme.accent.primary, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span>💡</span>
+          <div style={{ fontSize: '0.85rem', color: theme.text.secondary, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <LightbulbIcon size={16} color={theme.text.secondary} />
             <span>Qu'est-ce qui vous rend unique ?</span>
           </div>
           <div

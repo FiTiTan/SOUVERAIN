@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useTheme } from '../../../ThemeContext';
 import { useToast } from '../../ui/NotificationToast';
+import { SparklesIcon } from './icons';
 import { WizardProgress } from './WizardProgress';
 import { Step1Identity } from './Step1Identity';
 import { Step2Offer } from './Step2Offer';
@@ -193,7 +194,8 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
                 marginTop: '1rem',
               }}
             >
-              ⚡ DEV MODE - Autofill activé
+              <SparklesIcon size={14} color="#fbbf24" />
+              DEV MODE - Autofill activé
             </div>
           )}
         </div>
