@@ -7,6 +7,29 @@ module.exports = function initTemplatesSchema(db) {
   console.log('[DB] Initializing templates schema...');
 
   // ============================================================
+  // MIGRATION: Fix old paths to new paths
+  // ============================================================
+  try {
+    // Check if table exists first
+    const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='templates'").get();
+    
+    if (tableExists) {
+      // Update old paths (resources/templates/portfolio/free/*/thumbnail.png) to new (templates/thumbnails/*.svg)
+      db.exec(`
+        UPDATE templates SET 
+          thumbnail_path = REPLACE(thumbnail_path, 'resources/templates/portfolio/free/', 'templates/thumbnails/'),
+          thumbnail_path = REPLACE(thumbnail_path, '/thumbnail.png', '.svg'),
+          html_path = REPLACE(html_path, 'resources/templates/portfolio/free/', 'templates/'),
+          html_path = REPLACE(html_path, '/template.html', '.html')
+        WHERE thumbnail_path LIKE 'resources/templates/%'
+      `);
+      console.log('[DB] ✅ Migrated old template paths to new structure');
+    }
+  } catch (e) {
+    console.warn('[DB] Template path migration warning:', e.message);
+  }
+
+  // ============================================================
   // TEMPLATES TABLE
   // ============================================================
 
