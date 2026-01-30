@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../../ThemeContext';
+import { TargetIcon, EditIcon, MapPinIcon, ImageIcon, BriefcaseIcon, PaletteIcon, RocketIcon, FolderIcon } from '../../../icons';
 
 interface PortfolioData {
   intentions: {
@@ -234,7 +235,7 @@ export const GenerationRecap: React.FC<GenerationRecapProps> = ({
             
             {/* Type */}
             <RecapItem
-              icon="🎯"
+              icon={<TargetIcon size={20} color="#3B82F6" />}
               iconBg="#DBEAFE"
               iconColor="#3B82F6"
               label="Type de portfolio"
@@ -245,7 +246,7 @@ export const GenerationRecap: React.FC<GenerationRecapProps> = ({
 
             {/* Priorités */}
             <RecapItem
-              icon="📝"
+              icon={<EditIcon size={20} color="#A855F7" />}
               iconBg="#F3E8FF"
               iconColor="#A855F7"
               label="Priorités"
@@ -257,7 +258,7 @@ export const GenerationRecap: React.FC<GenerationRecapProps> = ({
 
             {/* Infos pratiques */}
             <RecapItem
-              icon="📍"
+              icon={<MapPinIcon size={20} color="#10B981" />}
               iconBg="#D1FAE5"
               iconColor="#10B981"
               label="Informations pratiques"
@@ -269,7 +270,7 @@ export const GenerationRecap: React.FC<GenerationRecapProps> = ({
 
             {/* Projets */}
             <RecapItem
-              icon="📁"
+              icon={<FolderIcon size={20} color="#F97316" />}
               iconBg="#FED7AA"
               iconColor="#F97316"
               label="Projets"
@@ -281,7 +282,7 @@ export const GenerationRecap: React.FC<GenerationRecapProps> = ({
 
             {/* Médias */}
             <RecapItem
-              icon="🖼️"
+              icon={<ImageIcon size={20} color="#EC4899" />}
               iconBg="#FCE7F3"
               iconColor="#EC4899"
               label="Médias"
@@ -299,7 +300,7 @@ export const GenerationRecap: React.FC<GenerationRecapProps> = ({
             {/* LinkedIn (conditionnel) */}
             {(data.projects.linkedInData?.profileUrl || data.projects.linkedInData?.rawContent) && (
               <RecapItem
-                icon="💼"
+                icon={<BriefcaseIcon size={20} color="#FFFFFF" />}
                 iconBg="#3B82F6"
                 iconColor="#FFFFFF"
                 label="LinkedIn"
@@ -312,7 +313,7 @@ export const GenerationRecap: React.FC<GenerationRecapProps> = ({
 
             {/* Style */}
             <RecapItem
-              icon="🎨"
+              icon={<PaletteIcon size={20} color="#6366F1" />}
               iconBg="#E0E7FF"
               iconColor="#6366F1"
               label="Style choisi"
@@ -435,7 +436,7 @@ export const GenerationRecap: React.FC<GenerationRecapProps> = ({
               </>
             ) : (
               <>
-                <span>🚀</span>
+                <RocketIcon size={20} color="#FFFFFF" />
                 <span>Générer mon portfolio</span>
               </>
             )}
@@ -455,7 +456,7 @@ export const GenerationRecap: React.FC<GenerationRecapProps> = ({
 
 // Helper component for recap items
 const RecapItem: React.FC<{
-  icon: string;
+  icon: React.ReactNode;
   iconBg: string;
   iconColor: string;
   label: string;
@@ -527,7 +528,7 @@ const RecapItem: React.FC<{
           e.currentTarget.style.borderColor = theme.border.default!;
         }}
       >
-        ✏️ Modifier
+        Modifier
       </button>
     )}
   </div>

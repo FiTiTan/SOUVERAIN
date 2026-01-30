@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../../ThemeContext';
 import type { ExternalAccount } from '../../../types/portfolio';
+import { BriefcaseIcon, GlobeIcon, LinkIcon, PaletteIcon, ImageIcon, XIcon } from '../../icons';
 
 interface SocialsManagerProps {
   portfolioId: string;
 }
 
 const PLATFORMS = [
-  { id: 'linkedin', label: 'LinkedIn', icon: '💼' },
-  { id: 'github', label: 'GitHub', icon: '💻' },
-  { id: 'twitter', label: 'Twitter / X', icon: '🐦' },
-  { id: 'instagram', label: 'Instagram', icon: '📸' },
-  { id: 'dribbble', label: 'Dribbble', icon: '🎨' },
-  { id: 'behance', label: 'Behance', icon: '🔵' },
-  { id: 'website', label: 'Site Web', icon: '🌐' },
-  { id: 'other', label: 'Autre', icon: '🔗' },
+  { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'github', label: 'GitHub' },
+  { id: 'twitter', label: 'Twitter / X' },
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'dribbble', label: 'Dribbble' },
+  { id: 'behance', label: 'Behance' },
+  { id: 'website', label: 'Site Web' },
+  { id: 'other', label: 'Autre' },
 ];
 
 export const SocialsManager: React.FC<SocialsManagerProps> = ({ portfolioId }) => {
@@ -77,8 +78,17 @@ export const SocialsManager: React.FC<SocialsManagerProps> = ({ portfolioId }) =
   };
 
   const getIcon = (platform: string) => {
-    const p = PLATFORMS.find(x => x.id === platform);
-    return p ? p.icon : '🔗';
+    const iconMap: Record<string, React.ReactNode> = {
+      'linkedin': <BriefcaseIcon size={20} />,
+      'github': <BriefcaseIcon size={20} />,
+      'twitter': <BriefcaseIcon size={20} />,
+      'instagram': <ImageIcon size={20} />,
+      'dribbble': <PaletteIcon size={20} />,
+      'behance': <PaletteIcon size={20} />,
+      'website': <GlobeIcon size={20} />,
+      'other': <LinkIcon size={20} />,
+    };
+    return iconMap[platform] || <LinkIcon size={20} />;
   };
 
   return (
@@ -116,7 +126,7 @@ export const SocialsManager: React.FC<SocialsManagerProps> = ({ portfolioId }) =
                   onClick={() => handleDelete(social.id)}
                   className="p-2 text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  ❌
+                  <XIcon size={16} />
                 </button>
               </div>
             );
