@@ -65,12 +65,14 @@ export const MediathequeCard: React.FC<MediathequeCardProps> = ({
             )}
             {/* Thumbnail Area */}
             <div style={{
-                height: '160px',
-                backgroundColor: '#1a1b1e', // Darker placeholder
+                aspectRatio: '1 / 1',
+                width: '100%',
+                backgroundColor: theme.bg.tertiary,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                flexShrink: 0
             }}>
                 {/* Handle both snake_case (DB) and camelCase (Type) */}
                 {(item.file_type === 'image' || item.format === 'image' || item.format === 'jpg' || item.format === 'png' || item.format === 'webp') ? (

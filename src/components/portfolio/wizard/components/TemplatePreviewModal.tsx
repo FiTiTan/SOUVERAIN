@@ -28,63 +28,59 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
   onClose,
   onSelect,
 }) => {
-  const { theme, mode } = useTheme();
-
   useEffect(() => {
+    const openPreviewWindow = async () => {
+      if (!template) return;
+
+      try {
+        let html = await getTemplateHTML(template.id);
+        
+        if (!html) {
+          html = '<div style="padding: 2rem; text-align: center;">Template preview not available</div>';
+        }
+
+        // Injecter les données fictives dans le HTML
+        const htmlWithData = html
+          .replace(/{{name}}/g, MOCK_DATA.name)
+          .replace(/{{tagline}}/g, MOCK_DATA.tagline)
+          .replace(/{{email}}/g, MOCK_DATA.email)
+          .replace(/{{phone}}/g, MOCK_DATA.phone)
+          .replace(/{{address}}/g, MOCK_DATA.address)
+          .replace(/{{linkedin}}/g, MOCK_DATA.linkedin)
+          .replace(/{{github}}/g, MOCK_DATA.github)
+          .replace(/{{valueProp}}/g, MOCK_DATA.valueProp)
+          .replace(/{{services}}/g, MOCK_DATA.services.join(', '));
+
+        // Calculer dimensions (ratio A4 ≈ 1.4, mais réduit à 70%)
+        const width = 800;
+        const height = 1120; // ratio ~1.4
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
+
+        // Ouvrir nouvelle fenêtre
+        const previewWindow = window.open(
+          '',
+          `template-preview-${template.id}`,
+          `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+        );
+
+        if (previewWindow) {
+          previewWindow.document.write(htmlWithData);
+          previewWindow.document.close();
+          previewWindow.document.title = `Preview: ${template.name}`;
+        }
+        
+        // Fermer la modal
+        onClose();
+      } catch (error) {
+        console.error('Error loading template HTML:', error);
+      }
+    };
+
     if (isOpen && template) {
       openPreviewWindow();
     }
-  }, [isOpen, template]);
-
-  const openPreviewWindow = async () => {
-    if (!template) return;
-
-    try {
-      let html = await getTemplateHTML(template.id);
-      
-      if (!html) {
-        html = '<div style="padding: 2rem; text-align: center;">Template preview not available</div>';
-      }
-
-      // Injecter les données fictives dans le HTML
-      const htmlWithData = html
-        .replace(/{{name}}/g, MOCK_DATA.name)
-        .replace(/{{tagline}}/g, MOCK_DATA.tagline)
-        .replace(/{{email}}/g, MOCK_DATA.email)
-        .replace(/{{phone}}/g, MOCK_DATA.phone)
-        .replace(/{{address}}/g, MOCK_DATA.address)
-        .replace(/{{linkedin}}/g, MOCK_DATA.linkedin)
-        .replace(/{{github}}/g, MOCK_DATA.github)
-        .replace(/{{valueProp}}/g, MOCK_DATA.valueProp)
-        .replace(/{{services}}/g, MOCK_DATA.services.join(', '));
-
-      // Calculer dimensions (ratio A4 ≈ 1.4, mais réduit à 70%)
-      const width = 800;
-      const height = 1120; // ratio ~1.4
-      const left = (window.screen.width - width) / 2;
-      const top = (window.screen.height - height) / 2;
-
-      // Ouvrir nouvelle fenêtre
-      const previewWindow = window.open(
-        '',
-        `template-preview-${template.id}`,
-        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
-      );
-
-      if (previewWindow) {
-        previewWindow.document.write(htmlWithData);
-        previewWindow.document.close();
-        previewWindow.document.title = `Preview: ${template.name}`;
-      }
-      
-      // Fermer la modal
-      onClose();
-    } catch (error) {
-      console.error('Error loading template HTML:', error);
-    }
-  };
-
-  if (!template) return null;
+  }, [isOpen, template, onClose]);
 
   // Composant simplifié - la preview s'ouvre dans une nouvelle fenêtre
   return null;
