@@ -201,8 +201,8 @@ export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) =>
             const value = getSocialValue(platform.id);
 
             return (
-              <div key={platform.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', minWidth: '120px' }}>
+              <div key={platform.id} style={{ display: 'grid', gridTemplateColumns: '140px 1fr', alignItems: 'center', gap: '0.75rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={enabled}
@@ -213,6 +213,7 @@ export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) =>
                       marginRight: '0.5rem',
                       cursor: 'pointer',
                       accentColor: theme.accent.primary,
+                      flexShrink: 0,
                     }}
                   />
                   <span style={{ color: theme.text.primary, fontSize: '0.9rem' }}>
@@ -225,7 +226,7 @@ export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) =>
                   placeholder={platform.placeholder}
                   disabled={!enabled}
                   style={{
-                    flex: 1,
+                    width: '100%',
                     opacity: enabled ? 1 : 0.5,
                   }}
                 />

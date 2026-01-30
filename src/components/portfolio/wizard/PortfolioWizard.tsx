@@ -176,27 +176,26 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
       }}>
         {/* Progress */}
         <div style={{ flexShrink: 0, marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <WizardProgress currentStep={step} totalSteps={totalSteps} />
-            {DEV_MODE && (
-              <div
-                style={{
-                  padding: '0.5rem 1rem',
-                  background: 'rgba(251, 191, 36, 0.2)',
-                  border: '1px solid rgba(251, 191, 36, 0.5)',
-                  borderRadius: '8px',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: '#fbbf24',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                ⚡ DEV MODE - Autofill activé
-              </div>
-            )}
-          </div>
+          <WizardProgress currentStep={step} totalSteps={totalSteps} />
+          {DEV_MODE && (
+            <div
+              style={{
+                padding: '0.5rem 1rem',
+                background: 'rgba(251, 191, 36, 0.2)',
+                border: '1px solid rgba(251, 191, 36, 0.5)',
+                borderRadius: '8px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: '#fbbf24',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginTop: '1rem',
+              }}
+            >
+              ⚡ DEV MODE - Autofill activé
+            </div>
+          )}
         </div>
 
         {/* Step Content - Scrollable */}
@@ -242,19 +241,19 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
           {/* Back Button */}
           {step > 1 ? (
             <motion.button
-              whileHover={{ scale: 1.05, x: -4 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02, x: -4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleBack}
               style={{
                 padding: '0.75rem 1.5rem',
                 borderRadius: '12px',
-                border: `1px solid ${theme.border.default}`,
-                background: mode === 'dark' ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                border: `1px solid ${theme.border.light}`,
+                background: mode === 'dark' ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.5)',
                 backdropFilter: 'blur(20px)',
-                color: theme.text.primary,
+                color: theme.text.secondary,
                 cursor: 'pointer',
                 fontSize: '0.95rem',
-                fontWeight: 500,
+                fontWeight: 400,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
@@ -271,18 +270,19 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
           {/* Cancel Button (optional) */}
           {onCancel && step === 1 && (
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onCancel}
               style={{
                 padding: '0.75rem 1.5rem',
                 borderRadius: '12px',
-                border: `1px solid ${theme.border.default}`,
-                background: 'transparent',
-                color: theme.text.secondary,
+                border: `1px solid ${theme.border.light}`,
+                background: mode === 'dark' ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(20px)',
+                color: theme.text.tertiary,
                 cursor: 'pointer',
                 fontSize: '0.95rem',
-                fontWeight: 500,
+                fontWeight: 400,
                 transition: 'all 0.2s ease',
               }}
             >
@@ -292,29 +292,27 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
 
           {/* Continue/Finish Button */}
           <motion.button
-            whileHover={{ scale: canContinue() ? 1.05 : 1, x: canContinue() ? 4 : 0 }}
-            whileTap={{ scale: canContinue() ? 0.95 : 1 }}
+            whileHover={{ scale: canContinue() ? 1.02 : 1, x: canContinue() ? 4 : 0 }}
+            whileTap={{ scale: canContinue() ? 0.98 : 1 }}
             onClick={handleContinue}
             disabled={!canContinue()}
             style={{
               padding: '0.75rem 2rem',
               borderRadius: '12px',
-              border: 'none',
+              border: `1px solid ${canContinue() ? theme.border.default : theme.border.light}`,
               background: canContinue()
-                ? `linear-gradient(135deg, ${theme.accent.primary} 0%, ${theme.accent.secondary} 100%)`
-                : theme.bg.tertiary,
-              color: canContinue() ? '#ffffff' : theme.text.muted,
+                ? mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'
+                : mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
+              backdropFilter: 'blur(20px)',
+              color: canContinue() ? theme.text.primary : theme.text.muted,
               cursor: canContinue() ? 'pointer' : 'not-allowed',
               fontSize: '0.95rem',
-              fontWeight: 600,
+              fontWeight: 500,
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
               transition: 'all 0.2s ease',
               opacity: canContinue() ? 1 : 0.5,
-              boxShadow: canContinue()
-                ? `0 8px 24px ${theme.accent.primary}40`
-                : 'none',
             }}
           >
             {step === totalSteps ? 'Générer mon portfolio' : 'Continuer'}
