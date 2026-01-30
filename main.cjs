@@ -3372,17 +3372,26 @@ ipcMain.handle('template-get-thumbnail', async (event, id) => {
     const template = dbManager.templates_getById(id);
     
     if (!template || !template.thumbnail_path) {
+      console.error('[IPC] template-get-thumbnail: template not found or missing thumbnail_path', { id, template });
       return { success: false, error: 'Template ou thumbnail introuvable' };
     }
 
-    const thumbnailPath = path.join(__dirname, template.thumbnail_path);
+    // Fix path: thumbnail_path should be relative to project root (e.g. 'templates/thumbnails/xxx.svg')
+    // In dev mode, __dirname points to project root
+    // In production (packaged), we might need app.getAppPath()
+    const appPath = app.isPackaged ? app.getAppPath() : __dirname;
+    const thumbnailPath = path.join(appPath, template.thumbnail_path);
+    
+    console.log('[IPC] template-get-thumbnail: looking for file at:', thumbnailPath);
     
     if (!fs.existsSync(thumbnailPath)) {
       console.error('[IPC] Thumbnail file not found:', thumbnailPath);
+      console.error('[IPC] Template data:', { id, thumbnail_path: template.thumbnail_path, appPath, __dirname });
       return { success: false, error: 'Fichier thumbnail introuvable' };
     }
 
     const svgContent = fs.readFileSync(thumbnailPath, 'utf-8');
+    console.log('[IPC] template-get-thumbnail: success, SVG length:', svgContent.length);
     return { success: true, svg: svgContent };
   } catch (error) {
     console.error('[IPC] template-get-thumbnail error:', error);
