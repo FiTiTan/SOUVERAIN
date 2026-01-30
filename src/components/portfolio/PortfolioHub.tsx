@@ -18,6 +18,7 @@ import { renderPortfolioHTML, savePortfolioToDB } from '../../services/portfolio
 import type { PortfolioFormData } from './wizard/types';
 import { useToast } from '../ui/NotificationToast';
 import { AnalysisAnimation } from '../AnalysisAnimation';
+import { ModernLoader } from '../ui/ModernLoader';
 
 type PortfolioView = 'landing' | 'mpf' | 'projects' | 'mediatheque' | 'config';
 type MPFScreen = 'selector' | 'wizard' | 'generating' | 'preview' | 'mpf-view';
@@ -160,14 +161,6 @@ export const PortfolioHub: React.FC = () => {
         backgroundColor: theme.bg.primary
     }), [theme]);
 
-    const loadingTextStyle = useMemo(() => ({
-        textAlign: 'center' as const
-    }), []);
-
-    const loadingSecondaryTextStyle = useMemo(() => ({
-        color: theme.text.secondary
-    }), [theme]);
-
     const onboardingOverlayStyle = useMemo(() => ({
         position: 'fixed' as const,
         inset: 0,
@@ -286,10 +279,7 @@ export const PortfolioHub: React.FC = () => {
     if (hasCompletedOnboarding === null) {
         return (
             <div style={loadingContainerStyle}>
-                <div style={loadingTextStyle}>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-                    <p style={loadingSecondaryTextStyle}>Chargement...</p>
-                </div>
+                <ModernLoader message="Initialisation..." size="large" />
             </div>
         );
     }
