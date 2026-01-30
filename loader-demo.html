@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loader Showcase</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0f1419;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 3rem;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-weight: 300;
+            font-size: 2.5rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #1a1f2e;
+            border: 1px solid #2a3340;
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .loader-container {
+            width: 100%;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        h3 {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #e0e6ed;
+        }
+
+        /* 1. Orbital Rings */
+        .orbital {
+            position: relative;
+            width: 60px;
+            height: 60px;
+        }
+        .orbital div {
+            position: absolute;
+            inset: 0;
+            border: 3px solid #3B82F6;
+            border-radius: 50%;
+            border-top-color: transparent;
+        }
+        .orbital div:nth-child(1) {
+            animation: spin1 1.5s linear infinite;
+        }
+        .orbital div:nth-child(2) {
+            animation: spin2 1.8s linear infinite;
+            transform: rotate(45deg);
+        }
+        .orbital div:nth-child(3) {
+            animation: spin3 2.1s linear infinite;
+            transform: rotate(90deg);
+        }
+        @keyframes spin1 { to { transform: rotate(405deg); } }
+        @keyframes spin2 { to { transform: rotate(450deg); } }
+        @keyframes spin3 { to { transform: rotate(495deg); } }
+
+        /* 2. Morphing Shape */
+        .morphing {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #3B82F6, #60A5FA);
+            animation: morph 2s ease-in-out infinite;
+        }
+        @keyframes morph {
+            0%, 100% { border-radius: 10%; transform: rotate(0deg); }
+            25% { border-radius: 50%; }
+            50% { border-radius: 10%; transform: rotate(180deg); }
+            75% { border-radius: 50%; }
+        }
+
+        /* 3. Liquid Wave */
+        .liquid {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            height: 60px;
+        }
+        .liquid div {
+            width: 8px;
+            height: 100%;
+            background: #3B82F6;
+            border-radius: 4px;
+        }
+        .liquid div:nth-child(1) { animation: wave 1.2s ease-in-out 0s infinite; }
+        .liquid div:nth-child(2) { animation: wave 1.2s ease-in-out 0.1s infinite; }
+        .liquid div:nth-child(3) { animation: wave 1.2s ease-in-out 0.2s infinite; }
+        .liquid div:nth-child(4) { animation: wave 1.2s ease-in-out 0.3s infinite; }
+        .liquid div:nth-child(5) { animation: wave 1.2s ease-in-out 0.4s infinite; }
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.3); }
+            50% { transform: scaleY(1); }
+        }
+
+        /* 4. Audio Bars */
+        .audio {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            height: 60px;
+        }
+        .audio div {
+            width: 4px;
+            background: linear-gradient(to top, #3B82F6, #60A5FA);
+            border-radius: 2px;
+        }
+        .audio div:nth-child(1) { animation: audio 0.8s ease-in-out 0s infinite alternate; }
+        .audio div:nth-child(2) { animation: audio 0.8s ease-in-out 0.08s infinite alternate; }
+        .audio div:nth-child(3) { animation: audio 0.8s ease-in-out 0.16s infinite alternate; }
+        .audio div:nth-child(4) { animation: audio 0.8s ease-in-out 0.24s infinite alternate; }
+        .audio div:nth-child(5) { animation: audio 0.8s ease-in-out 0.32s infinite alternate; }
+        .audio div:nth-child(6) { animation: audio 0.8s ease-in-out 0.40s infinite alternate; }
+        .audio div:nth-child(7) { animation: audio 0.8s ease-in-out 0.48s infinite alternate; }
+        @keyframes audio {
+            0% { height: 20%; }
+            100% { height: 100%; }
+        }
+
+        /* 5. Gradient Ring */
+        .gradient-ring {
+            width: 60px;
+            height: 60px;
+            borderRadius: 50%;
+            background: conic-gradient(from 0deg, #3B82F6 0%, transparent 100%);
+            animation: spin-ring 1s linear infinite;
+            position: relative;
+        }
+        .gradient-ring::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            background: #0f1419;
+        }
+        @keyframes spin-ring {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 6. Pulse Grid */
+        .pulse-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 60px;
+            height: 60px;
+        }
+        .pulse-grid div {
+            border-radius: 50%;
+            background: #3B82F6;
+        }
+        .pulse-grid div:nth-child(1) { animation: pulse-grid 1.5s ease-in-out 0s infinite; }
+        .pulse-grid div:nth-child(2) { animation: pulse-grid 1.5s ease-in-out 0.1s infinite; }
+        .pulse-grid div:nth-child(3) { animation: pulse-grid 1.5s ease-in-out 0.2s infinite; }
+        .pulse-grid div:nth-child(4) { animation: pulse-grid 1.5s ease-in-out 0.3s infinite; }
+        .pulse-grid div:nth-child(5) { animation: pulse-grid 1.5s ease-in-out 0.4s infinite; }
+        .pulse-grid div:nth-child(6) { animation: pulse-grid 1.5s ease-in-out 0.5s infinite; }
+        .pulse-grid div:nth-child(7) { animation: pulse-grid 1.5s ease-in-out 0.6s infinite; }
+        .pulse-grid div:nth-child(8) { animation: pulse-grid 1.5s ease-in-out 0.7s infinite; }
+        .pulse-grid div:nth-child(9) { animation: pulse-grid 1.5s ease-in-out 0.8s infinite; }
+        @keyframes pulse-grid {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Loader Showcase</h1>
+    <div class="grid">
+        <div class="card">
+            <div class="loader-container">
+                <div class="orbital">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <h3>Orbital Rings</h3>
+        </div>
+
+        <div class="card">
+            <div class="loader-container">
+                <div class="morphing"></div>
+            </div>
+            <h3>Morphing Shape</h3>
+        </div>
+
+        <div class="card">
+            <div class="loader-container">
+                <div class="liquid">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <h3>Liquid Wave</h3>
+        </div>
+
+        <div class="card">
+            <div class="loader-container">
+                <div class="audio">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <h3>Audio Bars</h3>
+        </div>
+
+        <div class="card">
+            <div class="loader-container">
+                <div class="gradient-ring"></div>
+            </div>
+            <h3>Gradient Ring</h3>
+        </div>
+
+        <div class="card">
+            <div class="loader-container">
+                <div class="pulse-grid">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <h3>Pulse Grid</h3>
+        </div>
+    </div>
+</body>
+</html>
