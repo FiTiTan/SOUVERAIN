@@ -238,7 +238,7 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
               marginBottom: '0.5rem',
             }}
           >
-            Glissez vos documents ici
+            Glissez vos documents ici ou cliquez
           </div>
           <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary }}>
             PDF, Word, PowerPoint, textes acceptés

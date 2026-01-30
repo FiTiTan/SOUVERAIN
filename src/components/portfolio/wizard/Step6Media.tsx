@@ -220,7 +220,7 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
               marginBottom: '0.5rem',
             }}
           >
-            Glissez vos médias ici
+            Glissez vos médias ici ou cliquez
           </div>
           <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary }}>
             JPG, PNG, GIF, MP4, WebM acceptés
