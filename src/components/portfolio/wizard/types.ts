@@ -5,7 +5,20 @@ export const DEV_MODE = true;
 
 export type ProfileType = 'freelance' | 'commerce' | 'creative' | 'student' | 'employee';
 
-export type SocialPlatform = 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'behance' | 'github' | 'other';
+export type SocialPlatform = 
+  | 'instagram' 
+  | 'linkedin' 
+  | 'tiktok' 
+  | 'youtube' 
+  | 'behance' 
+  | 'github' 
+  | 'dribbble'
+  | 'twitter'
+  | 'facebook'
+  | 'malt'
+  | 'medium'
+  | 'pinterest'
+  | 'other';
 
 export interface SocialLink {
   platform: SocialPlatform;
@@ -123,12 +136,18 @@ export const PROFILE_TYPES: ProfileTypeOption[] = [
 ];
 
 export const SOCIAL_PLATFORMS = [
-  { id: 'instagram' as SocialPlatform, label: 'Instagram', placeholder: '@moncompte' },
   { id: 'linkedin' as SocialPlatform, label: 'LinkedIn', placeholder: 'linkedin.com/in/monprofil' },
-  { id: 'tiktok' as SocialPlatform, label: 'TikTok', placeholder: '@moncompte' },
-  { id: 'youtube' as SocialPlatform, label: 'YouTube', placeholder: 'youtube.com/@machaine' },
-  { id: 'behance' as SocialPlatform, label: 'Behance', placeholder: 'behance.net/monportfolio' },
+  { id: 'instagram' as SocialPlatform, label: 'Instagram', placeholder: '@moncompte' },
+  { id: 'twitter' as SocialPlatform, label: 'Twitter / X', placeholder: 'x.com/monpseudo' },
+  { id: 'facebook' as SocialPlatform, label: 'Facebook', placeholder: 'facebook.com/mapage' },
   { id: 'github' as SocialPlatform, label: 'GitHub', placeholder: 'github.com/monpseudo' },
+  { id: 'behance' as SocialPlatform, label: 'Behance', placeholder: 'behance.net/monportfolio' },
+  { id: 'dribbble' as SocialPlatform, label: 'Dribbble', placeholder: 'dribbble.com/monprofil' },
+  { id: 'youtube' as SocialPlatform, label: 'YouTube', placeholder: 'youtube.com/@machaine' },
+  { id: 'tiktok' as SocialPlatform, label: 'TikTok', placeholder: '@moncompte' },
+  { id: 'malt' as SocialPlatform, label: 'Malt', placeholder: 'malt.fr/profile/monprofil' },
+  { id: 'medium' as SocialPlatform, label: 'Medium', placeholder: 'medium.com/@monpseudo' },
+  { id: 'pinterest' as SocialPlatform, label: 'Pinterest', placeholder: 'pinterest.com/monprofil' },
   { id: 'other' as SocialPlatform, label: 'Autre', placeholder: 'URL personnalisée' },
 ];
 
