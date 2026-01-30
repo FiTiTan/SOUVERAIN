@@ -116,7 +116,7 @@ export async function getTemplateHTML(id: string): Promise<string | null> {
 export async function getTemplateThumbnail(id: string): Promise<string | null> {
   try {
     // @ts-ignore
-    const result = await window.electron.invoke('template-get-thumbnail', id);
+    const result = await window.electron.templates.getThumbnail(id);
     return result.svg || null;
   } catch (error) {
     console.error('[TemplateService] Error getting template thumbnail:', error);
