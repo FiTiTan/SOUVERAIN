@@ -7,8 +7,10 @@ import { WizardProgress } from './WizardProgress';
 import { Step1Identity } from './Step1Identity';
 import { Step2Offer } from './Step2Offer';
 import { Step3Contact } from './Step3Contact';
-import { Step4Content } from './Step4Content';
-import { Step5Template } from './Step5Template';
+import { Step4Documents } from './Step4Documents';
+import { Step5Social } from './Step5Social';
+import { Step6Media } from './Step6Media';
+import { Step7Template } from './Step7Template';
 import {
   initialFormData,
   validateStep1,
@@ -16,6 +18,8 @@ import {
   validateStep3,
   validateStep4,
   validateStep5,
+  validateStep6,
+  validateStep7,
   DEV_MODE,
 } from './types';
 import type { PortfolioFormData } from './types';
@@ -40,7 +44,7 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
     ...existingData,
   });
 
-  const totalSteps = 5;
+  const totalSteps = 7;
 
   const handleDataChange = (updates: Partial<PortfolioFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -58,6 +62,10 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
         return validateStep4(formData);
       case 5:
         return validateStep5(formData);
+      case 6:
+        return validateStep6(formData);
+      case 7:
+        return validateStep7(formData);
       default:
         return false;
     }
@@ -81,8 +89,12 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
         if (!emailRegex.test(formData.email)) return 'Email invalide';
         return '';
       case 4:
-        return '';
+        return ''; // Documents optionnels
       case 5:
+        return ''; // Réseaux sociaux optionnels
+      case 6:
+        return ''; // Médias optionnels
+      case 7:
         if (!formData.selectedTemplateId) return 'Veuillez sélectionner un template';
         return '';
       default:
@@ -122,10 +134,14 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
       case 3:
         return <Step3Contact data={formData} onChange={handleDataChange} />;
       case 4:
-        return <Step4Content data={formData} onChange={handleDataChange} />;
+        return <Step4Documents data={formData} onChange={handleDataChange} />;
       case 5:
+        return <Step5Social data={formData} onChange={handleDataChange} />;
+      case 6:
+        return <Step6Media data={formData} onChange={handleDataChange} />;
+      case 7:
         return (
-          <Step5Template
+          <Step7Template
             selectedTemplateId={formData.selectedTemplateId}
             onSelectTemplate={(templateId) => handleDataChange({ selectedTemplateId: templateId })}
             isPremiumUser={false}

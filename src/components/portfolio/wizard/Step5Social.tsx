@@ -1,0 +1,266 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useTheme } from '../../../ThemeContext';
+import { typography, borderRadius, transitions } from '../../../design-system';
+import { SOCIAL_PLATFORMS } from './types';
+import type { PortfolioFormData, SocialPlatform } from './types';
+
+interface Step5SocialProps {
+  data: PortfolioFormData;
+  onChange: (updates: Partial<PortfolioFormData>) => void;
+}
+
+export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
+  const { theme, mode } = useTheme();
+
+  const handleAddLink = (platform: SocialPlatform) => {
+    const exists = data.socialLinks.find(link => link.platform === platform);
+    if (!exists) {
+      onChange({
+        socialLinks: [...data.socialLinks, { platform, url: '', label: platform === 'other' ? '' : undefined }]
+      });
+    }
+  };
+
+  const handleUpdateLink = (index: number, url: string, label?: string) => {
+    const updated = [...data.socialLinks];
+    updated[index] = { ...updated[index], url, label };
+    onChange({ socialLinks: updated });
+  };
+
+  const handleRemoveLink = (index: number) => {
+    onChange({ socialLinks: data.socialLinks.filter((_, i) => i !== index) });
+  };
+
+  const handleImportLinkedIn = async () => {
+    // TODO: Connect to settings + import logic
+    onChange({ linkedInImported: true });
+    alert('Import LinkedIn à implémenter (connexion settings)');
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '700px', margin: '0 auto' }}
+    >
+      {/* Header */}
+      <div style={{ textAlign: 'center' }}>
+        <h2
+          style={{
+            fontSize: '2rem',
+            fontWeight: 300,
+            color: theme.text.primary,
+            marginBottom: '0.5rem',
+          }}
+        >
+          Réseaux sociaux
+        </h2>
+        <p style={{ color: theme.text.secondary, fontSize: '0.95rem' }}>
+          Ajoutez vos profils sociaux (optionnel)
+        </p>
+      </div>
+
+      {/* LinkedIn Import */}
+      <div
+        style={{
+          padding: '1.5rem',
+          background: mode === 'dark' ? 'rgba(14, 165, 233, 0.1)' : 'rgba(14, 165, 233, 0.05)',
+          border: `1px solid ${mode === 'dark' ? 'rgba(14, 165, 233, 0.3)' : 'rgba(14, 165, 233, 0.2)'}`,
+          borderRadius: borderRadius.lg,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <div>
+          <div style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary, marginBottom: '0.25rem' }}>
+            Importer depuis LinkedIn
+          </div>
+          <div style={{ fontSize: typography.fontSize.sm, color: theme.text.secondary }}>
+            Remplissez automatiquement vos réseaux depuis vos settings
+          </div>
+        </div>
+        <button
+          onClick={handleImportLinkedIn}
+          style={{
+            padding: '0.75rem 1.5rem',
+            borderRadius: borderRadius.lg,
+            border: 'none',
+            background: '#0A66C2',
+            color: '#fff',
+            fontSize: typography.fontSize.sm,
+            fontWeight: typography.fontWeight.bold,
+            cursor: 'pointer',
+            transition: transitions.fast,
+          }}
+        >
+          Importer
+        </button>
+      </div>
+
+      {/* Platform Selector */}
+      <div>
+        <label
+          style={{
+            display: 'block',
+            fontSize: typography.fontSize.sm,
+            fontWeight: typography.fontWeight.semibold,
+            color: theme.text.primary,
+            marginBottom: '1rem',
+          }}
+        >
+          Ajouter un réseau social
+        </label>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+            gap: '0.75rem',
+          }}
+        >
+          {SOCIAL_PLATFORMS.map((platform) => {
+            const alreadyAdded = data.socialLinks.some(link => link.platform === platform.id);
+            return (
+              <button
+                key={platform.id}
+                onClick={() => !alreadyAdded && handleAddLink(platform.id)}
+                disabled={alreadyAdded}
+                style={{
+                  padding: '0.75rem',
+                  borderRadius: borderRadius.md,
+                  border: `1px solid ${alreadyAdded ? theme.border.light : theme.border.default}`,
+                  background: alreadyAdded ? theme.bg.tertiary : 'transparent',
+                  color: alreadyAdded ? theme.text.tertiary : theme.text.primary,
+                  fontSize: typography.fontSize.xs,
+                  fontWeight: typography.fontWeight.medium,
+                  cursor: alreadyAdded ? 'not-allowed' : 'pointer',
+                  opacity: alreadyAdded ? 0.5 : 1,
+                  transition: transitions.fast,
+                }}
+              >
+                {platform.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Active Links */}
+      {data.socialLinks.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h4
+            style={{
+              fontSize: typography.fontSize.sm,
+              fontWeight: typography.fontWeight.bold,
+              color: theme.text.secondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            Vos réseaux ({data.socialLinks.length})
+          </h4>
+          {data.socialLinks.map((link, index) => {
+            const platformInfo = SOCIAL_PLATFORMS.find(p => p.id === link.platform);
+            return (
+              <div
+                key={index}
+                style={{
+                  background: theme.bg.secondary,
+                  border: `1px solid ${theme.border.light}`,
+                  borderRadius: borderRadius.lg,
+                  padding: '1rem',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <div style={{ fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
+                    {platformInfo?.label || link.platform}
+                  </div>
+                  <button
+                    onClick={() => handleRemoveLink(index)}
+                    style={{
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: borderRadius.sm,
+                      border: 'none',
+                      background: 'transparent',
+                      color: theme.text.tertiary,
+                      fontSize: typography.fontSize.xs,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Retirer
+                  </button>
+                </div>
+                {link.platform === 'other' && (
+                  <input
+                    type="text"
+                    value={link.label || ''}
+                    onChange={(e) => handleUpdateLink(index, link.url, e.target.value)}
+                    placeholder="Nom du réseau"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      marginBottom: '0.5rem',
+                      fontSize: typography.fontSize.sm,
+                      color: theme.text.primary,
+                      backgroundColor: theme.bg.primary,
+                      border: `1px solid ${theme.border.default}`,
+                      borderRadius: borderRadius.md,
+                      outline: 'none',
+                    }}
+                  />
+                )}
+                <input
+                  type="text"
+                  value={link.url}
+                  onChange={(e) => handleUpdateLink(index, e.target.value, link.label)}
+                  placeholder={platformInfo?.placeholder || 'URL'}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: typography.fontSize.sm,
+                    color: theme.text.primary,
+                    backgroundColor: theme.bg.primary,
+                    border: `1px solid ${theme.border.default}`,
+                    borderRadius: borderRadius.md,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Social as Main Contact */}
+      <label
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          padding: '1rem',
+          background: theme.bg.secondary,
+          borderRadius: borderRadius.lg,
+          cursor: 'pointer',
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={data.socialIsMain}
+          onChange={(e) => onChange({ socialIsMain: e.target.checked })}
+          style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+        />
+        <div>
+          <div style={{ fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.medium, color: theme.text.primary }}>
+            Les réseaux sociaux sont mon contact principal
+          </div>
+          <div style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>
+            Affichera les réseaux sociaux en priorité sur le portfolio
+          </div>
+        </div>
+      </label>
+    </motion.div>
+  );
+};
