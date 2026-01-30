@@ -4,6 +4,7 @@ import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import { SOCIAL_PLATFORMS } from './types';
 import type { PortfolioFormData, SocialPlatform } from './types';
+import { getSocialIcon } from './socialIcons';
 
 interface Step5SocialProps {
   data: PortfolioFormData;
@@ -105,9 +106,14 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
                   fontWeight: isActive ? typography.fontWeight.semibold : typography.fontWeight.medium,
                   cursor: 'pointer',
                   transition: transitions.fast,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.5rem',
                 }}
               >
-                {platform.label}
+                {getSocialIcon(platform.id, 20, isActive ? theme.text.primary : theme.text.secondary)}
+                <span>{platform.label}</span>
               </button>
             );
           })}
