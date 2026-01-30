@@ -226,8 +226,8 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
           id="doc-upload"
           accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
         />
-        <label htmlFor="doc-upload" style={{ cursor: 'pointer', display: 'block' }}>
-          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             <UploadIcon size={64} color={theme.text.tertiary} />
           </div>
           <div
@@ -235,7 +235,6 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
               fontSize: typography.fontSize.lg,
               fontWeight: typography.fontWeight.bold,
               color: theme.text.primary,
-              marginBottom: '0.5rem',
             }}
           >
             Glissez vos documents ici ou cliquez
@@ -243,7 +242,33 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
           <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary }}>
             PDF, Word, PowerPoint, textes acceptés
           </div>
-        </label>
+          <label
+            htmlFor="doc-upload"
+            style={{
+              padding: '0.75rem 2rem',
+              borderRadius: borderRadius.lg,
+              border: `2px solid ${theme.border.default}`,
+              background: mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+              backdropFilter: 'blur(20px)',
+              color: theme.text.primary,
+              cursor: 'pointer',
+              fontSize: typography.fontSize.base,
+              fontWeight: typography.fontWeight.semibold,
+              transition: transitions.fast,
+              display: 'inline-block',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)';
+              e.currentTarget.style.borderColor = theme.accent.primary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)';
+              e.currentTarget.style.borderColor = theme.border.default;
+            }}
+          >
+            Choisir des fichiers
+          </label>
+        </div>
       </div>
 
       {/* Notion Section */}
