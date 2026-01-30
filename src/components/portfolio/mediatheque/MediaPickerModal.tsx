@@ -47,11 +47,11 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({ isOpen, onCl
           height: '80vh',
           display: 'flex',
           flexDirection: 'column',
-          border: `1px solid ${theme.border}`,
+          border: `1px solid ${theme.border.default}`,
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
           color: theme.text.primary
       }}>
-        <div style={{ padding: '1.5rem', borderBottom: `1px solid ${theme.border}` }}>
+        <div style={{ padding: '1.5rem', borderBottom: `1px solid ${theme.border.default}` }}>
             <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Sélectionner des Médias</h2>
         </div>
         
@@ -68,7 +68,7 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({ isOpen, onCl
 
         <div style={{ 
             padding: '1.5rem', 
-            borderTop: `1px solid ${theme.border}`, 
+            borderTop: `1px solid ${theme.border.default}`, 
             display: 'flex', 
             justifyContent: 'space-between', 
             alignItems: 'center' 
@@ -80,7 +80,7 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({ isOpen, onCl
                 style={{
                     padding: '10px 20px',
                     background: 'transparent',
-                    border: `1px solid ${theme.border}`,
+                    border: `1px solid ${theme.border.default}`,
                     borderRadius: '8px',
                     color: theme.text.primary,
                     cursor: 'pointer'

@@ -60,7 +60,7 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({ isOpen, 
             width: '100%',
             padding: '10px',
             borderRadius: '6px',
-            border: `1px solid ${theme.border}`,
+            border: `1px solid ${theme.border.default}`,
             backgroundColor: theme.bg.primary,
             color: theme.text.primary,
             outline: 'none',
@@ -70,7 +70,7 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({ isOpen, 
             width: '100%',
             padding: '10px',
             borderRadius: '6px',
-            border: `1px solid ${theme.border}`,
+            border: `1px solid ${theme.border.default}`,
             backgroundColor: theme.bg.primary,
             color: theme.text.primary,
             outline: 'none',
@@ -99,10 +99,10 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({ isOpen, 
                 maxHeight: '90vh',
                 display: 'flex',
                 flexDirection: 'column',
-                border: `1px solid ${theme.border}`,
+                border: `1px solid ${theme.border.default}`,
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
             }}>
-                <div style={{ padding: '1.5rem', borderBottom: `1px solid ${theme.border}` }}>
+                <div style={{ padding: '1.5rem', borderBottom: `1px solid ${theme.border.default}` }}>
                      <h2 style={{ margin: 0, color: theme.text.primary }}>Nouveau Projet (Format Excellence)</h2>
                      <p style={{ margin: '0.5rem 0 0', color: theme.text.tertiary, fontSize: '0.9rem' }}>
                         Définissez les bases de votre future étude de cas.
@@ -171,14 +171,14 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({ isOpen, 
                     </form>
                 </div>
 
-                <div style={{ padding: '1.5rem', borderTop: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                <div style={{ padding: '1.5rem', borderTop: `1px solid ${theme.border.default}`, display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                     <button 
                         type="button" 
                         onClick={onClose}
                         style={{
                             padding: '10px 20px',
                             background: 'transparent',
-                            border: `1px solid ${theme.border}`,
+                            border: `1px solid ${theme.border.default}`,
                             borderRadius: '8px',
                             color: theme.text.primary,
                             cursor: 'pointer'

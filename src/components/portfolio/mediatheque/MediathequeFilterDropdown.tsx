@@ -41,7 +41,7 @@ export const MediathequeFilterDropdown: React.FC<MediathequeFilterDropdownProps>
             right: '0',
             width: '300px',
             backgroundColor: theme.bg.secondary,
-            border: `1px solid ${theme.border}`,
+            border: `1px solid ${theme.border.default}`,
             borderRadius: '12px',
             boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
             padding: '1.5rem',
@@ -98,7 +98,7 @@ export const MediathequeFilterDropdown: React.FC<MediathequeFilterDropdownProps>
             justifyContent: 'space-between',
             marginTop: '1rem',
             paddingTop: '1rem',
-            borderTop: `1px solid ${theme.border}`,
+            borderTop: `1px solid ${theme.border.default}`,
         },
         resetBtn: {
             background: 'transparent',

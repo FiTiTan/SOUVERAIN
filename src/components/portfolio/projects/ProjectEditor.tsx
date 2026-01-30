@@ -173,7 +173,7 @@ Résultat: ${resultText}
         width: '100%',
         padding: '10px',
         borderRadius: '6px',
-        border: `1px solid ${theme.border}`,
+        border: `1px solid ${theme.border.default}`,
         backgroundColor: theme.bg.primary,
         color: theme.text.primary,
         outline: 'none',
@@ -183,7 +183,7 @@ Résultat: ${resultText}
         width: '100%',
         padding: '10px',
         borderRadius: '6px',
-        border: `1px solid ${theme.border}`,
+        border: `1px solid ${theme.border.default}`,
         backgroundColor: theme.bg.primary,
         color: theme.text.primary,
         outline: 'none',
@@ -248,10 +248,10 @@ Résultat: ${resultText}
             height: '90vh',
             display: 'flex',
             flexDirection: 'column',
-            border: `1px solid ${theme.border}`,
+            border: `1px solid ${theme.border.default}`,
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
         }}>
-          <div style={{ padding: '1.5rem', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ padding: '1.5rem', borderBottom: `1px solid ${theme.border.default}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <input
                       type="text"
@@ -277,7 +277,7 @@ Résultat: ${resultText}
 
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
               {/* Main Content (Left) */}
-              <div style={{ flex: 2, padding: '2rem', overflowY: 'auto', borderRight: `1px solid ${theme.border}` }}>
+              <div style={{ flex: 2, padding: '2rem', overflowY: 'auto', borderRight: `1px solid ${theme.border.default}` }}>
                 <form id="project-edit-form" onSubmit={handleSubmit}>
                   <div style={styles.section}>
                       <div style={styles.headerContainer}>
@@ -370,7 +370,7 @@ Résultat: ${resultText}
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {linkedMedia.map(media => (
-                      <div key={media.id} style={{ display: 'flex', gap: '10px', borderRadius: '8px', padding: '8px', backgroundColor: theme.bg.primary, border: `1px solid ${theme.border}` }}>
+                      <div key={media.id} style={{ display: 'flex', gap: '10px', borderRadius: '8px', padding: '8px', backgroundColor: theme.bg.primary, border: `1px solid ${theme.border.default}` }}>
                         <div style={{ width: '60px', height: '60px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
                             {(media.localPath || media.file_path) ? (
                                 <img 

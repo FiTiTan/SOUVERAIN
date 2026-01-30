@@ -36,10 +36,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onExp
           borderRadius: '12px',
           width: '100%',
           maxWidth: '500px',
-          border: `1px solid ${theme.border}`,
+          border: `1px solid ${theme.border.default}`,
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
       }}>
-        <div style={{ padding: '1.5rem', borderBottom: `1px solid ${theme.border}` }}>
+        <div style={{ padding: '1.5rem', borderBottom: `1px solid ${theme.border.default}` }}>
             <h2 style={{ margin: 0, color: theme.text.primary }}>Exporter {scope === 'global' ? 'le Portfolio' : 'le Projet'}</h2>
         </div>
 
@@ -54,7 +54,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onExp
                           flex: 1,
                           padding: '0.75rem',
                           borderRadius: '8px',
-                          border: `2px solid ${format === 'pdf' ? theme.accent.primary : theme.border}`,
+                          border: `2px solid ${format === 'pdf' ? theme.accent.primary : theme.border.default}`,
                           backgroundColor: format === 'pdf' ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
                           color: theme.text.primary,
                           cursor: 'pointer',
@@ -73,7 +73,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onExp
                               flex: 1,
                               padding: '0.75rem',
                               borderRadius: '8px',
-                              border: `2px solid ${format === 'html' ? theme.accent.primary : theme.border}`,
+                              border: `2px solid ${format === 'html' ? theme.accent.primary : theme.border.default}`,
                               backgroundColor: format === 'html' ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
                               color: theme.text.primary,
                               cursor: 'pointer',
@@ -111,14 +111,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onExp
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem', borderTop: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+        <div style={{ padding: '1.5rem', borderTop: `1px solid ${theme.border.default}`, display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
             <button
                 type="button"
                 onClick={onClose}
                 style={{
                     padding: '10px 20px',
                     background: 'transparent',
-                    border: `1px solid ${theme.border}`,
+                    border: `1px solid ${theme.border.default}`,
                     borderRadius: '8px',
                     color: theme.text.primary,
                     cursor: 'pointer'
