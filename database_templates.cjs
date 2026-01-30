@@ -7,26 +7,25 @@ module.exports = function initTemplatesSchema(db) {
   console.log('[DB] Initializing templates schema...');
 
   // ============================================================
-  // MIGRATION: Fix old paths to new paths
+  // MIGRATION: Fix old paths by deleting and re-seeding
   // ============================================================
   try {
     // Check if table exists first
     const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='templates'").get();
     
     if (tableExists) {
-      // Update old paths (resources/templates/portfolio/free/*/thumbnail.png) to new (templates/thumbnails/*.svg)
-      db.exec(`
-        UPDATE templates SET 
-          thumbnail_path = REPLACE(thumbnail_path, 'resources/templates/portfolio/free/', 'templates/thumbnails/'),
-          thumbnail_path = REPLACE(thumbnail_path, '/thumbnail.png', '.svg'),
-          html_path = REPLACE(html_path, 'resources/templates/portfolio/free/', 'templates/'),
-          html_path = REPLACE(html_path, '/template.html', '.html')
-        WHERE thumbnail_path LIKE 'resources/templates/%'
-      `);
-      console.log('[DB] ✅ Migrated old template paths to new structure');
+      // Check if we have old paths
+      const oldPaths = db.prepare("SELECT COUNT(*) as count FROM templates WHERE thumbnail_path LIKE 'resources/templates/%'").get();
+      
+      if (oldPaths.count > 0) {
+        console.log('[DB] Detected old template paths, re-seeding with correct paths...');
+        // Delete all templates (we'll re-insert with correct paths below)
+        db.exec('DELETE FROM templates');
+        console.log('[DB] ✅ Deleted old template entries');
+      }
     }
   } catch (e) {
-    console.warn('[DB] Template path migration warning:', e.message);
+    console.warn('[DB] Template migration warning:', e.message);
   }
 
   // ============================================================
