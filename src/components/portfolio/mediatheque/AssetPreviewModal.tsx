@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTheme } from '../../../ThemeContext';
 import type { MediathequeItem } from '../../../hooks/useMediatheque';
+import { FileIcon } from '../../icons';
 
 interface AssetPreviewModalProps {
     isOpen: boolean;
@@ -94,7 +95,7 @@ export const AssetPreviewModal: React.FC<AssetPreviewModalProps> = ({
                 )}
                 {(asset.file_type === 'pdf' || asset.format === 'pdf') && (
                     <div style={{ textAlign: 'center' }}>
-                         <span style={{ fontSize: '80px' }}>📄</span>
+                         <FileIcon size={80} color={theme.text.tertiary} />
                          <p>Prévisualisation PDF non disponible en plein écran pour le moment.</p>
                          <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{asset.file_path || asset.localPath}</p>
                     </div>

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useTheme } from '../../ThemeContext';
+import { FileIcon, GlobeIcon } from '../icons';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -60,7 +61,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onExp
                           fontWeight: 600
                       }}
                   >
-                      📄 PDF {scope === 'single' ? 'Excellence' : 'Global'}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+                        <FileIcon size={18} />
+                        <span>PDF {scope === 'single' ? 'Excellence' : 'Global'}</span>
+                      </div>
                   </button>
                   {scope === 'global' && (
                       <button
@@ -76,7 +80,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, onExp
                               fontWeight: 600
                           }}
                       >
-                          🌐 Site Web
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+                            <GlobeIcon size={18} />
+                            <span>Site Web</span>
+                          </div>
                       </button>
                   )}
               </div>

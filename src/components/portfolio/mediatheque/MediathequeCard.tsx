@@ -1,6 +1,7 @@
 import React from 'react';
 import type { MediathequeItem } from '../../../hooks/useMediatheque';
 import { useTheme } from '../../../ThemeContext';
+import { FileIcon, VideoIcon, FolderIcon, XIcon } from '../../icons';
 
 interface MediathequeCardProps {
     item: MediathequeItem;
@@ -79,12 +80,19 @@ export const MediathequeCard: React.FC<MediathequeCardProps> = ({
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         onError={(e) => {
                             e.currentTarget.style.display = 'none';
-                            e.currentTarget.parentElement!.innerText = '❌'; 
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                                parent.innerHTML = '';
+                                const errorDiv = document.createElement('div');
+                                errorDiv.style.color = '#EF4444';
+                                errorDiv.appendChild(document.createTextNode('Error'));
+                                parent.appendChild(errorDiv);
+                            }
                         }}
                     />
                 ) : (
-                    <div style={{ fontSize: '3rem' }}>
-                        {(item.file_type === 'pdf' || item.format === 'pdf') ? '📄' : (item.file_type === 'video' || item.format === 'video') ? '🎥' : '📁'}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {(item.file_type === 'pdf' || item.format === 'pdf') ? <FileIcon size={48} color={theme.text.tertiary} /> : (item.file_type === 'video' || item.format === 'video') ? <VideoIcon size={48} color={theme.text.tertiary} /> : <FolderIcon size={48} color={theme.text.tertiary} />}
                     </div>
                 )}
             </div>
