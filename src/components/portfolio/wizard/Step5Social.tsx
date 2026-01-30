@@ -83,7 +83,7 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+            gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '0.75rem',
           }}
         >
