@@ -32,7 +32,8 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
       <div style={{
         position: 'relative',
         width: `${spacing * 6}px`,
-        height: `${spacing * 6}px`
+        height: `${spacing * 6}px`,
+        animation: 'spin 2s linear infinite'
       }}>
         {[...Array(8)].map((_, i) => {
           const angle = (i * 45) * (Math.PI / 180);
@@ -51,8 +52,7 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
                 borderRadius: '50%',
                 backgroundColor: theme.accent.primary,
                 transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
-                animation: `pulse-dot ${1.2}s ease-in-out ${i * 0.15}s infinite`,
-                opacity: 0.2
+                animation: `pulse-dot ${1.2}s ease-in-out ${i * 0.15}s infinite`
               }}
             />
           );
@@ -74,14 +74,21 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
 
       {/* CSS Animations */}
       <style>{`
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        
         @keyframes pulse-dot {
           0%, 100% {
             opacity: 0.2;
-            transform: translate(-50%, -50%) translate(${0}px, ${0}px) scale(1);
           }
           50% {
             opacity: 1;
-            transform: translate(-50%, -50%) translate(var(--x), var(--y)) scale(1.2);
           }
         }
         
