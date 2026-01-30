@@ -16,6 +16,7 @@ import {
   validateStep3,
   validateStep4,
   validateStep5,
+  DEV_MODE,
 } from './types';
 import type { PortfolioFormData } from './types';
 
@@ -159,7 +160,27 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
       }}>
         {/* Progress */}
         <div style={{ flexShrink: 0, marginBottom: '1.5rem' }}>
-          <WizardProgress currentStep={step} totalSteps={totalSteps} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <WizardProgress currentStep={step} totalSteps={totalSteps} />
+            {DEV_MODE && (
+              <div
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: 'rgba(251, 191, 36, 0.2)',
+                  border: '1px solid rgba(251, 191, 36, 0.5)',
+                  borderRadius: '8px',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: '#fbbf24',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                ⚡ DEV MODE - Autofill activé
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Step Content - Scrollable */}

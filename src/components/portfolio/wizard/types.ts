@@ -1,5 +1,8 @@
 // Type definitions for Portfolio Wizard V2
 
+// ⚡ DEV MODE - Set to false for production
+export const DEV_MODE = true;
+
 export type ProfileType = 'freelance' | 'commerce' | 'creative' | 'student' | 'employee';
 
 export type SocialPlatform = 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'behance' | 'github' | 'other';
@@ -173,8 +176,32 @@ export const validateStep5 = (data: PortfolioFormData): boolean => {
   return data.selectedTemplateId !== null;
 };
 
-// Initial form data
-export const initialFormData: PortfolioFormData = {
+// Dev autofill data
+const devFormData: PortfolioFormData = {
+  name: 'Jean Dupont',
+  profileType: 'freelance',
+  tagline: 'Développeur Full-Stack passionné par les solutions innovantes',
+  services: ['Développement web', 'Conseil technique', 'Formation'],
+  valueProp: 'Je transforme vos idées en applications web performantes et élégantes',
+  email: 'jean.dupont@example.com',
+  phone: '+33 6 12 34 56 78',
+  address: '42 rue de la Tech, 75001 Paris',
+  openingHours: 'Lun-Ven 9h-18h',
+  socialLinks: [
+    { platform: 'github', url: 'github.com/jeandupont' },
+    { platform: 'linkedin', url: 'linkedin.com/in/jeandupont' },
+  ],
+  socialIsMain: false,
+  projects: [],
+  testimonials: [],
+  linkedInData: '',
+  notionData: '',
+  media: [],
+  selectedTemplateId: null,
+};
+
+// Initial form data - Autofilled in DEV_MODE
+export const initialFormData: PortfolioFormData = DEV_MODE ? devFormData : {
   name: '',
   profileType: null,
   tagline: '',
