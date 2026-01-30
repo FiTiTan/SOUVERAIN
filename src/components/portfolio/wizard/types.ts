@@ -51,18 +51,25 @@ export interface PortfolioFormData {
   phone: string;
   address: string;
   openingHours: string;
+
+  // Step 4: Documents
+  documents: File[];
+  notionData: string;
+
+  // Step 5: Social Networks
   socialLinks: SocialLink[];
   socialIsMain: boolean;
+  linkedInImported: boolean;
 
-  // Step 4: Content
-  projects: Project[];
-  testimonials: Testimonial[];
-  linkedInData: string;
-  notionData: string;
+  // Step 6: Media
   media: Media[];
 
-  // Step 5: Template
+  // Step 7: Template
   selectedTemplateId: string | null;
+
+  // Future: Projects (separate screen, not in wizard)
+  projects: Project[];
+  testimonials: Testimonial[];
 }
 
 export interface GroqFlags {
@@ -169,10 +176,18 @@ export const validateStep3 = (data: PortfolioFormData): boolean => {
 };
 
 export const validateStep4 = (data: PortfolioFormData): boolean => {
-  return true; // Everything is optional in step 4
+  return true; // Documents are optional
 };
 
 export const validateStep5 = (data: PortfolioFormData): boolean => {
+  return true; // Social links are optional
+};
+
+export const validateStep6 = (data: PortfolioFormData): boolean => {
+  return true; // Media is optional
+};
+
+export const validateStep7 = (data: PortfolioFormData): boolean => {
   return data.selectedTemplateId !== null;
 };
 
@@ -187,17 +202,18 @@ const devFormData: PortfolioFormData = {
   phone: '+33 6 12 34 56 78',
   address: '42 rue de la Tech, 75001 Paris',
   openingHours: 'Lun-Ven 9h-18h',
+  documents: [],
+  notionData: '',
   socialLinks: [
     { platform: 'github', url: 'github.com/jeandupont' },
     { platform: 'linkedin', url: 'linkedin.com/in/jeandupont' },
   ],
   socialIsMain: false,
-  projects: [],
-  testimonials: [],
-  linkedInData: '',
-  notionData: '',
+  linkedInImported: false,
   media: [],
   selectedTemplateId: null,
+  projects: [],
+  testimonials: [],
 };
 
 // Initial form data - Autofilled in DEV_MODE
@@ -211,14 +227,15 @@ export const initialFormData: PortfolioFormData = DEV_MODE ? devFormData : {
   phone: '',
   address: '',
   openingHours: '',
+  documents: [],
+  notionData: '',
   socialLinks: [],
   socialIsMain: false,
-  projects: [],
-  testimonials: [],
-  linkedInData: '',
-  notionData: '',
+  linkedInImported: false,
   media: [],
   selectedTemplateId: null,
+  projects: [],
+  testimonials: [],
 };
 
 // Calculate Groq flags based on form data
