@@ -30,11 +30,13 @@ const formatFileSize = (bytes: number): string => {
 const DocumentPreviewCard: React.FC<{
   file: File;
   onRemove: () => void;
-}> = ({ file, onRemove }) => {
+  onClick: () => void;
+}> = ({ file, onRemove, onClick }) => {
   const { theme } = useTheme();
 
   return (
     <div
+      onClick={onClick}
       style={{
         background: theme.bg.secondary,
         border: `1px solid ${theme.border.light}`,
@@ -44,6 +46,15 @@ const DocumentPreviewCard: React.FC<{
         gap: '1rem',
         alignItems: 'center',
         transition: transitions.normal,
+        cursor: 'pointer',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = theme.bg.tertiary;
+        e.currentTarget.style.borderColor = theme.border.default;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = theme.bg.secondary;
+        e.currentTarget.style.borderColor = theme.border.light;
       }}
     >
       {/* Icon */}
@@ -94,7 +105,10 @@ const DocumentPreviewCard: React.FC<{
 
       {/* Remove Button */}
       <button
-        onClick={onRemove}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
         style={{
           padding: '0.5rem',
           borderRadius: borderRadius.md,
@@ -125,6 +139,8 @@ const DocumentPreviewCard: React.FC<{
 export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }) => {
   const { theme, mode } = useTheme();
   const [isDragging, setIsDragging] = useState(false);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -144,6 +160,20 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
 
   const handleRemove = (index: number) => {
     onChange({ documents: data.documents.filter((_, i) => i !== index) });
+  };
+
+  const handlePreview = (file: File) => {
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setPreviewFile(file);
+  };
+
+  const closePreview = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setPreviewFile(null);
   };
 
   return (
@@ -281,8 +311,109 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
                 key={`${file.name}-${index}`}
                 file={file}
                 onRemove={() => handleRemove(index)}
+                onClick={() => handlePreview(file)}
               />
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewFile && previewUrl && (
+        <div
+          onClick={closePreview}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(10px)',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '2rem',
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem',
+            }}
+          >
+            <div style={{ color: '#fff', fontSize: typography.fontSize.lg, fontWeight: typography.fontWeight.semibold }}>
+              {previewFile.name}
+            </div>
+            <button
+              onClick={closePreview}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: borderRadius.md,
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontSize: typography.fontSize.sm,
+                cursor: 'pointer',
+              }}
+            >
+              Fermer ✕
+            </button>
+          </div>
+
+          {/* Preview Content */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              flex: 1,
+              background: '#fff',
+              borderRadius: borderRadius.xl,
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {previewFile.type === 'application/pdf' ? (
+              <iframe
+                src={previewUrl}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                }}
+                title={previewFile.name}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '3rem' }}>
+                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>{getFileIcon(previewFile)}</div>
+                <div style={{ fontSize: typography.fontSize.xl, fontWeight: typography.fontWeight.semibold, color: theme.text.primary, marginBottom: '1rem' }}>
+                  {previewFile.name}
+                </div>
+                <div style={{ fontSize: typography.fontSize.sm, color: theme.text.secondary, marginBottom: '2rem' }}>
+                  Aperçu non disponible pour ce type de fichier
+                </div>
+                <a
+                  href={previewUrl}
+                  download={previewFile.name}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: borderRadius.lg,
+                    background: theme.accent.primary,
+                    color: '#fff',
+                    fontSize: typography.fontSize.sm,
+                    fontWeight: typography.fontWeight.semibold,
+                    textDecoration: 'none',
+                    display: 'inline-block',
+                  }}
+                >
+                  Télécharger
+                </a>
+              </div>
+            )}
           </div>
         </div>
       )}
