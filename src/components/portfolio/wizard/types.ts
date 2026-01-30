@@ -16,7 +16,6 @@ export type SocialPlatform =
   | 'twitter'
   | 'facebook'
   | 'malt'
-  | 'medium'
   | 'pinterest'
   | 'other';
 
@@ -146,7 +145,6 @@ export const SOCIAL_PLATFORMS = [
   { id: 'youtube' as SocialPlatform, label: 'YouTube', placeholder: 'youtube.com/@machaine' },
   { id: 'tiktok' as SocialPlatform, label: 'TikTok', placeholder: '@moncompte' },
   { id: 'malt' as SocialPlatform, label: 'Malt', placeholder: 'malt.fr/profile/monprofil' },
-  { id: 'medium' as SocialPlatform, label: 'Medium', placeholder: 'medium.com/@monpseudo' },
   { id: 'pinterest' as SocialPlatform, label: 'Pinterest', placeholder: 'pinterest.com/monprofil' },
   { id: 'other' as SocialPlatform, label: 'Autre', placeholder: 'URL personnalisée' },
 ];
