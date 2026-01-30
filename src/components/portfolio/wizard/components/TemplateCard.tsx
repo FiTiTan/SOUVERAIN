@@ -133,18 +133,6 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           overflow: 'hidden',
         }}
       >
-<<<<<<< HEAD
-        {/* Template Thumbnail */}
-        {template.thumbnail_path ? (
-          <img
-            src={template.thumbnail_path}
-            alt={template.name}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              opacity: 0.8,
-=======
         {/* SVG Thumbnail */}
         {thumbnailSvg ? (
           <div
@@ -155,7 +143,6 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
->>>>>>> 7eb3639 (✨ Fix: Templates thumbnails + File import preview)
             }}
           />
         ) : (
