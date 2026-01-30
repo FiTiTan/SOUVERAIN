@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, Check, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../../../ThemeContext';
 import type { Media } from '../types';
+import { ImageIcon } from '../icons';
 
 interface MediaUploaderProps {
   media: Media[];
@@ -282,7 +283,9 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onChange })
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                  <div style={{ fontSize: '2rem' }}>🖼</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ImageIcon size={32} color={theme.text.tertiary} />
+                  </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ color: theme.text.primary, fontSize: '0.9rem', fontWeight: 500 }}>
                       {item.url.split(/[\\/]/).pop()}
