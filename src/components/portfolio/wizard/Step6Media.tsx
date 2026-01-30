@@ -138,14 +138,10 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
   const { theme, mode } = useTheme();
   const [isDragging, setIsDragging] = useState(false);
 
-  // Convert Media[] to File[] for display (simplified for now)
-  const mediaFiles: File[] = []; // TODO: Store actual File objects in state
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      // TODO: Convert to Media[] format and update data.media
-      console.log('New media files:', newFiles);
+      onChange({ media: [...data.media, ...newFiles] });
     }
   };
 
@@ -154,8 +150,12 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
     setIsDragging(false);
     if (e.dataTransfer.files) {
       const newFiles = Array.from(e.dataTransfer.files);
-      console.log('Dropped files:', newFiles);
+      onChange({ media: [...data.media, ...newFiles] });
     }
+  };
+
+  const handleRemove = (index: number) => {
+    onChange({ media: data.media.filter((_, i) => i !== index) });
   };
 
   return (
@@ -228,8 +228,8 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
         </label>
       </div>
 
-      {/* Media Grid - Placeholder for now */}
-      {mediaFiles.length > 0 && (
+      {/* Media Grid */}
+      {data.media.length > 0 && (
         <div>
           <h4
             style={{
@@ -241,7 +241,7 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
               marginBottom: '1rem',
             }}
           >
-            Médias ({mediaFiles.length})
+            Médias ({data.media.length})
           </h4>
           <div
             style={{
@@ -250,11 +250,11 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
               gap: '1rem',
             }}
           >
-            {mediaFiles.map((file, index) => (
+            {data.media.map((file, index) => (
               <MediaPreviewCard
                 key={`${file.name}-${index}`}
                 file={file}
-                onRemove={() => console.log('Remove', index)}
+                onRemove={() => handleRemove(index)}
               />
             ))}
           </div>

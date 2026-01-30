@@ -74,7 +74,7 @@ export interface PortfolioFormData {
   linkedInImported: boolean;
 
   // Step 6: Media
-  media: Media[];
+  media: File[];
 
   // Step 7: Template
   selectedTemplateId: string | null;
