@@ -10,15 +10,15 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
   message = 'Chargement...', 
   size = 'medium' 
 }) => {
-  const { theme, mode } = useTheme();
+  const { theme } = useTheme();
 
   const sizeMap = {
-    small: { dot: 8, spacing: 12 },
-    medium: { dot: 12, spacing: 18 },
-    large: { dot: 16, spacing: 24 }
+    small: 40,
+    medium: 60,
+    large: 80
   };
 
-  const { dot, spacing } = sizeMap[size];
+  const loaderSize = sizeMap[size];
 
   return (
     <div style={{
@@ -28,36 +28,14 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
       justifyContent: 'center',
       gap: '2rem'
     }}>
-      {/* Spinning dots */}
+      {/* Morphing Shape */}
       <div style={{
-        position: 'relative',
-        width: `${spacing * 6}px`,
-        height: `${spacing * 6}px`,
-        animation: 'spin 2s linear infinite'
-      }}>
-        {[...Array(8)].map((_, i) => {
-          const angle = (i * 45) * (Math.PI / 180);
-          const x = Math.cos(angle) * spacing * 2;
-          const y = Math.sin(angle) * spacing * 2;
-          
-          return (
-            <div
-              key={i}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                width: `${dot}px`,
-                height: `${dot}px`,
-                borderRadius: '50%',
-                backgroundColor: theme.accent.primary,
-                transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
-                animation: `pulse-dot ${1.2}s ease-in-out ${i * 0.15}s infinite`
-              }}
-            />
-          );
-        })}
-      </div>
+        width: `${loaderSize}px`,
+        height: `${loaderSize}px`,
+        background: `linear-gradient(45deg, ${theme.accent.primary}, ${theme.accent.secondary})`,
+        animation: 'morph 2s ease-in-out infinite',
+        boxShadow: `0 0 30px ${theme.accent.primary}40`
+      }} />
 
       {/* Message */}
       {message && (
@@ -74,21 +52,20 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
 
       {/* CSS Animations */}
       <style>{`
-        @keyframes spin {
-          from {
+        @keyframes morph {
+          0%, 100% {
+            border-radius: 10%;
             transform: rotate(0deg);
           }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        @keyframes pulse-dot {
-          0%, 100% {
-            opacity: 0.2;
+          25% {
+            border-radius: 50%;
           }
           50% {
-            opacity: 1;
+            border-radius: 10%;
+            transform: rotate(180deg);
+          }
+          75% {
+            border-radius: 50%;
           }
         }
         
