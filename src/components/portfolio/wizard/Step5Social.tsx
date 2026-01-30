@@ -13,6 +13,14 @@ interface Step5SocialProps {
 export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
   const { theme, mode } = useTheme();
 
+  // TODO: Auto-fill from settings on mount
+  // useEffect(() => {
+  //   const userSettings = getUserSettings(); // From context or API
+  //   if (userSettings.socialLinks && data.socialLinks.length === 0) {
+  //     onChange({ socialLinks: userSettings.socialLinks });
+  //   }
+  // }, []);
+
   const handleToggleLink = (platform: SocialPlatform) => {
     const exists = data.socialLinks.find(link => link.platform === platform);
     if (exists) {
@@ -32,12 +40,6 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
     const updated = [...data.socialLinks];
     updated[index] = { ...updated[index], url, label };
     onChange({ socialLinks: updated });
-  };
-
-  const handleImportFromSettings = async () => {
-    // TODO: Connect to settings + import all social networks
-    onChange({ linkedInImported: true });
-    alert('Import settings à implémenter (tous les réseaux sociaux)');
   };
 
   return (
@@ -109,42 +111,6 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
               </button>
             );
           })}
-        </div>
-
-        {/* Settings Import Hint */}
-        <div
-          style={{
-            marginTop: '1rem',
-            padding: '0.75rem 1rem',
-            background: mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
-            border: `1px solid ${theme.border.light}`,
-            borderRadius: borderRadius.md,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '1rem',
-          }}
-        >
-          <div style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>
-            Remplissez automatiquement vos réseaux depuis vos settings
-          </div>
-          <button
-            onClick={handleImportFromSettings}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: borderRadius.md,
-              border: `1px solid ${theme.border.light}`,
-              background: 'transparent',
-              color: theme.text.secondary,
-              fontSize: typography.fontSize.xs,
-              fontWeight: typography.fontWeight.medium,
-              cursor: 'pointer',
-              transition: transitions.fast,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Importer
-          </button>
         </div>
       </div>
 
