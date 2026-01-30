@@ -13,9 +13,15 @@ interface Step5SocialProps {
 export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
   const { theme, mode } = useTheme();
 
-  const handleAddLink = (platform: SocialPlatform) => {
+  const handleToggleLink = (platform: SocialPlatform) => {
     const exists = data.socialLinks.find(link => link.platform === platform);
-    if (!exists) {
+    if (exists) {
+      // Remove
+      onChange({
+        socialLinks: data.socialLinks.filter(link => link.platform !== platform)
+      });
+    } else {
+      // Add
       onChange({
         socialLinks: [...data.socialLinks, { platform, url: '', label: platform === 'other' ? '' : undefined }]
       });
@@ -26,10 +32,6 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
     const updated = [...data.socialLinks];
     updated[index] = { ...updated[index], url, label };
     onChange({ socialLinks: updated });
-  };
-
-  const handleRemoveLink = (index: number) => {
-    onChange({ socialLinks: data.socialLinks.filter((_, i) => i !== index) });
   };
 
   const handleImportLinkedIn = async () => {
@@ -122,22 +124,22 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
           }}
         >
           {SOCIAL_PLATFORMS.map((platform) => {
-            const alreadyAdded = data.socialLinks.some(link => link.platform === platform.id);
+            const isActive = data.socialLinks.some(link => link.platform === platform.id);
             return (
               <button
                 key={platform.id}
-                onClick={() => !alreadyAdded && handleAddLink(platform.id)}
-                disabled={alreadyAdded}
+                onClick={() => handleToggleLink(platform.id)}
                 style={{
                   padding: '0.75rem',
                   borderRadius: borderRadius.md,
-                  border: `1px solid ${alreadyAdded ? theme.border.light : theme.border.default}`,
-                  background: alreadyAdded ? theme.bg.tertiary : 'transparent',
-                  color: alreadyAdded ? theme.text.tertiary : theme.text.primary,
+                  border: `1px solid ${isActive ? theme.border.default : theme.border.light}`,
+                  background: isActive 
+                    ? mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'
+                    : 'transparent',
+                  color: isActive ? theme.text.primary : theme.text.secondary,
                   fontSize: typography.fontSize.xs,
-                  fontWeight: typography.fontWeight.medium,
-                  cursor: alreadyAdded ? 'not-allowed' : 'pointer',
-                  opacity: alreadyAdded ? 0.5 : 1,
+                  fontWeight: isActive ? typography.fontWeight.semibold : typography.fontWeight.medium,
+                  cursor: 'pointer',
                   transition: transitions.fast,
                 }}
               >
@@ -174,24 +176,10 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
                   padding: '1rem',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <div style={{ marginBottom: '0.75rem' }}>
                   <div style={{ fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
                     {platformInfo?.label || link.platform}
                   </div>
-                  <button
-                    onClick={() => handleRemoveLink(index)}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: borderRadius.sm,
-                      border: 'none',
-                      background: 'transparent',
-                      color: theme.text.tertiary,
-                      fontSize: typography.fontSize.xs,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Retirer
-                  </button>
                 </div>
                 {link.platform === 'other' && (
                   <input
