@@ -34,10 +34,10 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
     onChange({ socialLinks: updated });
   };
 
-  const handleImportLinkedIn = async () => {
-    // TODO: Connect to settings + import logic
+  const handleImportFromSettings = async () => {
+    // TODO: Connect to settings + import all social networks
     onChange({ linkedInImported: true });
-    alert('Import LinkedIn à implémenter (connexion settings)');
+    alert('Import settings à implémenter (tous les réseaux sociaux)');
   };
 
   return (
@@ -63,44 +63,6 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
         <p style={{ color: theme.text.secondary, fontSize: '0.95rem' }}>
           Ajoutez vos profils sociaux (optionnel)
         </p>
-      </div>
-
-      {/* LinkedIn Import */}
-      <div
-        style={{
-          padding: '1.5rem',
-          background: mode === 'dark' ? 'rgba(14, 165, 233, 0.1)' : 'rgba(14, 165, 233, 0.05)',
-          border: `1px solid ${mode === 'dark' ? 'rgba(14, 165, 233, 0.3)' : 'rgba(14, 165, 233, 0.2)'}`,
-          borderRadius: borderRadius.lg,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <div>
-          <div style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary, marginBottom: '0.25rem' }}>
-            Importer depuis LinkedIn
-          </div>
-          <div style={{ fontSize: typography.fontSize.sm, color: theme.text.secondary }}>
-            Remplissez automatiquement vos réseaux depuis vos settings
-          </div>
-        </div>
-        <button
-          onClick={handleImportLinkedIn}
-          style={{
-            padding: '0.75rem 1.5rem',
-            borderRadius: borderRadius.lg,
-            border: 'none',
-            background: '#0A66C2',
-            color: '#fff',
-            fontSize: typography.fontSize.sm,
-            fontWeight: typography.fontWeight.bold,
-            cursor: 'pointer',
-            transition: transitions.fast,
-          }}
-        >
-          Importer
-        </button>
       </div>
 
       {/* Platform Selector */}
@@ -147,6 +109,42 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
               </button>
             );
           })}
+        </div>
+
+        {/* Settings Import Hint */}
+        <div
+          style={{
+            marginTop: '1rem',
+            padding: '0.75rem 1rem',
+            background: mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
+            border: `1px solid ${theme.border.light}`,
+            borderRadius: borderRadius.md,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '1rem',
+          }}
+        >
+          <div style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>
+            Remplissez automatiquement vos réseaux depuis vos settings
+          </div>
+          <button
+            onClick={handleImportFromSettings}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: borderRadius.md,
+              border: `1px solid ${theme.border.light}`,
+              background: 'transparent',
+              color: theme.text.secondary,
+              fontSize: typography.fontSize.xs,
+              fontWeight: typography.fontWeight.medium,
+              cursor: 'pointer',
+              transition: transitions.fast,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Importer
+          </button>
         </div>
       </div>
 
