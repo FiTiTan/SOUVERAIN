@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Eye, Check, Lock } from 'lucide-react';
 import { useTheme } from '../../../../ThemeContext';
-import { parseTemplateTags, isTemplateFree, isTemplateOwned, getTemplatePrice } from '../../../../services/templateService';
+import { parseTemplateTags, isTemplateFree, isTemplateOwned, getTemplatePrice, getTemplateThumbnail } from '../../../../services/templateService';
 import type { Template } from '../../../../services/templateService';
 
 interface TemplateCardProps {
@@ -21,6 +21,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
   isPremiumUser = false,
 }) => {
   const { theme, mode } = useTheme();
+  const [thumbnailSvg, setThumbnailSvg] = useState<string | null>(null);
 
   const isFree = isTemplateFree(template);
   const isOwned = isTemplateOwned(template);
@@ -28,6 +29,15 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
   const tags = parseTemplateTags(template);
 
   const canSelect = isFree || isOwned;
+
+  // Load thumbnail SVG
+  useEffect(() => {
+    const loadThumbnail = async () => {
+      const svg = await getTemplateThumbnail(template.id);
+      setThumbnailSvg(svg);
+    };
+    loadThumbnail();
+  }, [template.id]);
 
   const handleClick = () => {
     if (canSelect) {
@@ -123,6 +133,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           overflow: 'hidden',
         }}
       >
+<<<<<<< HEAD
         {/* Template Thumbnail */}
         {template.thumbnail_path ? (
           <img
@@ -133,6 +144,18 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
               height: '100%',
               objectFit: 'cover',
               opacity: 0.8,
+=======
+        {/* SVG Thumbnail */}
+        {thumbnailSvg ? (
+          <div
+            dangerouslySetInnerHTML={{ __html: thumbnailSvg }}
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+>>>>>>> 7eb3639 (✨ Fix: Templates thumbnails + File import preview)
             }}
           />
         ) : (

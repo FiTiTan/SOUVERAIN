@@ -111,6 +111,20 @@ export async function getTemplateHTML(id: string): Promise<string | null> {
 }
 
 /**
+ * Récupère le SVG thumbnail d'un template
+ */
+export async function getTemplateThumbnail(id: string): Promise<string | null> {
+  try {
+    // @ts-ignore
+    const result = await window.electron.invoke('template-get-thumbnail', id);
+    return result.svg || null;
+  } catch (error) {
+    console.error('[TemplateService] Error getting template thumbnail:', error);
+    return null;
+  }
+}
+
+/**
  * Achète un template premium (simulation pour l'instant)
  */
 export async function purchaseTemplate(

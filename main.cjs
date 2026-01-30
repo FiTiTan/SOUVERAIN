@@ -3365,6 +3365,31 @@ ipcMain.handle('template-get-html', async (event, id) => {
   }
 });
 
+// Get template thumbnail
+ipcMain.handle('template-get-thumbnail', async (event, id) => {
+  try {
+    console.log('[IPC] template-get-thumbnail called for:', id);
+    const template = dbManager.templates_getById(id);
+    
+    if (!template || !template.thumbnail_path) {
+      return { success: false, error: 'Template ou thumbnail introuvable' };
+    }
+
+    const thumbnailPath = path.join(__dirname, template.thumbnail_path);
+    
+    if (!fs.existsSync(thumbnailPath)) {
+      console.error('[IPC] Thumbnail file not found:', thumbnailPath);
+      return { success: false, error: 'Fichier thumbnail introuvable' };
+    }
+
+    const svgContent = fs.readFileSync(thumbnailPath, 'utf-8');
+    return { success: true, svg: svgContent };
+  } catch (error) {
+    console.error('[IPC] template-get-thumbnail error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // Purchase template
 ipcMain.handle('template-purchase', async (event, { templateId, amountPaid, isPremiumDiscount }) => {
   try {
