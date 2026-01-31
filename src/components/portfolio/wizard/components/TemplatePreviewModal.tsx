@@ -39,17 +39,27 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
           html = '<div style="padding: 2rem; text-align: center;">Template preview not available</div>';
         }
 
-        // Injecter les données fictives dans le HTML
+        // Injecter les données fictives dans le HTML (placeholders en MAJUSCULES)
+        const servicesHTML = MOCK_DATA.services
+          .map(s => `<li>${s}</li>`)
+          .join('');
+        
+        const socialLinksHTML = `
+          <a href="https://${MOCK_DATA.linkedin}" target="_blank">LinkedIn</a>
+          <a href="https://${MOCK_DATA.github}" target="_blank">GitHub</a>
+        `;
+
         const htmlWithData = html
-          .replace(/{{name}}/g, MOCK_DATA.name)
-          .replace(/{{tagline}}/g, MOCK_DATA.tagline)
-          .replace(/{{email}}/g, MOCK_DATA.email)
-          .replace(/{{phone}}/g, MOCK_DATA.phone)
-          .replace(/{{address}}/g, MOCK_DATA.address)
-          .replace(/{{linkedin}}/g, MOCK_DATA.linkedin)
-          .replace(/{{github}}/g, MOCK_DATA.github)
-          .replace(/{{valueProp}}/g, MOCK_DATA.valueProp)
-          .replace(/{{services}}/g, MOCK_DATA.services.join(', '));
+          .replace(/{{NAME}}/g, MOCK_DATA.name)
+          .replace(/{{TAGLINE}}/g, MOCK_DATA.tagline)
+          .replace(/{{EMAIL}}/g, MOCK_DATA.email)
+          .replace(/{{PHONE}}/g, MOCK_DATA.phone)
+          .replace(/{{ADDRESS}}/g, MOCK_DATA.address)
+          .replace(/{{LINKEDIN}}/g, MOCK_DATA.linkedin)
+          .replace(/{{GITHUB}}/g, MOCK_DATA.github)
+          .replace(/{{VALUE_PROP}}/g, MOCK_DATA.valueProp)
+          .replace(/{{SERVICES}}/g, servicesHTML)
+          .replace(/{{SOCIAL_LINKS}}/g, socialLinksHTML);
 
         // Calculer dimensions (ratio A4 ≈ 1.4, mais réduit à 70%)
         const width = 800;
