@@ -17,6 +17,11 @@ const { LinkedInScraper } = require('./linkedin-scraper.cjs');
 const sharp = require('sharp');
 const os = require('os');
 
+// Handler modules
+const { registerVaultHandlers } = require('./handlers/vault');
+const { registerPortfolioHandlers } = require('./handlers/portfolio');
+const { registerCVHandlers } = require('./handlers/cv');
+
 const pdfExtract = new PDFExtract();
 let groqClient = null;
 let linkedInScraper = null;
@@ -3417,6 +3422,16 @@ app.whenReady().then(async () => {
   // Initialiser Groq
   groqClient = new GroqClient(GROQ_API_KEY);
   console.log('[SOUVERAIN] Groq Cloud initialisé');
+
+  // Initialiser LinkedIn Scraper
+  linkedInScraper = new LinkedInScraper();
+
+  // Register all IPC handlers (modular architecture)
+  console.log('[SOUVERAIN] Registering IPC handlers...');
+  registerVaultHandlers(ipcMain, dbManager);
+  registerPortfolioHandlers(ipcMain, dbManager);
+  registerCVHandlers(ipcMain, dbManager, pdfExtract, groqClient, linkedInScraper, Anonymizer);
+  console.log('[SOUVERAIN] ✅ All modular handlers registered');
 
   // Créer la fenêtre
   createWindow();
