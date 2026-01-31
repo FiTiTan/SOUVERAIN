@@ -57,9 +57,10 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
         zIndex: 9999,
         pointerEvents: 'all', // Block all clicks
       }}>
-      <AnimatePresence mode="wait">
-        {phase === 'logo' && (
-          <motion.div
+      {phase !== 'done' && (
+        <AnimatePresence mode="wait">
+          {phase === 'logo' && (
+            <motion.div
             key="logo"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -126,10 +127,11 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
           </motion.div>
         )}
 
-        {phase === 'skeleton' && (
-          <SkeletonScreen theme={theme} />
-        )}
-      </AnimatePresence>
+          {phase === 'skeleton' && (
+            <SkeletonScreen theme={theme} />
+          )}
+        </AnimatePresence>
+      )}
 
       {/* CSS Animations */}
       <style>{`
