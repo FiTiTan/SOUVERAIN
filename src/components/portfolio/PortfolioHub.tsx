@@ -25,7 +25,7 @@ type MPFScreen = 'selector' | 'wizard' | 'generating' | 'preview' | 'mpf-view';
 
 export const PortfolioHub: React.FC = () => {
     const { theme } = useTheme();
-    const { toast } = useToast();
+    const toast = useToast();
     const [currentView, setCurrentView] = useState<PortfolioView>('landing');
     const [mpfScreen, setMpfScreen] = useState<MPFScreen>('selector');
     const [showOnboarding, setShowOnboarding] = useState(false);
