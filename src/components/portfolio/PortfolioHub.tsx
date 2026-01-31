@@ -33,12 +33,12 @@ async function convertMediaToDataURLs(data: PortfolioFormData): Promise<Portfoli
 
     const convertedMedia = await Promise.all(
         data.media.map(async (item: any) => {
-            // Si c'est déjà un objet Media avec url, on le garde
-            if (item && typeof item === 'object' && 'url' in item) {
+            // Si c'est déjà un objet Media avec url (déjà cropé et converti), on le garde tel quel
+            if (item && typeof item === 'object' && 'url' in item && typeof item.url === 'string') {
                 return item;
             }
 
-            // Si c'est un File, on le convertit en data URL
+            // Si c'est un File, on le convertit en data URL (fallback, normalement déjà converti par le tagging)
             if (item instanceof File) {
                 return new Promise<{url: string, alt?: string}>((resolve, reject) => {
                     const reader = new FileReader();

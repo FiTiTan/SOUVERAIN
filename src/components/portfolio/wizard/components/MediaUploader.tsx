@@ -155,6 +155,8 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onChange })
       ...updatedMedia[currentTagIndex],
       tag: tag.type,
       projectName: tag.projectName,
+      // Remplacer l'URL par l'image croppée si fournie
+      url: tag.croppedImageUrl || updatedMedia[currentTagIndex].url,
     };
     setProcessedMedia(updatedMedia);
 

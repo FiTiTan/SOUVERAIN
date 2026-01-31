@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, spacing } from '../../../design-system';
+import Cropper from 'react-easy-crop';
+import { Area } from 'react-easy-crop/types';
 
 interface MediaTaggingModalProps {
   images: File[];
@@ -13,6 +15,7 @@ interface MediaTaggingModalProps {
 export interface MediaTag {
   type: 'profile' | 'business' | 'project';
   projectName?: string;
+  croppedImageUrl?: string;
 }
 
 export const MediaTaggingModal: React.FC<MediaTaggingModalProps> = ({
@@ -26,6 +29,11 @@ export const MediaTaggingModal: React.FC<MediaTaggingModalProps> = ({
   const [selectedType, setSelectedType] = useState<'profile' | 'business' | 'project' | null>(null);
   const [projectName, setProjectName] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  
+  // Crop state
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
   const currentImage = images[currentIndex];
   const totalImages = images.length;
@@ -41,19 +49,105 @@ export const MediaTaggingModal: React.FC<MediaTaggingModalProps> = ({
     }
   }, [currentImage]);
 
-  const handleSubmit = () => {
-    if (!selectedType) return;
+  // Reset crop quand le type change
+  React.useEffect(() => {
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+  }, [selectedType]);
 
-    const tag: MediaTag = {
-      type: selectedType,
-      projectName: selectedType === 'project' ? projectName : undefined,
-    };
+  const onCropComplete = useCallback((croppedArea: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
 
-    onTag(tag);
-    
-    // Reset pour la prochaine image
-    setSelectedType(null);
-    setProjectName('');
+  // Get aspect ratio based on type
+  const getAspectRatio = () => {
+    switch (selectedType) {
+      case 'profile':
+        return 1; // 1:1 carré
+      case 'business':
+        return 16 / 9; // 16:9 banner
+      case 'project':
+        return 16 / 10; // 16:10 projet
+      default:
+        return 4 / 3; // Default
+    }
+  };
+
+  // Create cropped image
+  const createCroppedImage = async (
+    imageSrc: string,
+    pixelCrop: Area
+  ): Promise<string> => {
+    const image = await createImage(imageSrc);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      throw new Error('No 2d context');
+    }
+
+    canvas.width = pixelCrop.width;
+    canvas.height = pixelCrop.height;
+
+    ctx.drawImage(
+      image,
+      pixelCrop.x,
+      pixelCrop.y,
+      pixelCrop.width,
+      pixelCrop.height,
+      0,
+      0,
+      pixelCrop.width,
+      pixelCrop.height
+    );
+
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          throw new Error('Canvas is empty');
+        }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      }, 'image/jpeg', 0.92);
+    });
+  };
+
+  const createImage = (url: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.addEventListener('load', () => resolve(image));
+      image.addEventListener('error', (error) => reject(error));
+      image.src = url;
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedType || !croppedAreaPixels) return;
+
+    try {
+      // Créer l'image croppée
+      const croppedImage = await createCroppedImage(previewUrl, croppedAreaPixels);
+
+      const tag: MediaTag = {
+        type: selectedType,
+        projectName: selectedType === 'project' ? projectName : undefined,
+        croppedImageUrl: croppedImage, // Passer l'image croppée
+      };
+
+      onTag(tag);
+      
+      // Reset pour la prochaine image
+      setSelectedType(null);
+      setProjectName('');
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCroppedAreaPixels(null);
+    } catch (error) {
+      console.error('Error creating cropped image:', error);
+    }
   };
 
   const canSubmit = selectedType && (selectedType !== 'project' || projectName.trim().length > 0);
@@ -101,12 +195,28 @@ export const MediaTaggingModal: React.FC<MediaTaggingModalProps> = ({
       overflow: 'hidden',
       border: `2px solid ${theme.border.default}`,
       backgroundColor: theme.bg.secondary,
+      position: 'relative' as const,
+      height: '400px',
     },
-    preview: {
-      width: '100%',
-      maxHeight: '300px',
-      objectFit: 'contain' as const,
-      display: 'block',
+    cropperContainer: {
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
+    cropInfo: {
+      position: 'absolute' as const,
+      bottom: spacing[3],
+      left: spacing[3],
+      right: spacing[3],
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      color: '#FFFFFF',
+      padding: spacing[2],
+      borderRadius: borderRadius.md,
+      fontSize: typography.fontSize.xs,
+      textAlign: 'center' as const,
+      zIndex: 10,
     },
     question: {
       fontSize: typography.fontSize.lg,
@@ -195,7 +305,36 @@ export const MediaTaggingModal: React.FC<MediaTaggingModalProps> = ({
         </div>
 
         <div style={styles.previewContainer}>
-          {previewUrl && <img src={previewUrl} alt={currentImage?.name} style={styles.preview} />}
+          {previewUrl && selectedType && (
+            <>
+              <div style={styles.cropperContainer}>
+                <Cropper
+                  image={previewUrl}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={getAspectRatio()}
+                  onCropChange={setCrop}
+                  onCropComplete={onCropComplete}
+                  onZoomChange={setZoom}
+                />
+              </div>
+              <div style={styles.cropInfo}>
+                Ajustez le cadrage avec le drag et le scroll/pinch pour zoomer
+              </div>
+            </>
+          )}
+          {previewUrl && !selectedType && (
+            <div style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: theme.text.secondary,
+            }}>
+              Sélectionnez un type ci-dessous pour activer le crop
+            </div>
+          )}
         </div>
 
         <div style={styles.question}>À quoi correspond cette image ?</div>
