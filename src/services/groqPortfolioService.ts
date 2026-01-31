@@ -95,7 +95,7 @@ function computeFlags(data: PortfolioData): GroqFlags {
     showProjects: data.projects && data.projects.length > 0,
     showTestimonials: data.testimonials && data.testimonials.length > 0,
     profileType: data.profileType,
-    hasLinkedIn: data.socialLinks.some(s => s.platform.toLowerCase() === 'linkedin'),
+    hasLinkedIn: data.socialLinks.some(s => s.platform && s.platform.toLowerCase() === 'linkedin'),
     hasNotion: false,
   };
 }
@@ -148,7 +148,15 @@ export async function generatePortfolioWithGroq(
     // 1. Anonymisation des données sensibles
     console.log('[GROQ] Step 1: Anonymizing data...');
     const dataString = JSON.stringify(portfolioData);
-    const anonymizedResult = await detectAndAnonymize(dataString, portfolioId);
+    
+    let anonymizedResult;
+    try {
+      anonymizedResult = await detectAndAnonymize(dataString, portfolioId);
+    } catch (anonError: any) {
+      console.error('[GROQ] Anonymization failed:', anonError);
+      return { success: false, error: `Anonymization error: ${anonError.message}` };
+    }
+    
     const anonymizedData: PortfolioData = JSON.parse(anonymizedResult.anonymizedText);
 
     console.log('[GROQ] Anonymization complete:', {

@@ -199,6 +199,10 @@ export const PortfolioHub: React.FC = () => {
                 templateId: data.selectedTemplateId,
             });
 
+            if (!html || html.length === 0) {
+                throw new Error('Portfolio generation returned empty HTML');
+            }
+
             setGeneratedHTML(html);
 
             // Create portfolio in DB if needed

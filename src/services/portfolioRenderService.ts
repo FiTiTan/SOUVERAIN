@@ -184,19 +184,23 @@ export const renderPortfolioHTML = async (options: RenderOptions): Promise<strin
       phone: formData.phone,
       address: formData.address,
       openingHours: formData.openingHours,
-      socialLinks: formData.socialLinks.map(link => ({
-        platform: link.platform === 'other' ? (link.label || 'Website') : link.platform,
-        url: link.url
-      })),
+      socialLinks: (formData.socialLinks || []).map(link => ({
+        platform: link.platform === 'other' ? (link.label || 'Website') : (link.platform || 'Website'),
+        url: link.url || '#'
+      })).filter(link => link.url !== '#'),
       socialIsMain: formData.socialIsMain || false,
-      projects: formData.projects.map(p => ({
-        title: p.title,
+      projects: (formData.projects || []).map(p => ({
+        title: p.title || 'Projet',
         description: p.description || '',
         image: p.imageUrl || '',
         category: p.category || '',
         link: p.liveUrl || ''
       })),
-      testimonials: formData.testimonials || [],
+      testimonials: (formData.testimonials || []).map(t => ({
+        text: t.text || '',
+        author: t.author || '',
+        role: t.role || ''
+      })),
       media: []
     };
     
@@ -223,15 +227,23 @@ export const renderPortfolioHTML = async (options: RenderOptions): Promise<strin
 
   // 3. Fallback : Remplacer les placeholders manuellement
   console.log('[PortfolioRender] Using manual placeholder replacement (fallback)');
-  const renderedHTML = replaceTemplatePlaceholders(templateHTML, formData);
+  
+  try {
+    const renderedHTML = replaceTemplatePlaceholders(templateHTML, formData);
 
-  // 4. Ajouter des métadonnées (SEO)
-  const finalHTML = renderedHTML.replace(
-    '<title>',
-    `<meta name="description" content="${escapeHtml(formData.tagline)}">\n  <title>`
-  );
+    // 4. Ajouter des métadonnées (SEO)
+    const finalHTML = renderedHTML.replace(
+      '<title>',
+      `<meta name="description" content="${escapeHtml(formData.tagline)}">\n  <title>`
+    );
 
-  return finalHTML;
+    return finalHTML;
+  } catch (fallbackError) {
+    console.error('[PortfolioRender] Fallback also failed:', fallbackError);
+    
+    // Dernier fallback : retourner template brut
+    return templateHTML;
+  }
 };
 
 /**
