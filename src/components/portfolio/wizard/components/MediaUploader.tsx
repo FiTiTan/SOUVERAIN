@@ -61,70 +61,9 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onChange })
   };
 
   const processFiles = async (files: File[]) => {
-    const initialUploadingFiles: UploadingFile[] = files.map(f => ({
-      name: f.name,
-      status: 'processing',
-    }));
-    setUploadingFiles(initialUploadingFiles);
-
-    const newMedia: Media[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      try {
-        // Process image via IPC
-        const result = await window.electron.invoke('process-image', {
-          filePath: await saveFileTemporarily(file),
-          type: 'general',
-        });
-
-        newMedia.push({
-          url: result.processed.path,
-          optimized: result.wasProcessed,
-          originalSize: parseFloat(result.original.sizeMB),
-          optimizedSize: parseFloat(result.processed.sizeMB),
-        });
-
-        // Update uploading status
-        setUploadingFiles(prev =>
-          prev.map((uf, idx) =>
-            idx === i
-              ? {
-                  ...uf,
-                  status: 'success',
-                  originalSize: result.original.sizeMB + ' MB',
-                  optimizedSize: result.processed.sizeMB + ' MB',
-                  message: result.wasProcessed
-                    ? result.warnings.join(', ')
-                    : 'Aucune modification nécessaire',
-                }
-              : uf
-          )
-        );
-      } catch (error) {
-        console.error('Error processing image:', error);
-        setUploadingFiles(prev =>
-          prev.map((uf, idx) =>
-            idx === i
-              ? {
-                  ...uf,
-                  status: 'error',
-                  message: 'Erreur lors du traitement',
-                }
-              : uf
-          )
-        );
-      }
-    }
-
-    // Clear uploading files display
-    setTimeout(() => {
-      setUploadingFiles([]);
-    }, 1500);
-
-    // Store processed media and original files, then open tagging modal
-    setProcessedMedia(newMedia);
+    // Ouvrir directement le modal de tagging sans traitement IPC
     setFilesToTag(files);
+    setProcessedMedia([]); // Sera rempli pendant le tagging
     setCurrentTagIndex(0);
     setShowTaggingModal(true);
   };
@@ -149,15 +88,15 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onChange })
   };
 
   const handleTag = (tag: MediaTag) => {
-    // Apply tag to current media item
-    const updatedMedia = [...processedMedia];
-    updatedMedia[currentTagIndex] = {
-      ...updatedMedia[currentTagIndex],
+    // Create media item with crop
+    const newMediaItem: Media = {
+      url: tag.croppedImageUrl || '', // L'URL croppée (data URL)
+      alt: filesToTag[currentTagIndex]?.name,
       tag: tag.type,
       projectName: tag.projectName,
-      // Remplacer l'URL par l'image croppée si fournie
-      url: tag.croppedImageUrl || updatedMedia[currentTagIndex].url,
     };
+
+    const updatedMedia = [...processedMedia, newMediaItem];
     setProcessedMedia(updatedMedia);
 
     // Move to next image or finish
@@ -173,13 +112,29 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onChange })
     }
   };
 
-  const handleSkip = () => {
-    // Skip tagging for this image (no tag)
+  const handleSkip = async () => {
+    // Skip tagging - convert File to data URL without crop
+    const file = filesToTag[currentTagIndex];
+    const dataUrl = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(file);
+    });
+
+    const newMediaItem: Media = {
+      url: dataUrl,
+      alt: file.name,
+      // No tag
+    };
+
+    const updatedMedia = [...processedMedia, newMediaItem];
+    setProcessedMedia(updatedMedia);
+
     if (currentTagIndex < filesToTag.length - 1) {
       setCurrentTagIndex(currentTagIndex + 1);
     } else {
-      // Finish without tags for remaining images
-      onChange([...media, ...processedMedia]);
+      // Finish
+      onChange([...media, ...updatedMedia]);
       setShowTaggingModal(false);
       setFilesToTag([]);
       setProcessedMedia([]);
