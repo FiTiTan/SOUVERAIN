@@ -139,33 +139,68 @@ const DocumentPreviewCard: React.FC<{
 export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }) => {
   const { theme, mode } = useTheme();
   const [isDragging, setIsDragging] = useState(false);
-  const [previewFile, setPreviewFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      onChange({ documents: [...data.documents, ...newFiles] });
+      await processAndSaveFiles(newFiles);
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files) {
       const newFiles = Array.from(e.dataTransfer.files);
-      onChange({ documents: [...data.documents, ...newFiles] });
+      await processAndSaveFiles(newFiles);
     }
   };
 
-  const handleRemove = (index: number) => {
-    onChange({ documents: data.documents.filter((_, i) => i !== index) });
+  const processAndSaveFiles = async (files: File[]) => {
+    const uploadedFiles: any[] = [];
+
+    for (const file of files) {
+      try {
+        // Sauvegarder le fichier sur disque via IPC
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Array.from(new Uint8Array(arrayBuffer));
+        
+        // @ts-ignore
+        const result = await window.electron.invoke('file-save-temp', {
+          fileName: file.name,
+          buffer: buffer,
+        });
+
+        // Déterminer le type de fichier
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        let fileType = 'other';
+        if (ext === 'pdf') fileType = 'pdf';
+        else if (['doc', 'docx'].includes(ext || '')) fileType = 'doc';
+        else if (['txt', 'md'].includes(ext || '')) fileType = 'text';
+        else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) fileType = 'image';
+
+        uploadedFiles.push({
+          path: result.path,
+          type: fileType,
+          filename: file.name,
+        });
+      } catch (error) {
+        console.error('Error saving file:', error);
+      }
+    }
+
+    // Ajouter aux fichiers uploadés existants
+    onChange({ uploadedFiles: [...data.uploadedFiles, ...uploadedFiles] });
   };
 
-  const handlePreview = (file: File) => {
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    setPreviewFile(file);
+  const handleRemove = (index: number) => {
+    onChange({ uploadedFiles: data.uploadedFiles.filter((_, i) => i !== index) });
+  };
+
+  const handlePreview = async (uploadedFile: any) => {
+    // Pour la preview, on pourrait charger le fichier depuis le disque
+    // Pour l'instant, on skip la preview pour les fichiers uploadés
+    console.log('Preview not implemented for uploaded files yet');
   };
 
   const closePreview = () => {
@@ -303,7 +338,7 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
       </div>
 
       {/* Documents List */}
-      {data.documents.length > 0 && (
+      {data.uploadedFiles.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h4
@@ -315,10 +350,10 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
                 letterSpacing: '0.05em',
               }}
             >
-              Documents ({data.documents.length})
+              Documents ({data.uploadedFiles.length})
             </h4>
             <button
-              onClick={() => onChange({ documents: [] })}
+              onClick={() => onChange({ uploadedFiles: [] })}
               style={{
                 padding: '0.5rem 1rem',
                 borderRadius: borderRadius.md,
@@ -333,119 +368,94 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
             </button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {data.documents.map((file, index) => (
-              <DocumentPreviewCard
-                key={`${file.name}-${index}`}
-                file={file}
-                onRemove={() => handleRemove(index)}
-                onClick={() => handlePreview(file)}
-              />
+            {data.uploadedFiles.map((file, index) => (
+              <div
+                key={`${file.filename}-${index}`}
+                style={{
+                  background: theme.bg.secondary,
+                  border: `1px solid ${theme.border.light}`,
+                  borderRadius: borderRadius.lg,
+                  padding: '1rem',
+                  display: 'flex',
+                  gap: '1rem',
+                  alignItems: 'center',
+                }}
+              >
+                {/* Icon */}
+                <div
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: borderRadius.md,
+                    background: theme.accent.muted,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {file.type === 'pdf' && <FileIcon size={28} color={theme.accent.primary} />}
+                  {file.type === 'doc' && <DocumentIcon size={28} color={theme.accent.primary} />}
+                  {file.type === 'text' && <TextIcon size={28} color={theme.accent.primary} />}
+                  {file.type === 'image' && <FileIcon size={28} color={theme.accent.primary} />}
+                  {!['pdf', 'doc', 'text', 'image'].includes(file.type) && <AttachmentIcon size={28} color={theme.accent.primary} />}
+                </div>
+
+                {/* File Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: typography.fontSize.sm,
+                      fontWeight: typography.fontWeight.medium,
+                      color: theme.text.primary,
+                      marginBottom: '0.25rem',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {file.filename}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: typography.fontSize.xs,
+                      color: theme.text.tertiary,
+                    }}
+                  >
+                    Type: {file.type.toUpperCase()}
+                  </div>
+                </div>
+
+                {/* Remove Button */}
+                <button
+                  onClick={() => handleRemove(index)}
+                  style={{
+                    padding: '0.5rem',
+                    borderRadius: borderRadius.md,
+                    border: 'none',
+                    background: 'transparent',
+                    color: theme.text.tertiary,
+                    cursor: 'pointer',
+                    transition: transitions.fast,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = theme.semantic.errorBg;
+                    e.currentTarget.style.color = theme.semantic.error;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = theme.text.tertiary;
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Preview Modal */}
-      {previewFile && previewUrl && (
-        <div
-          onClick={closePreview}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.8)',
-            backdropFilter: 'blur(10px)',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '2rem',
-          }}
-        >
-          {/* Header */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1rem',
-            }}
-          >
-            <div style={{ color: '#fff', fontSize: typography.fontSize.lg, fontWeight: typography.fontWeight.semibold }}>
-              {previewFile.name}
-            </div>
-            <button
-              onClick={closePreview}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: borderRadius.md,
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                fontSize: typography.fontSize.sm,
-                cursor: 'pointer',
-              }}
-            >
-              Fermer ✕
-            </button>
-          </div>
-
-          {/* Preview Content */}
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              flex: 1,
-              background: '#fff',
-              borderRadius: borderRadius.xl,
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {previewFile.type === 'application/pdf' ? (
-              <iframe
-                src={previewUrl}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  border: 'none',
-                }}
-                title={previewFile.name}
-              />
-            ) : (
-              <div style={{ textAlign: 'center', padding: '3rem' }}>
-                <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-                  {getFileIcon(previewFile, theme.text.secondary)}
-                </div>
-                <div style={{ fontSize: typography.fontSize.xl, fontWeight: typography.fontWeight.semibold, color: theme.text.primary, marginBottom: '1rem' }}>
-                  {previewFile.name}
-                </div>
-                <div style={{ fontSize: typography.fontSize.sm, color: theme.text.secondary, marginBottom: '2rem' }}>
-                  Aperçu non disponible pour ce type de fichier
-                </div>
-                <a
-                  href={previewUrl}
-                  download={previewFile.name}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: borderRadius.lg,
-                    background: theme.accent.primary,
-                    color: '#fff',
-                    fontSize: typography.fontSize.sm,
-                    fontWeight: typography.fontWeight.semibold,
-                    textDecoration: 'none',
-                    display: 'inline-block',
-                  }}
-                >
-                  Télécharger
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </motion.div>
-  );
 };

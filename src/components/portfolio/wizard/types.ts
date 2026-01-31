@@ -48,6 +48,13 @@ export interface Media {
   optimizedSize?: number;
 }
 
+export interface UploadedFile {
+  path: string;           // Chemin sur disque
+  type: string;           // 'pdf', 'image', 'doc', etc.
+  filename: string;       // Nom original
+  associatedProject?: string; // ID du projet associé (optionnel)
+}
+
 export interface PortfolioFormData {
   // Step 1: Identity
   name: string;
@@ -65,8 +72,9 @@ export interface PortfolioFormData {
   openingHours: string;
 
   // Step 4: Documents
-  documents: File[];
+  uploadedFiles: UploadedFile[];  // ← NOUVEAU : chemins des fichiers uploadés
   notionData: string;
+  linkedInData?: string;  // ← Ajouté pour LinkedIn
 
   // Step 5: Social Networks
   socialLinks: SocialLink[];
@@ -74,7 +82,7 @@ export interface PortfolioFormData {
   linkedInImported: boolean;
 
   // Step 6: Media
-  media: File[];
+  media: Media[];  // ← Changé de File[] à Media[] (contient les chemins)
 
   // Step 7: Template
   selectedTemplateId: string | null;
@@ -219,8 +227,9 @@ const devFormData: PortfolioFormData = {
   phone: '+33 6 12 34 56 78',
   address: '42 rue de la Tech, 75001 Paris',
   openingHours: 'Lun-Ven 9h-18h',
-  documents: [],
+  uploadedFiles: [],
   notionData: '',
+  linkedInData: undefined,
   socialLinks: [
     { platform: 'github', url: 'github.com/jeandupont' },
     { platform: 'linkedin', url: 'linkedin.com/in/jeandupont' },
@@ -244,8 +253,9 @@ export const initialFormData: PortfolioFormData = DEV_MODE ? devFormData : {
   phone: '',
   address: '',
   openingHours: '',
-  documents: [],
+  uploadedFiles: [],
   notionData: '',
+  linkedInData: undefined,
   socialLinks: [],
   socialIsMain: false,
   linkedInImported: false,
