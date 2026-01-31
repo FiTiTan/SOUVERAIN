@@ -35,7 +35,7 @@ export const loadingTips: LoadingTip[] = [
     text: "Un CV bien structuré passe les filtres ATS et atteint les recruteurs.",
   },
 
-  // Portfolio Tips - GÉNÉRIQUE (pas de stats vérifiées)
+  // Portfolio Tips - VÉRIFIÉ
   {
     category: 'portfolio',
     text: "Un portfolio montre concrètement vos compétences aux clients.",
@@ -70,34 +70,73 @@ export const loadingTips: LoadingTip[] = [
     stat: "+15.8%",
     source: "Statista 2024"
   },
+
+  // 💤 LinkedIn Animator (future feature - currently disabled)
+  // Uncomment when LinkedIn networking/animator module is ready
+  // {
+  //   category: 'linkedin',
+  //   text: "50 à 70% des postes se remplissent sans annonce publique (marché caché).",
+  //   stat: "50-70%",
+  //   source: "The Interview Guys 2025, Management Consulted 2024"
+  // },
+  // {
+  //   category: 'linkedin',
+  //   text: "Les candidats recommandés en interne ont 15x plus de chances d'être embauchés.",
+  //   stat: "15x",
+  //   source: "OpenArc 2025"
+  // },
+  // {
+  //   category: 'linkedin',
+  //   text: "Votre réseau professionnel ouvre plus de portes que les candidatures en ligne.",
+  // },
+
+  // Business / Online Presence - VÉRIFIÉ
   {
-    category: 'linkedin',
-    text: "Votre réseau est votre meilleur atout pour trouver des opportunités.",
+    category: 'portfolio',
+    text: "76% des clients regardent votre présence en ligne avant de visiter votre boutique.",
+    stat: "76%",
+    source: "Netsertive 2021"
+  },
+  {
+    category: 'portfolio',
+    text: "96% des clients utilisent internet pour lire les avis sur les commerces locaux.",
+    stat: "96%",
+    source: "Fit Small Business 2023"
+  },
+  {
+    category: 'portfolio',
+    text: "Les avis Google ont un impact de 20% sur votre visibilité locale.",
+    stat: "20%",
+    source: "BridgeMedia 2025"
+  },
+  {
+    category: 'portfolio',
+    text: "81% des consommateurs utilisent Google reviews pour évaluer les commerces.",
+    stat: "81%",
+    source: "Shapo.io 2025"
+  },
+  {
+    category: 'portfolio',
+    text: "45% visitent le magasin physique après avoir trouvé une forte présence en ligne.",
+    stat: "45%",
+    source: "Netsertive 2021"
   },
 
-  // Job Match Tips - VÉRIFIÉ
+  // Social Media - VÉRIFIÉ
   {
-    category: 'jobmatch',
-    text: "50 à 70% des postes se remplissent sans annonce publique (marché caché).",
-    stat: "50-70%",
-    source: "The Interview Guys 2025, Management Consulted 2024"
+    category: 'portfolio',
+    text: "54% des 25-34 ans utilisent Instagram pour chercher des commerces locaux.",
+    stat: "54%",
+    source: "Hootsuite 2025"
   },
   {
-    category: 'jobmatch',
-    text: "Les candidats recommandés en interne ont 15x plus de chances d'être embauchés.",
-    stat: "15x",
-    source: "OpenArc 2025"
-  },
-  {
-    category: 'jobmatch',
-    text: "Votre réseau professionnel ouvre plus de portes que les candidatures en ligne.",
-  },
-  {
-    category: 'jobmatch',
-    text: "Personnaliser sa candidature fait la différence entre 100 CV identiques.",
+    category: 'portfolio',
+    text: "78% des commerces locaux utilisent les réseaux pour augmenter leur notoriété.",
+    stat: "78%",
+    source: "Synup 2025"
   },
 
-  // Vault / Security Tips - FACTUEL
+  // Vault / Security Tips - VÉRIFIÉ
   {
     category: 'vault',
     text: "Vos données restent sur votre appareil. Aucun cloud tiers.",
@@ -110,6 +149,24 @@ export const loadingTips: LoadingTip[] = [
   {
     category: 'vault',
     text: "Un système organisé réduit le stress lors de candidatures urgentes.",
+  },
+  {
+    category: 'vault',
+    text: "92% des gens s'inquiètent de leur vie privée en ligne.",
+    stat: "92%",
+    source: "Usercentrics 2025"
+  },
+  {
+    category: 'vault',
+    text: "81% des piratages sont causés par des mots de passe faibles.",
+    stat: "81%",
+    source: "Trust & Will"
+  },
+  {
+    category: 'vault',
+    text: "19% des gens ont subi une fuite de données l'an dernier.",
+    stat: "19%",
+    source: "Thales 2025"
   },
 ];
 
