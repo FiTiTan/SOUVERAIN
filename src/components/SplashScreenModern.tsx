@@ -19,16 +19,16 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
   const [phase, setPhase] = useState<'logo' | 'skeleton' | 'done'>('logo');
 
   useEffect(() => {
-    // Phase 1: Logo (1s)
+    // Phase 1: Logo (1.5s)
     const logoTimer = setTimeout(() => {
       setPhase('skeleton');
-    }, 1000);
+    }, 1500);
 
-    // Phase 2: Skeleton → Done (2s)
+    // Phase 2: Skeleton → Done (3s total, fade 0.5s)
     const doneTimer = setTimeout(() => {
       setPhase('done');
-      setTimeout(onComplete, 300); // Smooth transition
-    }, 3000);
+      setTimeout(onComplete, 500); // Smooth fade out
+    }, 4500);
 
     return () => {
       clearTimeout(logoTimer);
@@ -37,13 +37,17 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
   }, [onComplete]);
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: theme.bg.primary,
-      zIndex: 9999,
-      pointerEvents: 'all', // Block all clicks
-    }}>
+    <motion.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: phase === 'done' ? 0 : 1 }}
+      transition={{ duration: 0.5 }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: theme.bg.primary,
+        zIndex: 9999,
+        pointerEvents: 'all', // Block all clicks
+      }}>
       <AnimatePresence mode="wait">
         {phase === 'logo' && (
           <motion.div
@@ -51,7 +55,7 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6 }}
             style={{
               width: '100%',
               height: '100%',
@@ -124,7 +128,7 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
           to { transform: rotate(360deg); }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 };
 
@@ -136,7 +140,7 @@ const SkeletonScreen: React.FC<{ theme: any }> = ({ theme }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.5 }}
       style={{
         width: '100%',
         height: '100%',
