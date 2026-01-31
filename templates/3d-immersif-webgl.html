@@ -1,6 +1,6 @@
 <!--
-TEMPLATE: Glassmorphism Affiné
-DESCRIPTION: Transparence, blur, élégance premium
+TEMPLATE: 3D Immersif WebGL
+DESCRIPTION: Profondeur, ombres réalistes, technique
 SECTIONS_OBLIGATOIRES: hero, about, services, contact
 SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
 -->
@@ -13,7 +13,8 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
     <title>{{HERO_TITLE}} - Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     
@@ -21,22 +22,21 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         /* ========== NE PAS MODIFIER - STYLE PROTÉGÉ ========== */
         
         :root {
-            --color-bg-start: #0f0c29;
-            --color-bg-mid: #302b63;
-            --color-bg-end: #24243e;
-            --color-glass: rgba(255, 255, 255, 0.03);
-            --color-glass-hover: rgba(255, 255, 255, 0.08);
-            --color-border: rgba(255, 255, 255, 0.1);
-            --color-border-hover: rgba(255, 255, 255, 0.2);
+            --color-bg: #050508;
+            --color-surface: #0a0a0f;
+            --color-surface-elevated: #12121a;
+            --color-primary: #00d4ff;
+            --color-secondary: #7000ff;
+            --color-accent: #ff00aa;
             --color-text: #ffffff;
-            --color-text-muted: rgba(255, 255, 255, 0.6);
-            --color-accent: #00d4ff;
-            --color-accent-secondary: #7b2cbf;
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            --glass-shadow-hover: 0 20px 60px 0 rgba(0, 0, 0, 0.5);
+            --color-text-dim: #8892b0;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 212, 255, 0.1), 0 2px 4px -1px rgba(0, 212, 255, 0.06);
+            --shadow-md: 0 10px 30px -5px rgba(0, 212, 255, 0.2), 0 8px 10px -6px rgba(0, 212, 255, 0.1);
+            --shadow-lg: 0 20px 60px -10px rgba(0, 212, 255, 0.3), 0 12px 20px -8px rgba(112, 0, 255, 0.2);
+            --shadow-3d: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
             --font-heading: 'Space Grotesk', sans-serif;
             --font-body: 'Inter', sans-serif;
-            --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --easing: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
@@ -47,40 +47,41 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
 
         body {
             font-family: var(--font-body);
-            background: linear-gradient(135deg, var(--color-bg-start) 0%, var(--color-bg-mid) 50%, var(--color-bg-end) 100%);
-            background-attachment: fixed;
+            background-color: var(--color-bg);
             color: var(--color-text);
             line-height: 1.6;
             overflow-x: hidden;
-            min-height: 100vh;
+            perspective: 1000px;
         }
 
         h1, h2, h3, h4, h5, h6 {
             font-family: var(--font-heading);
-            font-weight: 600;
+            font-weight: 700;
             line-height: 1.2;
         }
 
         a {
             text-decoration: none;
             color: inherit;
-            transition: var(--transition);
+            transition: all 0.3s var(--easing);
         }
 
         img {
             max-width: 100%;
             height: auto;
             display: block;
-            border-radius: 16px;
         }
 
-        /* Glass effect base */
-        .glass {
-            background: var(--color-glass);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--color-border);
-            box-shadow: var(--glass-shadow);
+        /* WebGL Canvas */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.6;
         }
 
         /* Navigation */
@@ -91,15 +92,17 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             width: 100%;
             z-index: 1000;
             padding: 1.5rem 3rem;
-            transition: var(--transition);
+            background: rgba(5, 5, 8, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transform-style: preserve-3d;
+            transition: all 0.4s var(--easing);
         }
 
         nav.scrolled {
-            background: rgba(15, 12, 41, 0.8);
-            backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid var(--color-border);
-            box-shadow: var(--glass-shadow);
             padding: 1rem 3rem;
+            background: rgba(5, 5, 8, 0.95);
+            box-shadow: var(--shadow-lg);
         }
 
         .nav-container {
@@ -108,17 +111,16 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transform: translateZ(20px);
         }
 
         .logo {
             font-family: var(--font-heading);
             font-size: 1.5rem;
             font-weight: 700;
+            color: var(--color-text);
             letter-spacing: -0.02em;
-            background: linear-gradient(135deg, var(--color-text) 0%, var(--color-accent) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
         }
 
         nav ul {
@@ -129,31 +131,34 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
 
         nav ul li a {
             font-weight: 500;
-            font-size: 0.95rem;
-            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            color: var(--color-text-dim);
             position: relative;
             padding: 0.5rem 0;
+            letter-spacing: 0.05em;
         }
 
-        nav ul li a::after {
+        nav ul li a::before {
             content: '';
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 0;
+            width: 100%;
             height: 1px;
-            background: var(--color-accent);
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px var(--color-accent);
+            background: var(--color-primary);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s var(--easing);
         }
 
         nav ul li a:hover {
-            color: var(--color-accent);
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            color: var(--color-primary);
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
         }
 
-        nav ul li a:hover::after {
-            width: 100%;
+        nav ul li a:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
         }
 
         /* Hero Section */
@@ -166,56 +171,45 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             text-align: center;
             position: relative;
             padding: 2rem;
-            margin-top: 80px;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            filter: blur(60px);
+            transform-style: preserve-3d;
         }
 
         .hero-content {
-            position: relative;
-            z-index: 1;
             max-width: 900px;
+            transform: translateZ(50px);
         }
 
         .hero-eyebrow {
             display: inline-block;
             padding: 0.75rem 1.5rem;
-            background: rgba(0, 212, 255, 0.1);
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(112, 0, 255, 0.1));
             border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 50px;
+            border-radius: 100px;
             font-size: 0.875rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--color-accent);
-            margin-bottom: 2rem;
+            letter-spacing: 3px;
+            color: var(--color-primary);
+            margin-bottom: 2.5rem;
             backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
         }
 
         .hero h1 {
             font-size: clamp(3rem, 8vw, 6rem);
             margin-bottom: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            text-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+            background: linear-gradient(to right, #ffffff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 10px 30px rgba(0, 212, 255, 0.2));
+            letter-spacing: -0.02em;
         }
 
         .hero-subtitle {
-            font-size: 1.25rem;
-            color: var(--color-text-muted);
-            max-width: 600px;
-            margin: 0 auto 3rem;
+            font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+            color: var(--color-text-dim);
+            margin-bottom: 3rem;
             font-weight: 300;
             line-height: 1.6;
         }
@@ -225,34 +219,34 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             align-items: center;
             gap: 0.75rem;
             padding: 1.25rem 3rem;
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(123, 44, 191, 0.2));
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
             color: white;
             font-family: var(--font-heading);
             font-weight: 600;
             font-size: 1rem;
-            border-radius: 50px;
-            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            border: none;
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.05);
-            transition: var(--transition);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.3), 0 0 0 1px rgba(0, 212, 255, 0.2);
+            transform-style: preserve-3d;
+            transform: translateZ(30px);
+            transition: all 0.4s var(--easing);
         }
 
         .btn-primary::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2));
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.3));
             opacity: 0;
             transition: opacity 0.3s;
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1);
-            border-color: rgba(0, 212, 255, 0.5);
+            transform: translateZ(30px) translateY(-3px);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.5), 0 0 0 1px rgba(0, 212, 255, 0.4);
         }
 
         .btn-primary:hover::before {
@@ -263,14 +257,15 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         .social-showcase {
             padding: 6rem 2rem;
             position: relative;
+            transform-style: preserve-3d;
         }
 
         .social-showcase h2 {
             text-align: center;
-            font-size: clamp(2rem, 5vw, 3rem);
+            font-size: clamp(2rem, 4vw, 3rem);
             margin-bottom: 4rem;
             color: var(--color-text);
-            font-weight: 300;
+            text-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
         }
 
         .social-main {
@@ -278,7 +273,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             margin: 0 auto;
             display: flex;
             justify-content: center;
-            gap: 2rem;
+            gap: 3rem;
             flex-wrap: wrap;
         }
 
@@ -286,22 +281,41 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             display: flex;
             align-items: center;
             gap: 1.5rem;
-            padding: 1.5rem 2.5rem;
-            background: var(--color-glass);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--color-border);
+            padding: 2rem 3rem;
+            background: var(--color-surface-elevated);
             border-radius: 16px;
-            font-weight: 500;
-            font-size: 1.1rem;
-            box-shadow: var(--glass-shadow);
-            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: var(--shadow-3d);
+            transition: all 0.5s var(--easing);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-link-large::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(0, 212, 255, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .social-link-large:hover {
-            background: var(--color-glass-hover);
-            border-color: var(--color-border-hover);
-            transform: translateY(-5px);
-            box-shadow: var(--glass-shadow-hover), 0 0 30px rgba(0, 212, 255, 0.1);
+            transform: translateY(-10px) rotateX(10deg) rotateY(-5deg);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .social-link-large:hover::after {
+            opacity: 1;
+        }
+
+        .social-link-large span {
+            font-weight: 600;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
         }
 
         .social-icon {
@@ -313,12 +327,15 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             border-radius: 12px;
             background: rgba(0, 212, 255, 0.1);
             border: 1px solid rgba(0, 212, 255, 0.2);
+            position: relative;
+            z-index: 1;
+            transform: translateZ(20px);
         }
 
         .social-icon .icon {
             width: 24px;
             height: 24px;
-            color: var(--color-accent);
+            color: var(--color-primary);
         }
 
         /* About Section */
@@ -330,22 +347,24 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             grid-template-columns: 1fr 1.5fr;
             gap: 6rem;
             align-items: center;
-            position: relative;
+            transform-style: preserve-3d;
         }
 
         .about-image-wrapper {
             position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
 
         .about-image-wrapper::before {
             content: '';
             position: absolute;
             inset: -20px;
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(123, 44, 191, 0.2));
-            border-radius: 30px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            border-radius: 24px;
+            opacity: 0.3;
             filter: blur(30px);
-            opacity: 0.5;
-            z-index: 0;
+            transform: translateZ(-50px);
         }
 
         .about img {
@@ -353,23 +372,32 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             max-width: 400px;
             height: 400px;
             object-fit: cover;
-            border-radius: 24px;
-            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.05);
             position: relative;
-            z-index: 1;
-            box-shadow: var(--glass-shadow);
+            transform: translateZ(30px);
+            transition: transform 0.5s var(--easing);
+        }
+
+        .about-image-wrapper:hover img {
+            transform: translateZ(50px) rotateY(-5deg);
+        }
+
+        .about-content {
+            transform: translateZ(40px);
         }
 
         .about-content h2 {
             font-size: clamp(2.5rem, 5vw, 4rem);
             margin-bottom: 2rem;
-            font-weight: 300;
             color: var(--color-text);
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
         }
 
         .about-content p {
             font-size: 1.2rem;
-            color: var(--color-text-muted);
+            color: var(--color-text-dim);
             margin-bottom: 1.5rem;
             line-height: 1.8;
         }
@@ -379,18 +407,19 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             color: var(--color-text);
             font-weight: 500;
             padding: 2rem;
-            background: var(--color-glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--color-border);
-            border-radius: 20px;
+            background: rgba(0, 212, 255, 0.05);
+            border-left: 3px solid var(--color-primary);
+            border-radius: 0 12px 12px 0;
             margin-top: 2rem;
-            box-shadow: var(--glass-shadow);
+            box-shadow: inset 0 0 40px rgba(0, 212, 255, 0.05);
         }
 
         /* Services Section */
         .services {
             padding: 8rem 2rem;
+            background: var(--color-surface);
             position: relative;
+            transform-style: preserve-3d;
         }
 
         .services::before {
@@ -398,34 +427,35 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
+            width: 100%;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+            background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
         }
 
         .services h2 {
             text-align: center;
             font-size: clamp(2.5rem, 5vw, 4rem);
             margin-bottom: 4rem;
-            font-weight: 300;
+            color: var(--color-text);
         }
 
         .services-grid {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            perspective: 1000px;
         }
 
         .service-card {
+            background: var(--color-surface-elevated);
             padding: 3rem 2rem;
-            background: var(--color-glass);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--color-border);
-            border-radius: 24px;
-            box-shadow: var(--glass-shadow);
-            transition: var(--transition);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: var(--shadow-3d);
+            transition: all 0.5s var(--easing);
+            transform-style: preserve-3d;
             position: relative;
             overflow: hidden;
         }
@@ -436,21 +466,21 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             top: 0;
             left: 0;
             width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s var(--easing);
         }
 
         .service-card:hover {
-            transform: translateY(-10px);
-            background: var(--color-glass-hover);
-            border-color: var(--color-border-hover);
-            box-shadow: var(--glass-shadow-hover);
+            transform: translateY(-15px) translateZ(30px) rotateX(5deg);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.1);
         }
 
         .service-card:hover::before {
-            opacity: 1;
+            transform: scaleX(1);
         }
 
         .service-icon {
@@ -462,25 +492,28 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             border-radius: 16px;
             background: rgba(0, 212, 255, 0.1);
             border: 1px solid rgba(0, 212, 255, 0.2);
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            transform: translateZ(20px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
         }
 
         .service-icon .icon {
             width: 28px;
             height: 28px;
-            color: var(--color-accent);
+            color: var(--color-primary);
         }
 
         .service-card h3 {
             font-size: 1.5rem;
             margin-bottom: 1rem;
             color: var(--color-text);
-            font-weight: 600;
+            transform: translateZ(15px);
         }
 
         .service-card p {
-            color: var(--color-text-muted);
+            color: var(--color-text-dim);
             line-height: 1.7;
+            transform: translateZ(10px);
         }
 
         /* Projects Section */
@@ -488,51 +521,56 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             padding: 8rem 2rem;
             max-width: 1400px;
             margin: 0 auto;
+            transform-style: preserve-3d;
         }
 
         .projects h2 {
             text-align: center;
             font-size: clamp(2.5rem, 5vw, 4rem);
             margin-bottom: 4rem;
-            font-weight: 300;
+            color: var(--color-text);
         }
 
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2.5rem;
+            gap: 3rem;
+            perspective: 1000px;
         }
 
         .project-card {
-            background: var(--color-glass);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--color-border);
+            background: var(--color-surface-elevated);
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: var(--glass-shadow);
-            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: var(--shadow-3d);
+            transition: all 0.6s var(--easing);
+            transform-style: preserve-3d;
         }
 
         .project-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            background: var(--color-glass-hover);
-            border-color: var(--color-border-hover);
-            box-shadow: var(--glass-shadow-hover);
+            transform: translateY(-20px) translateZ(40px) rotateX(3deg);
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 212, 255, 0.2);
         }
 
         .project-image {
             position: relative;
-            height: 240px;
+            height: 260px;
             overflow: hidden;
-            border-bottom: 1px solid var(--color-border);
+        }
+
+        .project-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 50%, var(--color-surface-elevated) 100%);
         }
 
         .project-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.6s ease;
-            border-radius: 0;
+            transition: transform 0.8s var(--easing);
         }
 
         .project-card:hover .project-image img {
@@ -540,29 +578,34 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         }
 
         .project-content {
-            padding: 2rem;
+            padding: 2.5rem;
+            transform: translateZ(30px);
+            position: relative;
+            z-index: 1;
         }
 
         .project-category {
             display: inline-block;
-            padding: 0.4rem 1rem;
-            background: rgba(123, 44, 191, 0.2);
-            color: #d8b4fe;
-            border-radius: 50px;
+            padding: 0.5rem 1.25rem;
+            background: rgba(112, 0, 255, 0.15);
+            color: var(--color-secondary);
+            border-radius: 100px;
             font-size: 0.875rem;
             font-weight: 600;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(123, 44, 191, 0.3);
+            margin-bottom: 1.25rem;
+            border: 1px solid rgba(112, 0, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .project-content h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.75rem;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
             color: var(--color-text);
         }
 
         .project-content p {
-            color: var(--color-text-muted);
+            color: var(--color-text-dim);
             margin-bottom: 1.5rem;
             line-height: 1.6;
         }
@@ -571,7 +614,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--color-accent);
+            color: var(--color-primary);
             font-weight: 600;
             font-size: 0.95rem;
             position: relative;
@@ -579,7 +622,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
 
         .project-link::after {
             content: '→';
-            transition: transform 0.3s ease;
+            transition: transform 0.3s var(--easing);
         }
 
         .project-link:hover::after {
@@ -589,28 +632,16 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         /* Testimonials Section */
         .testimonials {
             padding: 8rem 2rem;
+            background: var(--color-surface);
             position: relative;
-        }
-
-        .testimonials::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: -10%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(123, 44, 191, 0.2) 0%, transparent 70%);
-            filter: blur(60px);
-            pointer-events: none;
+            transform-style: preserve-3d;
         }
 
         .testimonials h2 {
             text-align: center;
             font-size: clamp(2.5rem, 5vw, 4rem);
             margin-bottom: 4rem;
-            font-weight: 300;
-            position: relative;
-            z-index: 1;
+            color: var(--color-text);
         }
 
         .testimonials-grid {
@@ -618,50 +649,64 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-            position: relative;
-            z-index: 1;
+            gap: 2.5rem;
+            perspective: 1000px;
         }
 
         .testimonial-card {
-            background: var(--color-glass);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--color-border);
+            background: rgba(18, 18, 26, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 3rem;
             border-radius: 24px;
-            padding: 2.5rem;
-            box-shadow: var(--glass-shadow);
-            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: var(--shadow-3d);
+            transition: all 0.5s var(--easing);
+            transform-style: preserve-3d;
             position: relative;
         }
 
         .testimonial-card:hover {
-            transform: translateY(-5px);
-            background: var(--color-glass-hover);
-            box-shadow: var(--glass-shadow-hover);
+            transform: translateY(-10px) translateZ(20px) rotateY(3deg);
+            border-color: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 212, 255, 0.15);
         }
 
         .testimonial-text {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             color: var(--color-text);
             margin-bottom: 2rem;
             line-height: 1.8;
             font-style: italic;
+            position: relative;
+        }
+
+        .testimonial-text::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: -10px;
+            font-size: 4rem;
+            color: var(--color-primary);
+            opacity: 0.2;
+            font-family: serif;
+            line-height: 1;
         }
 
         .testimonial-card footer {
-            border-top: 1px solid var(--color-border);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding-top: 1.5rem;
         }
 
         .testimonial-author {
             display: block;
-            color: var(--color-accent);
-            font-weight: 600;
+            color: var(--color-primary);
+            font-weight: 700;
             margin-bottom: 0.25rem;
+            font-size: 1.1rem;
         }
 
         .testimonial-role {
-            color: var(--color-text-muted);
+            color: var(--color-text-dim);
             font-size: 0.9rem;
         }
 
@@ -670,13 +715,14 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             padding: 8rem 2rem;
             max-width: 1400px;
             margin: 0 auto;
+            transform-style: preserve-3d;
         }
 
         .practical-info h2 {
             text-align: center;
             font-size: clamp(2.5rem, 5vw, 4rem);
             margin-bottom: 4rem;
-            font-weight: 300;
+            color: var(--color-text);
         }
 
         .info-grid {
@@ -684,30 +730,30 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            gap: 2.5rem;
+            perspective: 1000px;
         }
 
         .info-card {
-            background: var(--color-glass);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--color-border);
-            border-radius: 24px;
-            padding: 3rem 2rem;
+            background: var(--color-surface-elevated);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: var(--shadow-3d);
             text-align: center;
-            box-shadow: var(--glass-shadow);
-            transition: var(--transition);
+            transition: all 0.5s var(--easing);
+            transform-style: preserve-3d;
         }
 
         .info-card:hover {
-            transform: translateY(-10px);
-            background: var(--color-glass-hover);
-            border-color: var(--color-border-hover);
-            box-shadow: var(--glass-shadow-hover);
+            transform: translateY(-15px) translateZ(30px);
+            border-color: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 212, 255, 0.1);
         }
 
         .info-icon {
-            width: 64px;
-            height: 64px;
+            width: 72px;
+            height: 72px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -715,32 +761,36 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             border-radius: 50%;
             background: rgba(0, 212, 255, 0.1);
             border: 1px solid rgba(0, 212, 255, 0.2);
+            transform: translateZ(20px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
         }
 
         .info-icon .icon {
-            width: 28px;
-            height: 28px;
-            color: var(--color-accent);
+            width: 32px;
+            height: 32px;
+            color: var(--color-primary);
         }
 
         .info-card h3 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             margin-bottom: 1rem;
             color: var(--color-text);
-            font-weight: 600;
+            transform: translateZ(15px);
         }
 
         .info-card p {
-            color: var(--color-text-muted);
+            color: var(--color-text-dim);
             line-height: 1.7;
+            transform: translateZ(10px);
         }
 
         .map-link {
             display: inline-block;
             margin-top: 1.5rem;
-            color: var(--color-accent);
+            color: var(--color-primary);
             font-weight: 600;
             position: relative;
+            transform: translateZ(15px);
         }
 
         .map-link::after {
@@ -750,11 +800,10 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             left: 0;
             width: 100%;
             height: 1px;
-            background: var(--color-accent);
+            background: var(--color-primary);
             transform: scaleX(0);
             transform-origin: right;
-            transition: transform 0.3s ease;
-            box-shadow: 0 0 10px var(--color-accent);
+            transition: transform 0.3s var(--easing);
         }
 
         .map-link:hover::after {
@@ -765,8 +814,9 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         /* Contact Section */
         .contact {
             padding: 10rem 2rem 6rem;
-            text-align: center;
+            background: linear-gradient(to bottom, var(--color-surface), var(--color-bg));
             position: relative;
+            transform-style: preserve-3d;
         }
 
         .contact::before {
@@ -775,47 +825,56 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 200px;
+            width: 300px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+            background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
         }
 
         .contact h2 {
+            text-align: center;
             font-size: clamp(2.5rem, 5vw, 4rem);
             margin-bottom: 4rem;
-            font-weight: 300;
+            color: var(--color-text);
         }
 
         .contact-content {
             max-width: 800px;
-            margin: 0 auto 4rem;
+            margin: 0 auto;
+            text-align: center;
+            margin-bottom: 4rem;
+            transform: translateZ(40px);
         }
 
         .contact-email {
             display: block;
             font-size: clamp(1.5rem, 4vw, 2.5rem);
-            font-weight: 600;
-            color: var(--color-accent);
+            font-weight: 700;
+            color: var(--color-primary);
             margin-bottom: 1rem;
             font-family: var(--font-heading);
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            transition: all 0.3s var(--easing);
         }
 
         .contact-email:hover {
-            text-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+            text-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+            transform: translateZ(10px);
         }
 
         .contact-phone {
             font-size: 1.5rem;
-            color: var(--color-text-muted);
-            display: block;
-            margin-bottom: 3rem;
+            color: var(--color-text-dim);
+            transition: color 0.3s;
+        }
+
+        .contact-phone:hover {
+            color: var(--color-text);
         }
 
         .social-links {
             display: flex;
             justify-content: center;
-            gap: 1.5rem;
+            gap: 2rem;
             flex-wrap: wrap;
         }
 
@@ -826,42 +885,41 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: var(--color-glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--color-border);
-            box-shadow: var(--glass-shadow);
-            transition: var(--transition);
+            background: var(--color-surface-elevated);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s var(--easing);
+            transform-style: preserve-3d;
         }
 
         .social-link .icon {
-            width: 22px;
-            height: 22px;
-            color: var(--color-text-muted);
+            width: 24px;
+            height: 24px;
+            color: var(--color-text-dim);
             transition: color 0.3s;
         }
 
         .social-link:hover {
-            transform: translateY(-5px);
-            background: var(--color-glass-hover);
-            border-color: var(--color-accent);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+            transform: translateY(-5px) translateZ(20px);
+            border-color: var(--color-primary);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
         }
 
         .social-link:hover .icon {
-            color: var(--color-accent);
+            color: var(--color-primary);
         }
 
         /* Footer */
         footer {
             padding: 3rem 2rem;
             text-align: center;
-            background: rgba(0, 0, 0, 0.2);
-            border-top: 1px solid var(--color-border);
-            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--color-bg);
+            position: relative;
         }
 
         footer p {
-            color: var(--color-text-muted);
+            color: var(--color-text-dim);
             font-size: 0.9rem;
         }
 
@@ -873,6 +931,10 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         }
 
         @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+
             nav ul {
                 gap: 1.5rem;
             }
@@ -882,8 +944,21 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
                 text-align: center;
             }
 
-            .about img {
+            .about-image-wrapper {
                 margin: 0 auto;
+                max-width: 300px;
+            }
+
+            .about img {
+                height: 300px;
+            }
+
+            .value-prop {
+                text-align: left;
+            }
+
+            .social-main {
+                gap: 1.5rem;
             }
 
             .services-grid,
@@ -891,24 +966,21 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             .testimonials-grid {
                 grid-template-columns: 1fr;
             }
+
+            .project-card:hover,
+            .service-card:hover,
+            .testimonial-card:hover {
+                transform: translateY(-10px);
+            }
         }
 
         @media (max-width: 480px) {
-            nav {
-                padding: 1rem;
-            }
-
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .social-main {
-                flex-direction: column;
-                width: 100%;
+            .hero-content {
+                padding: 0 1rem;
             }
 
             .social-link-large {
+                padding: 1.5rem 2rem;
                 width: 100%;
                 justify-content: center;
             }
@@ -921,36 +993,12 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             }
         }
 
-        /* Selection */
-        ::selection {
-            background: rgba(0, 212, 255, 0.3);
-            color: white;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--color-bg-start);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            border: 2px solid transparent;
-            background-clip: content-box;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
         /* ========== FIN STYLE PROTÉGÉ ========== */
     </style>
 </head>
 <body>
+
+    <canvas id="webgl-canvas"></canvas>
 
     <!-- Navigation -->
     <nav id="navbar">
@@ -1189,9 +1237,106 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
     </footer>
 
     <script>
+        // WebGL Background
+        const canvas = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // Create floating geometric shapes
+        const geometries = [
+            new THREE.IcosahedronGeometry(1, 0),
+            new THREE.OctahedronGeometry(1, 0),
+            new THREE.TetrahedronGeometry(1, 0)
+        ];
+        
+        const material = new THREE.MeshBasicMaterial({ 
+            color: 0x00d4ff, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.15
+        });
+        
+        const shapes = [];
+        for (let i = 0; i < 8; i++) {
+            const mesh = new THREE.Mesh(geometries[i % 3], material);
+            mesh.position.set(
+                (Math.random() - 0.5) * 20,
+                (Math.random() - 0.5) * 20,
+                (Math.random() - 0.5) * 10 - 5
+            );
+            mesh.rotation.set(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI,
+                0
+            );
+            mesh.userData = {
+                rotSpeed: {
+                    x: (Math.random() - 0.5) * 0.01,
+                    y: (Math.random() - 0.5) * 0.01
+                },
+                floatSpeed: Math.random() * 0.005 + 0.002,
+                floatOffset: Math.random() * Math.PI * 2
+            };
+            scene.add(mesh);
+            shapes.push(mesh);
+        }
+        
+        camera.position.z = 5;
+        
+        // Mouse interaction
+        let mouseX = 0;
+        let mouseY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+        
+        // Animation loop
+        let scrollY = 0;
+        window.addEventListener('scroll', () => {
+            scrollY = window.scrollY;
+        });
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            shapes.forEach((shape, i) => {
+                shape.rotation.x += shape.userData.rotSpeed.x;
+                shape.rotation.y += shape.userData.rotSpeed.y;
+                
+                const time = Date.now() * 0.001;
+                shape.position.y += Math.sin(time + shape.userData.floatOffset) * shape.userData.floatSpeed;
+                
+                // Parallax based on mouse
+                shape.position.x += (mouseX * 0.01 - shape.position.x * 0.01) * 0.1;
+                shape.position.z += (mouseY * 0.01 - shape.position.z * 0.01) * 0.1;
+            });
+            
+            // Camera parallax based on scroll
+            camera.position.y = -scrollY * 0.002;
+            camera.rotation.x = scrollY * 0.0002;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // GSAP Animations
         gsap.registerPlugin(ScrollTrigger);
         
-        // Navbar scroll effect
+        // Navbar background on scroll
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) {
@@ -1202,21 +1347,80 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         });
         
         // Fade-in au scroll
-        gsap.utils.toArray('.service-card, .project-card, .testimonial-card, .info-card').forEach(el => {
+        gsap.utils.toArray('.service-card, .project-card, .testimonial-card, .info-card').forEach((el, i) => {
             gsap.fromTo(el, 
-                { opacity: 0, y: 50 },
-                { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
-                    scrollTrigger: { trigger: el, start: 'top 85%' }
+                { opacity: 0, y: 80 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 1, 
+                    ease: 'power3.out',
+                    delay: i * 0.1,
+                    scrollTrigger: { 
+                        trigger: el, 
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
                 }
             );
         });
         
         // Hero animation
         gsap.timeline()
-            .fromTo('.hero-eyebrow', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 })
-            .fromTo('.hero h1', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8 }, '-=0.3')
-            .fromTo('.hero-subtitle', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
-            .fromTo('.hero .btn-primary', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5 }, '-=0.2');
+            .fromTo('.hero-eyebrow', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
+            .fromTo('.hero h1', { opacity: 0, y: 50, rotateX: 45 }, { opacity: 1, y: 0, rotateX: 0, duration: 1.2, ease: 'power3.out' }, '-=0.4')
+            .fromTo('.hero-subtitle', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6')
+            .fromTo('.hero .btn-primary', { opacity: 0, z: -100 }, { opacity: 1, z: 30, duration: 0.8, ease: 'back.out(1.7)' }, '-=0.4');
+        
+        // About section animation
+        gsap.fromTo('.about-image-wrapper', 
+            { opacity: 0, x: -100, rotateY: -30 },
+            { 
+                opacity: 1, 
+                x: 0, 
+                rotateY: 0,
+                duration: 1.2, 
+                ease: 'power3.out',
+                scrollTrigger: { 
+                    trigger: '.about', 
+                    start: 'top 70%',
+                    toggleActions: 'play none none reverse'
+                }
+            }
+        );
+        
+        gsap.fromTo('.about-content', 
+            { opacity: 0, x: 100 },
+            { 
+                opacity: 1, 
+                x: 0, 
+                duration: 1.2, 
+                ease: 'power3.out',
+                scrollTrigger: { 
+                    trigger: '.about', 
+                    start: 'top 70%',
+                    toggleActions: 'play none none reverse'
+                }
+            }
+        );
+        
+        // Social links stagger
+        gsap.fromTo('.social-link-large', 
+            { opacity: 0, y: 50, rotateX: 20 },
+            { 
+                opacity: 1, 
+                y: 0, 
+                rotateX: 0,
+                duration: 0.8, 
+                stagger: 0.15,
+                ease: 'power3.out',
+                scrollTrigger: { 
+                    trigger: '.social-showcase', 
+                    start: 'top 80%',
+                    toggleActions: 'play none none reverse'
+                }
+            }
+        );
         
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

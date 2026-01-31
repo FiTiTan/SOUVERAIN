@@ -14,11 +14,11 @@ module.exports = function initTemplatesSchema(db) {
     const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='templates'").get();
     
     if (tableExists) {
-      // Check if we have old paths
-      const oldPaths = db.prepare("SELECT COUNT(*) as count FROM templates WHERE thumbnail_path LIKE 'resources/templates/%'").get();
+      // Check if we have old paths or old template count
+      const currentCount = db.prepare("SELECT COUNT(*) as count FROM templates").get();
       
-      if (oldPaths.count > 0) {
-        console.log('[DB] Detected old template paths, re-seeding with correct paths...');
+      if (currentCount.count !== 10) {
+        console.log('[DB] Detected wrong template count, re-seeding with 10 new templates...');
         // Delete all templates (we'll re-insert with correct paths below)
         db.exec('DELETE FROM templates');
         console.log('[DB] ✅ Deleted old template entries');
@@ -84,7 +84,7 @@ module.exports = function initTemplatesSchema(db) {
   `);
 
   // ============================================================
-  // SEED FREE TEMPLATES
+  // SEED FREE TEMPLATES (10 nouveaux templates 2026)
   // ============================================================
 
   const freeTemplates = [
@@ -99,37 +99,37 @@ module.exports = function initTemplatesSchema(db) {
       is_owned: 1,
       tags: 'moderne,minimaliste,tech,freelance',
       ideal_for: 'Freelances, Créatifs, Tech',
-      version: '1.0.0'
+      version: '2.0.0'
     },
     {
-      id: 'kinetic-typo',
+      id: 'kinetic-typography',
       name: 'Kinetic Typography',
       description: 'Typographie animée avec micro-interactions, mise en avant du texte',
       category: 'free',
       price: 0,
-      thumbnail_path: 'templates/thumbnails/kinetic-typo.svg',
-      html_path: 'templates/kinetic-typo.html',
+      thumbnail_path: 'templates/thumbnails/kinetic-typography.svg',
+      html_path: 'templates/kinetic-typography.html',
       is_owned: 1,
       tags: 'typographie,animation,créatif',
       ideal_for: 'Créatifs, Artistes, Rédacteurs',
-      version: '1.0.0'
+      version: '2.0.0'
     },
     {
-      id: 'organic-flow',
-      name: 'Organic Flow',
+      id: 'organic-anti-grid',
+      name: 'Organic Anti-Grid',
       description: 'Formes organiques et transitions fluides, ambiance naturelle',
       category: 'free',
       price: 0,
-      thumbnail_path: 'templates/thumbnails/organic-flow.svg',
-      html_path: 'templates/organic-flow.html',
+      thumbnail_path: 'templates/thumbnails/organic-anti-grid.svg',
+      html_path: 'templates/organic-anti-grid.html',
       is_owned: 1,
       tags: 'organique,fluide,naturel',
       ideal_for: 'Créatifs, Bien-être, Lifestyle',
-      version: '1.0.0'
+      version: '2.0.0'
     },
     {
       id: 'glassmorphism',
-      name: 'Glassmorphism',
+      name: 'Glassmorphism Affiné',
       description: 'Effet verre dépoli, transparence et profondeur moderne',
       category: 'free',
       price: 0,
@@ -138,20 +138,85 @@ module.exports = function initTemplatesSchema(db) {
       is_owned: 1,
       tags: 'glass,moderne,premium,tech',
       ideal_for: 'Tech, Freelances, Startups',
-      version: '1.0.0'
+      version: '2.0.0'
     },
     {
-      id: 'minimal-apple',
-      name: 'Minimal Apple',
-      description: 'Minimalisme extrême inspiré Apple, blanc, espace, élégance',
+      id: 'tactile-maximalism',
+      name: 'Tactile Maximalism',
+      description: 'Design maximaliste avec textures tactiles et richesse visuelle',
       category: 'free',
       price: 0,
-      thumbnail_path: 'templates/thumbnails/minimal-apple.svg',
-      html_path: 'templates/minimal-apple.html',
+      thumbnail_path: 'templates/thumbnails/tactile-maximalism.svg',
+      html_path: 'templates/tactile-maximalism.html',
       is_owned: 1,
-      tags: 'minimal,apple,élégant,blanc',
-      ideal_for: 'Design, Produit, Corporate',
-      version: '1.0.0'
+      tags: 'maximaliste,textures,bold,créatif',
+      ideal_for: 'Artistes, Créatifs, Mode',
+      version: '2.0.0'
+    },
+    {
+      id: 'scroll-storytelling',
+      name: 'Scroll Storytelling',
+      description: 'Narration immersive avec animations au scroll progressives',
+      category: 'free',
+      price: 0,
+      thumbnail_path: 'templates/thumbnails/scroll-storytelling.svg',
+      html_path: 'templates/scroll-storytelling.html',
+      is_owned: 1,
+      tags: 'storytelling,animation,immersif',
+      ideal_for: 'Créatifs, Journalistes, Narrateurs',
+      version: '2.0.0'
+    },
+    {
+      id: 'hand-drawn-scribble',
+      name: 'Hand-Drawn Scribble',
+      description: 'Esthétique dessinée à la main avec traits organiques',
+      category: 'free',
+      price: 0,
+      thumbnail_path: 'templates/thumbnails/hand-drawn-scribble.svg',
+      html_path: 'templates/hand-drawn-scribble.html',
+      is_owned: 1,
+      tags: 'dessin,organique,créatif,unique',
+      ideal_for: 'Illustrateurs, Artistes, Créatifs',
+      version: '2.0.0'
+    },
+    {
+      id: 'exaggerated-hierarchy',
+      name: 'Exaggerated Hierarchy',
+      description: 'Hiérarchie typographique exagérée pour un impact visuel fort',
+      category: 'free',
+      price: 0,
+      thumbnail_path: 'templates/thumbnails/exaggerated-hierarchy.svg',
+      html_path: 'templates/exaggerated-hierarchy.html',
+      is_owned: 1,
+      tags: 'typo,hiérarchie,bold,moderne',
+      ideal_for: 'Designers, Créatifs, Branding',
+      version: '2.0.0'
+    },
+    {
+      id: '3d-immersif-webgl',
+      name: '3D Immersif WebGL',
+      description: 'Expérience 3D interactive avec WebGL pour un effet wow',
+      category: 'free',
+      price: 0,
+      thumbnail_path: 'templates/thumbnails/3d-immersif-webgl.svg',
+      html_path: 'templates/3d-immersif-webgl.html',
+      is_owned: 1,
+      tags: '3d,webgl,immersif,tech',
+      ideal_for: 'Développeurs 3D, Tech, Gaming',
+      version: '2.0.0'
+    },
+    {
+      id: 'dopamine-colors',
+      name: 'Dopamine Colors',
+      description: 'Palette de couleurs vibrantes et énergisantes pour un impact immédiat',
+      category: 'free',
+      price: 0,
+      thumbnail_path: 'templates/thumbnails/dopamine-colors.svg',
+      html_path: 'templates/dopamine-colors.html',
+      is_owned: 1,
+      tags: 'couleurs,vibrant,énergique,moderne',
+      ideal_for: 'Créatifs, Marketing, Startups',
+      version: '2.0.0'
     }
   ];
 

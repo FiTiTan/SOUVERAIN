@@ -1,0 +1,1353 @@
+<!--
+TEMPLATE: Tactile Maximalism
+DESCRIPTION: Textures 3D, couleurs saturées, design bold avec effets tactiles, ombres prononcées et compositions énergiques
+SECTIONS_OBLIGATOIRES: hero, about, services, contact
+SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
+-->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{HERO_TITLE}} — Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <style>
+        /* ========== NE PAS MODIFIER - STYLE PROTÉGÉ ========== */
+        :root {
+            --color-bg: #FF006E;
+            --color-surface: #FFBE0B;
+            --color-accent-1: #FB5607;
+            --color-accent-2: #8338EC;
+            --color-accent-3: #3A86FF;
+            --color-text: #1A1A2E;
+            --color-text-light: #FFFFFF;
+            --font-display: 'Anton', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
+            --shadow-hard: 8px 8px 0px rgba(0,0,0,0.9);
+            --shadow-soft: 12px 12px 0px rgba(0,0,0,0.15);
+            --border-thick: 4px solid #1A1A2E;
+            --transition: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.4;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 50%, var(--color-accent-2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, var(--color-accent-3) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Navigation - Bold & Playful */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: var(--color-surface);
+            border-bottom: var(--border-thick);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--color-text);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transform: rotate(-2deg);
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--color-accent-3);
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            transition: all 0.3s var(--transition);
+        }
+
+        .logo:hover {
+            transform: rotate(0deg) scale(1.05);
+            box-shadow: 12px 12px 0px rgba(0,0,0,0.9);
+        }
+
+        nav ul {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        nav ul li a {
+            font-family: var(--font-display);
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 3px solid var(--color-text);
+            box-shadow: 4px 4px 0px var(--color-text);
+            transition: all 0.2s var(--transition);
+            display: inline-block;
+        }
+
+        nav ul li a:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--color-text);
+            background: var(--color-accent-1);
+            color: white;
+        }
+
+        /* Hero - Maximal Impact */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255,255,255,0.1) 10px,
+                    rgba(255,255,255,0.1) 20px
+                );
+            animation: patternMove 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes patternMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .hero-eyebrow {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            background: var(--color-accent-1);
+            color: white;
+            padding: 0.5rem 2rem;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            transform: rotate(-3deg);
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+            display: inline-block;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(4rem, 15vw, 10rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 2;
+            text-shadow: 
+                4px 4px 0px var(--color-accent-2),
+                8px 8px 0px var(--color-accent-3);
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1) rotate(-1deg); }
+            50% { transform: scale(1.02) rotate(1deg); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 700;
+            max-width: 600px;
+            margin-bottom: 3rem;
+            background: white;
+            padding: 1.5rem;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            transform: rotate(2deg);
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-primary {
+            font-family: var(--font-display);
+            display: inline-block;
+            padding: 1.5rem 4rem;
+            background: var(--color-text);
+            color: var(--color-surface);
+            text-decoration: none;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            transition: all 0.3s var(--transition);
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translate(-4px, -4px) scale(1.05);
+            box-shadow: 12px 12px 0px rgba(0,0,0,0.9);
+            background: var(--color-accent-1);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px rgba(0,0,0,0.9);
+        }
+
+        /* Decorative elements */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--color-accent-2);
+            top: 10%;
+            left: -10%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .blob-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--color-accent-3);
+            bottom: 10%;
+            right: -5%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.1); }
+        }
+
+        /* Social Showcase - Colorful Grid */
+        .social-showcase {
+            padding: 6rem 2rem;
+            background: var(--color-accent-3);
+            border-top: var(--border-thick);
+            border-bottom: var(--border-thick);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-showcase::before {
+            content: 'SOCIAL';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-display);
+            font-size: 20vw;
+            color: rgba(0,0,0,0.1);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .social-showcase h2 {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 4px 4px 0px var(--color-text);
+            position: relative;
+            z-index: 2;
+        }
+
+        .social-main {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+        }
+
+        .social-link-large {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem 3rem;
+            background: white;
+            color: var(--color-text);
+            text-decoration: none;
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            transition: all 0.3s var(--transition);
+            transform: rotate(-2deg);
+        }
+
+        .social-link-large:nth-child(even) {
+            transform: rotate(2deg);
+            background: var(--color-surface);
+        }
+
+        .social-link-large:hover {
+            transform: rotate(0deg) scale(1.1);
+            box-shadow: 12px 12px 0px var(--color-text);
+            z-index: 10;
+        }
+
+        .social-icon {
+            font-size: 2rem;
+        }
+
+        /* About - Layered Composition */
+        .about {
+            padding: 8rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: center;
+            position: relative;
+        }
+
+        .about-image-wrapper {
+            position: relative;
+            transform: rotate(-3deg);
+        }
+
+        .about-image-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 100%;
+            height: 100%;
+            background: var(--color-accent-2);
+            border: var(--border-thick);
+            z-index: 1;
+        }
+
+        .about-image-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            width: 100%;
+            height: 100%;
+            background: var(--color-accent-3);
+            border: var(--border-thick);
+            z-index: 0;
+        }
+
+        .about img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: var(--border-thick);
+            position: relative;
+            z-index: 2;
+            filter: contrast(1.1) saturate(1.2);
+            transition: all 0.3s;
+        }
+
+        .about-image-wrapper:hover img {
+            transform: translate(-10px, -10px);
+        }
+
+        .about-content h2 {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            line-height: 1;
+            color: var(--color-text);
+            text-shadow: 4px 4px 0px white;
+            transform: rotate(-2deg);
+            display: inline-block;
+        }
+
+        .about-content p {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1.5rem;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            transform: rotate(1deg);
+        }
+
+        .value-prop {
+            background: var(--color-accent-1) !important;
+            color: white !important;
+            transform: rotate(-1deg) !important;
+            font-size: 1.4rem !important;
+        }
+
+        /* Services - Sticky Cards Stack */
+        .services {
+            padding: 8rem 2rem;
+            background: var(--color-surface);
+            border-top: var(--border-thick);
+            border-bottom: var(--border-thick);
+            position: relative;
+        }
+
+        .services h2 {
+            font-family: var(--font-display);
+            font-size: 5rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            text-transform: uppercase;
+            color: var(--color-text);
+            text-shadow: 
+                4px 4px 0px white,
+                8px 8px 0px var(--color-accent-1);
+            transform: rotate(-2deg);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .service-card {
+            background: white;
+            padding: 3rem 2rem;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            transition: all 0.4s var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card:nth-child(1) {
+            transform: rotate(-2deg);
+            background: var(--color-accent-2);
+            color: white;
+        }
+
+        .service-card:nth-child(2) {
+            transform: rotate(1deg) translateY(20px);
+            background: var(--color-accent-1);
+            color: white;
+        }
+
+        .service-card:nth-child(3) {
+            transform: rotate(3deg);
+            background: var(--color-accent-3);
+            color: white;
+        }
+
+        .service-card:hover {
+            transform: rotate(0deg) scale(1.05) translateY(-10px);
+            box-shadow: 16px 16px 0px var(--color-text);
+            z-index: 10;
+        }
+
+        .service-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.3));
+        }
+
+        .service-card h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .service-card p {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        /* Projects - Masonry with Attitude */
+        .projects {
+            padding: 8rem 2rem;
+            position: relative;
+        }
+
+        .projects h2 {
+            font-family: var(--font-display);
+            font-size: 5rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 
+                4px 4px 0px var(--color-accent-2),
+                8px 8px 0px var(--color-accent-3);
+            transform: rotate(2deg);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .project-card {
+            position: relative;
+            background: white;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            transition: all 0.4s var(--transition);
+        }
+
+        .project-card:nth-child(odd) {
+            transform: rotate(-2deg) translateY(0);
+        }
+
+        .project-card:nth-child(even) {
+            transform: rotate(2deg) translateY(40px);
+        }
+
+        .project-card:hover {
+            transform: rotate(0deg) scale(1.02);
+            box-shadow: 16px 16px 0px var(--color-text);
+            z-index: 10;
+        }
+
+        .project-image {
+            overflow: hidden;
+            border-bottom: var(--border-thick);
+            height: 300px;
+        }
+
+        .project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+            filter: saturate(1.3) contrast(1.1);
+        }
+
+        .project-card:hover .project-image img {
+            transform: scale(1.1);
+        }
+
+        .project-content {
+            padding: 2rem;
+            background: white;
+        }
+
+        .project-category {
+            display: inline-block;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: var(--color-bg);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: 3px solid var(--color-text);
+            box-shadow: 3px 3px 0px var(--color-text);
+            margin-bottom: 1rem;
+            transform: rotate(-2deg);
+        }
+
+        .project-card h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .project-card p {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-link {
+            font-family: var(--font-display);
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: var(--color-text);
+            color: white;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 3px solid var(--color-text);
+            box-shadow: 4px 4px 0px white;
+            transition: all 0.2s;
+        }
+
+        .project-link:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px white;
+            background: var(--color-accent-1);
+        }
+
+        /* Testimonials - Speech Bubbles */
+        .testimonials {
+            padding: 8rem 2rem;
+            background: var(--color-accent-2);
+            border-top: var(--border-thick);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonials::before {
+            content: '★';
+            position: absolute;
+            font-size: 30vw;
+            color: rgba(0,0,0,0.1);
+            top: -10%;
+            right: -10%;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .testimonials h2 {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 4px 4px 0px var(--color-text);
+            position: relative;
+            z-index: 2;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 3rem 2rem;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            position: relative;
+            transition: all 0.3s var(--transition);
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-family: var(--font-display);
+            font-size: 6rem;
+            color: var(--color-accent-1);
+            line-height: 1;
+            text-shadow: 3px 3px 0px var(--color-text);
+        }
+
+        .testimonial-card:nth-child(1) { transform: rotate(-2deg); }
+        .testimonial-card:nth-child(2) { 
+            transform: rotate(1deg) translateY(20px); 
+            background: var(--color-surface);
+        }
+        .testimonial-card:nth-child(3) { transform: rotate(2deg); }
+
+        .testimonial-card:hover {
+            transform: rotate(0deg) scale(1.05);
+            z-index: 10;
+        }
+
+        .testimonial-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+            margin-top: 1rem;
+        }
+
+        .testimonial-card footer {
+            border-top: 3px solid var(--color-text);
+            padding-top: 1rem;
+        }
+
+        .testimonial-author {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        .testimonial-role {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-accent-1);
+        }
+
+        /* Practical Info - Bold Cards */
+        .practical-info {
+            padding: 6rem 2rem;
+            background: var(--color-bg);
+            border-top: var(--border-thick);
+        }
+
+        .practical-info h2 {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 4px 4px 0px var(--color-text);
+            transform: rotate(-1deg);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .info-card {
+            background: white;
+            padding: 3rem;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            text-align: center;
+            transition: all 0.3s var(--transition);
+        }
+
+        .info-card:nth-child(1) {
+            transform: rotate(-2deg);
+            background: var(--color-accent-3);
+            color: white;
+        }
+
+        .info-card:nth-child(2) {
+            transform: rotate(2deg);
+            background: var(--color-accent-1);
+            color: white;
+        }
+
+        .info-card:hover {
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        .info-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .info-card p {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .map-link {
+            color: inherit;
+            text-decoration: none;
+            font-weight: 700;
+            border-bottom: 3px solid currentColor;
+            padding-bottom: 2px;
+            transition: all 0.2s;
+        }
+
+        .map-link:hover {
+            border-bottom-width: 6px;
+        }
+
+        /* Contact - Explosive Ending */
+        .contact {
+            padding: 10rem 2rem;
+            text-align: center;
+            background: 
+                radial-gradient(circle at 20% 50%, var(--color-accent-2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, var(--color-accent-1) 0%, transparent 50%),
+                var(--color-text);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact h2 {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 10vw, 6rem);
+            margin-bottom: 3rem;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 
+                4px 4px 0px var(--color-accent-2),
+                8px 8px 0px var(--color-accent-1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .contact-content {
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .contact-email, .contact-phone {
+            display: inline-block;
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            color: var(--color-text);
+            text-decoration: none;
+            background: var(--color-surface);
+            padding: 1rem 3rem;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            margin: 0.5rem;
+            transition: all 0.3s var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .contact-email:hover, .contact-phone:hover {
+            transform: translate(-4px, -4px) scale(1.05);
+            box-shadow: 12px 12px 0px rgba(0,0,0,0.9);
+            background: white;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 4rem;
+            position: relative;
+            z-index: 2;
+            flex-wrap: wrap;
+        }
+
+        .social-links a {
+            font-family: var(--font-display);
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem 2rem;
+            background: var(--color-accent-3);
+            border: 3px solid white;
+            box-shadow: 4px 4px 0px white;
+            transition: all 0.3s var(--transition);
+        }
+
+        .social-links a:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 8px 8px 0px white;
+            background: var(--color-accent-2);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem;
+            text-align: center;
+            background: var(--color-text);
+            color: white;
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-top: var(--border-thick);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            nav {
+                padding: 1rem 2rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            nav ul li a {
+                font-size: 0.9rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .about {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .about-image-wrapper {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+            
+            .services-grid,
+            .projects-grid,
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .project-card:nth-child(even) {
+                transform: rotate(2deg) translateY(0);
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .services h2,
+            .projects h2,
+            .testimonials h2,
+            .practical-info h2,
+            .contact h2 {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                text-shadow: 
+                    2px 2px 0px var(--color-accent-2),
+                    4px 4px 0px var(--color-accent-3);
+            }
+            
+            .social-main {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .social-link-large {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .contact-email, .contact-phone {
+                display: block;
+                margin: 1rem auto;
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-eyebrow {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .btn-primary {
+                padding: 1rem 2rem;
+                font-size: 1.2rem;
+            }
+            
+            .service-card,
+            .project-card,
+            .testimonial-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .blob {
+                display: none;
+            }
+        }
+        /* ========== FIN STYLE PROTÉGÉ ========== */
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo">{{HERO_TITLE}}</a>
+        <ul>
+            <li><a href="#about">À propos</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#projects">Projets</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- SECTION: hero (OBLIGATOIRE) -->
+    <section class="hero" id="hero">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <span class="hero-eyebrow">{{HERO_EYEBROW}}</span>
+        <h1>{{HERO_TITLE}}</h1>
+        <p class="hero-subtitle">{{HERO_SUBTITLE}}</p>
+        <a href="#contact" class="btn-primary">{{HERO_CTA_TEXT}}</a>
+    </section>
+
+    <!-- SECTION: social_showcase (OPTIONNEL - SI vitrine = réseaux) -->
+    <!-- IF: showSocialShowcase -->
+    <section class="social-showcase">
+        <h2>Retrouvez mon travail</h2>
+        <div class="social-main">
+            <!-- REPEAT: socialLinks -->
+            <a href="{{SOCIAL_URL}}" class="social-link-large" target="_blank">
+                <span class="social-icon">{{SOCIAL_ICON}}</span>
+                <span>{{SOCIAL_PLATFORM}}</span>
+            </a>
+            <a href="{{SOCIAL_URL}}" class="social-link-large" target="_blank">
+                <span class="social-icon">{{SOCIAL_ICON}}</span>
+                <span>{{SOCIAL_PLATFORM}}</span>
+            </a>
+            <!-- END REPEAT: socialLinks -->
+        </div>
+    </section>
+    <!-- ENDIF: showSocialShowcase -->
+
+    <!-- SECTION: about (OBLIGATOIRE) -->
+    <section class="about" id="about">
+        <!-- IF: hasAboutImage -->
+        <div class="about-image-wrapper">
+            <img src="{{ABOUT_IMAGE}}" alt="{{HERO_TITLE}}">
+        </div>
+        <!-- ENDIF: hasAboutImage -->
+        <div class="about-content">
+            <h2>À propos</h2>
+            <p>{{ABOUT_TEXT}}</p>
+            <!-- IF: hasValueProp -->
+            <p class="value-prop">{{VALUE_PROP}}</p>
+            <!-- ENDIF: hasValueProp -->
+        </div>
+    </section>
+
+    <!-- SECTION: services (OBLIGATOIRE) -->
+    <section class="services" id="services">
+        <h2>Services</h2>
+        <div class="services-grid">
+            <!-- REPEAT: services -->
+            <div class="service-card">
+                <span class="service-icon">{{SERVICE_ICON}}</span>
+                <h3>{{SERVICE_TITLE}}</h3>
+                <p>{{SERVICE_DESC}}</p>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">{{SERVICE_ICON}}</span>
+                <h3>{{SERVICE_TITLE}}</h3>
+                <p>{{SERVICE_DESC}}</p>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">{{SERVICE_ICON}}</span>
+                <h3>{{SERVICE_TITLE}}</h3>
+                <p>{{SERVICE_DESC}}</p>
+            </div>
+            <!-- END REPEAT: services -->
+        </div>
+    </section>
+
+    <!-- SECTION: projects (OPTIONNEL - SI projets fournis) -->
+    <!-- IF: showProjects -->
+    <section class="projects" id="projects">
+        <h2>Réalisations</h2>
+        <div class="projects-grid">
+            <!-- REPEAT: projects -->
+            <article class="project-card">
+                <div class="project-image">
+                    <img src="{{PROJECT_IMAGE}}" alt="{{PROJECT_TITLE}}">
+                </div>
+                <div class="project-content">
+                    <span class="project-category">{{PROJECT_CATEGORY}}</span>
+                    <h3>{{PROJECT_TITLE}}</h3>
+                    <p>{{PROJECT_DESC}}</p>
+                    <!-- IF: hasProjectLink -->
+                    <a href="{{PROJECT_LINK}}" class="project-link">Voir →</a>
+                    <!-- ENDIF: hasProjectLink -->
+                </div>
+            </article>
+            <article class="project-card">
+                <div class="project-image">
+                    <img src="{{PROJECT_IMAGE}}" alt="{{PROJECT_TITLE}}">
+                </div>
+                <div class="project-content">
+                    <span class="project-category">{{PROJECT_CATEGORY}}</span>
+                    <h3>{{PROJECT_TITLE}}</h3>
+                    <p>{{PROJECT_DESC}}</p>
+                    <!-- IF: hasProjectLink -->
+                    <a href="{{PROJECT_LINK}}" class="project-link">Voir →</a>
+                    <!-- ENDIF: hasProjectLink -->
+                </div>
+            </article>
+            <article class="project-card">
+                <div class="project-image">
+                    <img src="{{PROJECT_IMAGE}}" alt="{{PROJECT_TITLE}}">
+                </div>
+                <div class="project-content">
+                    <span class="project-category">{{PROJECT_CATEGORY}}</span>
+                    <h3>{{PROJECT_TITLE}}</h3>
+                    <p>{{PROJECT_DESC}}</p>
+                    <!-- IF: hasProjectLink -->
+                    <a href="{{PROJECT_LINK}}" class="project-link">Voir →</a>
+                    <!-- ENDIF: hasProjectLink -->
+                </div>
+            </article>
+            <!-- END REPEAT: projects -->
+        </div>
+    </section>
+    <!-- ENDIF: showProjects -->
+
+    <!-- SECTION: testimonials (OPTIONNEL - SI témoignages fournis) -->
+    <!-- IF: showTestimonials -->
+    <section class="testimonials" id="testimonials">
+        <h2>Témoignages</h2>
+        <div class="testimonials-grid">
+            <!-- REPEAT: testimonials -->
+            <blockquote class="testimonial-card">
+                <p class="testimonial-text">"{{TESTIMONIAL_TEXT}}"</p>
+                <footer>
+                    <strong class="testimonial-author">{{TESTIMONIAL_AUTHOR}}</strong>
+                    <span class="testimonial-role">{{TESTIMONIAL_ROLE}}</span>
+                </footer>
+            </blockquote>
+            <blockquote class="testimonial-card">
+                <p class="testimonial-text">"{{TESTIMONIAL_TEXT}}"</p>
+                <footer>
+                    <strong class="testimonial-author">{{TESTIMONIAL_AUTHOR}}</strong>
+                    <span class="testimonial-role">{{TESTIMONIAL_ROLE}}</span>
+                </footer>
+            </blockquote>
+            <blockquote class="testimonial-card">
+                <p class="testimonial-text">"{{TESTIMONIAL_TEXT}}"</p>
+                <footer>
+                    <strong class="testimonial-author">{{TESTIMONIAL_AUTHOR}}</strong>
+                    <span class="testimonial-role">{{TESTIMONIAL_ROLE}}</span>
+                </footer>
+            </blockquote>
+            <!-- END REPEAT: testimonials -->
+        </div>
+    </section>
+    <!-- ENDIF: showTestimonials -->
+
+    <!-- SECTION: practical_info (OPTIONNEL - SI adresse OU horaires) -->
+    <!-- IF: showPracticalInfo -->
+    <section class="practical-info" id="info">
+        <h2>Informations</h2>
+        <div class="info-grid">
+            <!-- IF: hasAddress -->
+            <div class="info-card">
+                <h3>📍 Adresse</h3>
+                <p>{{CONTACT_ADDRESS}}</p>
+                <a href="https://maps.google.com/?q={{CONTACT_ADDRESS}}" target="_blank" class="map-link">Google Maps →</a>
+            </div>
+            <!-- ENDIF: hasAddress -->
+            <!-- IF: hasOpeningHours -->
+            <div class="info-card">
+                <h3>🕐 Horaires</h3>
+                <p>{{OPENING_HOURS}}</p>
+            </div>
+            <!-- ENDIF: hasOpeningHours -->
+        </div>
+    </section>
+    <!-- ENDIF: showPracticalInfo -->
+
+    <!-- SECTION: contact (OBLIGATOIRE) -->
+    <section class="contact" id="contact">
+        <h2>Contact</h2>
+        <div class="contact-content">
+            <a href="mailto:{{CONTACT_EMAIL}}" class="contact-email">{{CONTACT_EMAIL}}</a>
+            <!-- IF: hasPhone -->
+            <a href="tel:{{CONTACT_PHONE}}" class="contact-phone">{{CONTACT_PHONE}}</a>
+            <!-- ENDIF: hasPhone -->
+        </div>
+        <!-- IF: NOT showSocialShowcase -->
+        <div class="social-links">
+            <!-- REPEAT: socialLinks -->
+            <a href="{{SOCIAL_URL}}" target="_blank" title="{{SOCIAL_PLATFORM}}">{{SOCIAL_PLATFORM}}</a>
+            <a href="{{SOCIAL_URL}}" target="_blank" title="{{SOCIAL_PLATFORM}}">{{SOCIAL_PLATFORM}}</a>
+            <!-- END REPEAT: socialLinks -->
+        </div>
+        <!-- ENDIF: NOT showSocialShowcase -->
+    </section>
+
+    <footer>
+        <p>© {{CURRENT_YEAR}} {{HERO_TITLE}} — TOUS DROITS RÉSERVÉS</p>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero entrance animation
+        const heroTl = gsap.timeline({delay: 0.3});
+        heroTl
+            .from('.hero-eyebrow', {y: -50, opacity: 0, rotation: -10, duration: 0.8, ease: 'back.out(1.7)'})
+            .from('.hero h1', {y: 100, opacity: 0, scale: 0.8, duration: 1, ease: 'power4.out'}, '-=0.4')
+            .from('.hero-subtitle', {x: -50, opacity: 0, duration: 0.8, ease: 'power3.out'}, '-=0.6')
+            .from('.btn-primary', {y: 50, opacity: 0, rotation: 5, duration: 0.6, ease: 'back.out(1.7)'}, '-=0.4')
+            .from('.blob', {scale: 0, opacity: 0, duration: 1.5, ease: 'elastic.out(1, 0.5)', stagger: 0.2}, '-=1');
+
+        // Hero parallax blobs
+        gsap.to('.blob-1', {
+            y: 100,
+            x: 50,
+            scrollTrigger: {
+                trigger: '.hero',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
+
+        gsap.to('.blob-2', {
+            y: -100,
+            x: -50,
+            scrollTrigger: {
+                trigger: '.hero',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
+
+        // About image layers parallax
+        gsap.to('.about-image-wrapper::before', {
+            y: -30,
+            scrollTrigger: {
+                trigger: '.about',
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
+
+        // Cards stagger animations
+        const cards = document.querySelectorAll('.service-card, .project-card, .testimonial-card, .info-card, .social-link-large');
+        
+        cards.forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 85%',
+                    toggleActions: 'play none none reverse'
+                },
+                y: 100,
+                opacity: 0,
+                rotation: gsap.utils.random(-10, 10),
+                duration: 0.8,
+                delay: i % 3 * 0.1,
+                ease: 'back.out(1.2)'
+            });
+        });
+
+        // Section headers bounce in
+        gsap.utils.toArray('section h2').forEach(header => {
+            gsap.from(header, {
+                scrollTrigger: {
+                    trigger: header,
+                    start: 'top 85%'
+                },
+                scale: 0,
+                opacity: 0,
+                rotation: -5,
+                duration: 0.8,
+                ease: 'back.out(1.7)'
+            });
+        });
+
+        // About content slide in
+        gsap.from('.about-content > *', {
+            scrollTrigger: {
+                trigger: '.about',
+                start: 'top 70%'
+            },
+            x: 50,
+            opacity: 0,
+            stagger: 0.2,
+            duration: 0.8,
+            ease: 'power3.out'
+        });
+
+        // Project cards hover enhancement
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                gsap.to(card, {scale: 1.02, rotation: 0, duration: 0.3, ease: 'power2.out'});
+            });
+            card.addEventListener('mouseleave', () => {
+                const index = Array.from(card.parentNode.children).indexOf(card);
+                const rotation = index % 2 === 0 ? -2 : 2;
+                gsap.to(card, {scale: 1, rotation: rotation, duration: 0.3, ease: 'power2.out'});
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({behavior: 'smooth'});
+            });
+        });
+
+        // Nav background on scroll
+        ScrollTrigger.create({
+            start: 'top -100',
+            end: 99999,
+            toggleClass: {className: 'scrolled', targets: 'nav'}
+        });
+    </script>
+</body>
+</html>

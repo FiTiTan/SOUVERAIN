@@ -1,0 +1,1202 @@
+<!--
+TEMPLATE: Kinetic Typography
+DESCRIPTION: Animations textuelles percutantes, titres qui bougent et se révèlent avec énergie, typographie expressive et mouvement cinétique
+SECTIONS_OBLIGATOIRES: hero, about, services, contact
+SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
+-->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{HERO_TITLE}} — Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <style>
+        /* ========== NE PAS MODIFIER - STYLE PROTÉGÉ ========== */
+        :root {
+            --color-bg: #0a0a0a;
+            --color-text: #ffffff;
+            --color-accent: #ff3d00;
+            --color-secondary: #1a1a1a;
+            --color-muted: #666666;
+            --font-main: 'Space Grotesk', sans-serif;
+            --transition: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--color-accent);
+            transform: translateX(-101%);
+            transition: transform 0.4s var(--transition);
+        }
+
+        .logo:hover::after {
+            transform: translateX(0);
+        }
+
+        nav ul {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        nav ul li a {
+            color: var(--color-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        nav ul li a::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: var(--color-accent);
+            transform: translateX(-101%);
+            transition: transform 0.3s var(--transition);
+        }
+
+        nav ul li a:hover::before {
+            transform: translateX(0);
+        }
+
+        /* Hero Section - Kinetic Style */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-eyebrow {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--color-accent);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            opacity: 0;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 12vw, 10rem);
+            font-weight: 700;
+            line-height: 0.9;
+            letter-spacing: -0.04em;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(100px) rotateX(-90deg);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--color-muted);
+            max-width: 600px;
+            margin-bottom: 3rem;
+            font-weight: 300;
+            opacity: 0;
+            clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0% 100%);
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            background: var(--color-accent);
+            color: var(--color-bg);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s var(--transition);
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--color-text);
+            transition: left 0.4s var(--transition);
+            z-index: -1;
+        }
+
+        .btn-primary:hover::before {
+            left: 0;
+        }
+
+        /* Floating text background effect */
+        .hero::before {
+            content: 'PORTFOLIO';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20vw;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.03);
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: -1;
+            animation: floatText 20s infinite linear;
+        }
+
+        @keyframes floatText {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            50% { transform: translate(-50%, -50%) translateX(-5%); }
+        }
+
+        /* Social Showcase */
+        .social-showcase {
+            padding: 6rem 2rem;
+            background: var(--color-secondary);
+            overflow: hidden;
+        }
+
+        .social-showcase h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-weight: 300;
+        }
+
+        .social-main {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .social-link-large {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem 3rem;
+            background: var(--color-bg);
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-link-large::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--color-accent);
+            transform: translateY(100%);
+            transition: transform 0.4s var(--transition);
+            z-index: 0;
+        }
+
+        .social-link-large:hover::before {
+            transform: translateY(0);
+        }
+
+        .social-link-large span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .social-link-large:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-accent);
+        }
+
+        /* About Section */
+        .about {
+            padding: 8rem 4rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 4rem;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .about img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            filter: grayscale(100%);
+            transition: filter 0.6s var(--transition), transform 0.6s var(--transition);
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+        }
+
+        .about img:hover {
+            filter: grayscale(0%);
+            transform: scale(1.05);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        .about-content h2 {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            overflow: hidden;
+        }
+
+        .about-text-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .about-content p {
+            font-size: 1.2rem;
+            color: var(--color-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .value-prop {
+            font-size: 1.5rem !important;
+            color: var(--color-accent) !important;
+            font-weight: 500;
+            border-left: 4px solid var(--color-accent);
+            padding-left: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Services Section */
+        .services {
+            padding: 8rem 4rem;
+            background: var(--color-secondary);
+        }
+
+        .services h2 {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            font-weight: 700;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .service-card {
+            background: var(--color-bg);
+            padding: 3rem 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--color-accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s var(--transition);
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--color-accent);
+            box-shadow: 0 20px 40px rgba(255, 61, 0, 0.1);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .service-card p {
+            color: var(--color-muted);
+            line-height: 1.6;
+        }
+
+        /* Projects Section */
+        .projects {
+            padding: 8rem 4rem;
+        }
+
+        .projects h2 {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            font-weight: 700;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .project-card {
+            position: relative;
+            overflow: hidden;
+            background: var(--color-secondary);
+            transition: transform 0.6s var(--transition);
+        }
+
+        .project-card:nth-child(odd) {
+            margin-top: 4rem;
+        }
+
+        .project-image {
+            overflow: hidden;
+            aspect-ratio: 4/3;
+        }
+
+        .project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s var(--transition);
+            filter: grayscale(100%) contrast(1.2);
+        }
+
+        .project-card:hover .project-image img {
+            transform: scale(1.1);
+            filter: grayscale(0%) contrast(1);
+        }
+
+        .project-content {
+            padding: 2rem;
+        }
+
+        .project-category {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .project-card h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .project-card p {
+            color: var(--color-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .project-link {
+            color: var(--color-text);
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.9rem;
+            position: relative;
+            display: inline-block;
+            overflow: hidden;
+        }
+
+        .project-link::after {
+            content: '→';
+            margin-left: 0.5rem;
+            transition: transform 0.3s var(--transition);
+            display: inline-block;
+        }
+
+        .project-link:hover::after {
+            transform: translateX(5px);
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 8rem 4rem;
+            background: var(--color-secondary);
+        }
+
+        .testimonials h2 {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            font-weight: 700;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonial-card {
+            background: var(--color-bg);
+            padding: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: all 0.4s var(--transition);
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 1rem;
+            left: 1.5rem;
+            font-size: 6rem;
+            color: var(--color-accent);
+            opacity: 0.3;
+            font-family: serif;
+            line-height: 1;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-accent);
+        }
+
+        .testimonial-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            margin-bottom: 2rem;
+            color: var(--color-text);
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-card footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+        }
+
+        .testimonial-author {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            font-size: 1.1rem;
+        }
+
+        .testimonial-role {
+            color: var(--color-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Practical Info */
+        .practical-info {
+            padding: 8rem 4rem;
+        }
+
+        .practical-info h2 {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            font-weight: 700;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .info-card {
+            background: var(--color-secondary);
+            padding: 3rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s var(--transition);
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-accent);
+        }
+
+        .info-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .info-card p {
+            font-size: 1.1rem;
+            color: var(--color-text);
+            margin-bottom: 1rem;
+        }
+
+        .map-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .map-link:hover {
+            opacity: 0.8;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 8rem 4rem;
+            text-align: center;
+            background: var(--color-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact::before {
+            content: 'CONTACT';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15vw;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.03);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .contact h2 {
+            font-size: 4rem;
+            margin-bottom: 3rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact-content {
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact-email, .contact-phone {
+            display: block;
+            font-size: 2rem;
+            color: var(--color-text);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            transition: color 0.3s;
+            position: relative;
+            display: inline-block;
+        }
+
+        .contact-email::after, .contact-phone::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--color-accent);
+            transition: width 0.4s var(--transition);
+        }
+
+        .contact-email:hover::after, .contact-phone:hover::after {
+            width: 100%;
+        }
+
+        .contact-email:hover, .contact-phone:hover {
+            color: var(--color-accent);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .social-links a {
+            color: var(--color-muted);
+            text-decoration: none;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links a:hover {
+            color: var(--color-accent);
+            border-color: var(--color-accent);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem;
+            text-align: center;
+            background: var(--color-bg);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--color-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            nav {
+                padding: 1.5rem 2rem;
+            }
+            
+            .about {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding: 6rem 2rem;
+            }
+            
+            .about img {
+                margin: 0 auto;
+                max-width: 300px;
+            }
+            
+            .services-grid, .testimonials-grid, .projects-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                gap: 1.5rem;
+            }
+            
+            nav ul li a {
+                font-size: 0.8rem;
+            }
+            
+            .hero h1 {
+                font-size: clamp(2.5rem, 15vw, 5rem);
+            }
+            
+            .services-grid, .testimonials-grid, .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .project-card:nth-child(odd) {
+                margin-top: 0;
+            }
+            
+            .social-main {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .contact-email, .contact-phone {
+                font-size: 1.5rem;
+            }
+            
+            .about-content h2, .services h2, .projects h2, 
+            .testimonials h2, .contact h2, .practical-info h2 {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .hero {
+                padding-top: 120px;
+            }
+            
+            .about, .services, .projects, .testimonials, 
+            .contact, .practical-info {
+                padding: 4rem 1.5rem;
+            }
+            
+            .service-card, .testimonial-card, .info-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+        /* ========== FIN STYLE PROTÉGÉ ========== */
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo">{{HERO_TITLE}}</a>
+        <ul>
+            <li><a href="#about">À propos</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#projects">Projets</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- SECTION: hero (OBLIGATOIRE) -->
+    <section class="hero" id="hero">
+        <span class="hero-eyebrow">{{HERO_EYEBROW}}</span>
+        <h1 class="kinetic-title">{{HERO_TITLE}}</h1>
+        <p class="hero-subtitle">{{HERO_SUBTITLE}}</p>
+        <a href="#contact" class="btn-primary">{{HERO_CTA_TEXT}}</a>
+    </section>
+
+    <!-- SECTION: social_showcase (OPTIONNEL - SI vitrine = réseaux) -->
+    <!-- IF: showSocialShowcase -->
+    <section class="social-showcase">
+        <h2>Retrouvez mon travail</h2>
+        <div class="social-main">
+            <!-- REPEAT: socialLinks -->
+            <a href="{{SOCIAL_URL}}" class="social-link-large" target="_blank">
+                <span class="social-icon">{{SOCIAL_ICON}}</span>
+                <span>{{SOCIAL_PLATFORM}}</span>
+            </a>
+            <a href="{{SOCIAL_URL}}" class="social-link-large" target="_blank">
+                <span class="social-icon">{{SOCIAL_ICON}}</span>
+                <span>{{SOCIAL_PLATFORM}}</span>
+            </a>
+            <!-- END REPEAT: socialLinks -->
+        </div>
+    </section>
+    <!-- ENDIF: showSocialShowcase -->
+
+    <!-- SECTION: about (OBLIGATOIRE) -->
+    <section class="about" id="about">
+        <!-- IF: hasAboutImage -->
+        <img src="{{ABOUT_IMAGE}}" alt="{{HERO_TITLE}}">
+        <!-- ENDIF: hasAboutImage -->
+        <div class="about-content">
+            <h2>À propos</h2>
+            <p class="about-text-reveal">{{ABOUT_TEXT}}</p>
+            <!-- IF: hasValueProp -->
+            <p class="value-prop about-text-reveal">{{VALUE_PROP}}</p>
+            <!-- ENDIF: hasValueProp -->
+        </div>
+    </section>
+
+    <!-- SECTION: services (OBLIGATOIRE) -->
+    <section class="services" id="services">
+        <h2>Services</h2>
+        <div class="services-grid">
+            <!-- REPEAT: services -->
+            <div class="service-card">
+                <span class="service-icon">{{SERVICE_ICON}}</span>
+                <h3>{{SERVICE_TITLE}}</h3>
+                <p>{{SERVICE_DESC}}</p>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">{{SERVICE_ICON}}</span>
+                <h3>{{SERVICE_TITLE}}</h3>
+                <p>{{SERVICE_DESC}}</p>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">{{SERVICE_ICON}}</span>
+                <h3>{{SERVICE_TITLE}}</h3>
+                <p>{{SERVICE_DESC}}</p>
+            </div>
+            <!-- END REPEAT: services -->
+        </div>
+    </section>
+
+    <!-- SECTION: projects (OPTIONNEL - SI projets fournis) -->
+    <!-- IF: showProjects -->
+    <section class="projects" id="projects">
+        <h2>Réalisations</h2>
+        <div class="projects-grid">
+            <!-- REPEAT: projects -->
+            <article class="project-card">
+                <div class="project-image">
+                    <img src="{{PROJECT_IMAGE}}" alt="{{PROJECT_TITLE}}">
+                </div>
+                <div class="project-content">
+                    <span class="project-category">{{PROJECT_CATEGORY}}</span>
+                    <h3>{{PROJECT_TITLE}}</h3>
+                    <p>{{PROJECT_DESC}}</p>
+                    <!-- IF: hasProjectLink -->
+                    <a href="{{PROJECT_LINK}}" class="project-link">Voir le projet →</a>
+                    <!-- ENDIF: hasProjectLink -->
+                </div>
+            </article>
+            <article class="project-card">
+                <div class="project-image">
+                    <img src="{{PROJECT_IMAGE}}" alt="{{PROJECT_TITLE}}">
+                </div>
+                <div class="project-content">
+                    <span class="project-category">{{PROJECT_CATEGORY}}</span>
+                    <h3>{{PROJECT_TITLE}}</h3>
+                    <p>{{PROJECT_DESC}}</p>
+                    <!-- IF: hasProjectLink -->
+                    <a href="{{PROJECT_LINK}}" class="project-link">Voir le projet →</a>
+                    <!-- ENDIF: hasProjectLink -->
+                </div>
+            </article>
+            <article class="project-card">
+                <div class="project-image">
+                    <img src="{{PROJECT_IMAGE}}" alt="{{PROJECT_TITLE}}">
+                </div>
+                <div class="project-content">
+                    <span class="project-category">{{PROJECT_CATEGORY}}</span>
+                    <h3>{{PROJECT_TITLE}}</h3>
+                    <p>{{PROJECT_DESC}}</p>
+                    <!-- IF: hasProjectLink -->
+                    <a href="{{PROJECT_LINK}}" class="project-link">Voir le projet →</a>
+                    <!-- ENDIF: hasProjectLink -->
+                </div>
+            </article>
+            <!-- END REPEAT: projects -->
+        </div>
+    </section>
+    <!-- ENDIF: showProjects -->
+
+    <!-- SECTION: testimonials (OPTIONNEL - SI témoignages fournis) -->
+    <!-- IF: showTestimonials -->
+    <section class="testimonials" id="testimonials">
+        <h2>Témoignages</h2>
+        <div class="testimonials-grid">
+            <!-- REPEAT: testimonials -->
+            <blockquote class="testimonial-card">
+                <p class="testimonial-text">"{{TESTIMONIAL_TEXT}}"</p>
+                <footer>
+                    <strong class="testimonial-author">{{TESTIMONIAL_AUTHOR}}</strong>
+                    <span class="testimonial-role">{{TESTIMONIAL_ROLE}}</span>
+                </footer>
+            </blockquote>
+            <blockquote class="testimonial-card">
+                <p class="testimonial-text">"{{TESTIMONIAL_TEXT}}"</p>
+                <footer>
+                    <strong class="testimonial-author">{{TESTIMONIAL_AUTHOR}}</strong>
+                    <span class="testimonial-role">{{TESTIMONIAL_ROLE}}</span>
+                </footer>
+            </blockquote>
+            <blockquote class="testimonial-card">
+                <p class="testimonial-text">"{{TESTIMONIAL_TEXT}}"</p>
+                <footer>
+                    <strong class="testimonial-author">{{TESTIMONIAL_AUTHOR}}</strong>
+                    <span class="testimonial-role">{{TESTIMONIAL_ROLE}}</span>
+                </footer>
+            </blockquote>
+            <!-- END REPEAT: testimonials -->
+        </div>
+    </section>
+    <!-- ENDIF: showTestimonials -->
+
+    <!-- SECTION: practical_info (OPTIONNEL - SI adresse OU horaires) -->
+    <!-- IF: showPracticalInfo -->
+    <section class="practical-info" id="info">
+        <h2>Informations pratiques</h2>
+        <div class="info-grid">
+            <!-- IF: hasAddress -->
+            <div class="info-card">
+                <h3>📍 Adresse</h3>
+                <p>{{CONTACT_ADDRESS}}</p>
+                <a href="https://maps.google.com/?q={{CONTACT_ADDRESS}}" target="_blank" class="map-link">Voir sur Google Maps →</a>
+            </div>
+            <!-- ENDIF: hasAddress -->
+            <!-- IF: hasOpeningHours -->
+            <div class="info-card">
+                <h3>🕐 Horaires</h3>
+                <p>{{OPENING_HOURS}}</p>
+            </div>
+            <!-- ENDIF: hasOpeningHours -->
+        </div>
+    </section>
+    <!-- ENDIF: showPracticalInfo -->
+
+    <!-- SECTION: contact (OBLIGATOIRE) -->
+    <section class="contact" id="contact">
+        <h2>Contact</h2>
+        <div class="contact-content">
+            <a href="mailto:{{CONTACT_EMAIL}}" class="contact-email">{{CONTACT_EMAIL}}</a>
+            <!-- IF: hasPhone -->
+            <a href="tel:{{CONTACT_PHONE}}" class="contact-phone">{{CONTACT_PHONE}}</a>
+            <!-- ENDIF: hasPhone -->
+        </div>
+        <!-- IF: NOT showSocialShowcase -->
+        <div class="social-links">
+            <!-- REPEAT: socialLinks -->
+            <a href="{{SOCIAL_URL}}" target="_blank" title="{{SOCIAL_PLATFORM}}">{{SOCIAL_PLATFORM}}</a>
+            <a href="{{SOCIAL_URL}}" target="_blank" title="{{SOCIAL_PLATFORM}}">{{SOCIAL_PLATFORM}}</a>
+            <!-- END REPEAT: socialLinks -->
+        </div>
+        <!-- ENDIF: NOT showSocialShowcase -->
+    </section>
+
+    <footer>
+        <p>© {{CURRENT_YEAR}} {{HERO_TITLE}}. Tous droits réservés.</p>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Kinetic Typography: Split hero title into characters
+        const heroTitle = document.querySelector('.kinetic-title');
+        if (heroTitle) {
+            const text = heroTitle.textContent;
+            heroTitle.innerHTML = text.split('').map(char => 
+                char === ' ' ? ' ' : `<span class="char">${char}</span>`
+            ).join('');
+            
+            // Animate each character
+            gsap.fromTo('.char', 
+                { opacity: 0, y: 100, rotateX: -90 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    rotateX: 0,
+                    duration: 1.2, 
+                    stagger: 0.03, 
+                    ease: 'power4.out',
+                    delay: 0.5
+                }
+            );
+        }
+
+        // Hero animation timeline
+        const heroTl = gsap.timeline();
+        heroTl
+            .fromTo('.hero-eyebrow', 
+                { opacity: 0, y: 20 }, 
+                { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
+            )
+            .fromTo('.hero-subtitle', 
+                { opacity: 0, clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0% 100%)' }, 
+                { opacity: 1, clipPath: 'polygon(0 0%, 100% 0%, 100% 100%, 0% 100%)', duration: 1, ease: 'power4.out' }, 
+                '-=0.5'
+            )
+            .fromTo('.hero .btn-primary', 
+                { opacity: 0, scale: 0.9 }, 
+                { opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.7)' }, 
+                '-=0.5'
+            );
+
+        // About section text reveal
+        gsap.utils.toArray('.about-text-reveal').forEach((el, i) => {
+            gsap.fromTo(el,
+                { opacity: 0, y: 30 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    },
+                    delay: i * 0.1
+                }
+            );
+        });
+
+        // Cards animation with stagger
+        ['.service-card', '.project-card', '.testimonial-card', '.info-card'].forEach(selector => {
+            gsap.utils.toArray(selector).forEach((el, i) => {
+                gsap.fromTo(el,
+                    { opacity: 0, y: 50 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.8,
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: el,
+                            start: 'top 85%',
+                            toggleActions: 'play none none reverse'
+                        },
+                        delay: i * 0.1
+                    }
+                );
+            });
+        });
+
+        // Section headers kinetic reveal
+        gsap.utils.toArray('section h2').forEach(header => {
+            gsap.fromTo(header,
+                { opacity: 0, x: -50, skewX: -10 },
+                {
+                    opacity: 1,
+                    x: 0,
+                    skewX: 0,
+                    duration: 1,
+                    ease: 'power4.out',
+                    scrollTrigger: {
+                        trigger: header,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
+                }
+            );
+        });
+
+        // Parallax effect on images
+        gsap.utils.toArray('.project-card img').forEach(img => {
+            gsap.to(img, {
+                yPercent: 10,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: img,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    gsap.to(window, {
+                        duration: 1.5,
+                        scrollTo: { y: target, offsetY: 70 },
+                        ease: 'power4.inOut'
+                    });
+                }
+            });
+        });
+
+        // Magnetic effect on buttons
+        document.querySelectorAll('.btn-primary, .social-link-large').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                gsap.to(btn, {
+                    x: x * 0.2,
+                    y: y * 0.2,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.5,
+                    ease: 'elastic.out(1, 0.3)'
+                });
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+</body>
+</html>
