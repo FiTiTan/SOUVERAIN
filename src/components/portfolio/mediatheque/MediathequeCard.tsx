@@ -79,6 +79,8 @@ export const MediathequeCard: React.FC<MediathequeCardProps> = ({
                     <img 
                         src={`file://${(item.file_path || item.localPath || '').replace(/\\/g, '/')}`} 
                         alt={item.original_filename || 'Media'}
+                        loading="lazy"
+                        decoding="async"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         onError={(e) => {
                             e.currentTarget.style.display = 'none';

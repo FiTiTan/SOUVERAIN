@@ -399,6 +399,8 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
               <img
                 src={previewUrl}
                 alt={previewFile.name}
+                loading="lazy"
+                decoding="async"
                 style={{
                   maxWidth: '100%',
                   maxHeight: '100%',
