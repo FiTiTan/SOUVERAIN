@@ -174,6 +174,7 @@ export const Shell: React.FC<ShellProps> = ({ children, onShowTutorial, pageTitl
     main: {
       flex: 1,
       overflow: 'auto',
+      padding: '0.5rem', // Espace pour que les box-shadows ne soient pas coupées
     },
     headerRight: {
       display: 'flex',
