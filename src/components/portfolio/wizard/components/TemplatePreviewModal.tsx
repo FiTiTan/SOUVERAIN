@@ -55,6 +55,7 @@ function replacePlaceholder(html: string, key: string, value: string): string {
 
 /**
  * Parse et remplace une section répétée
+ * Note: Les templates HTML ont été nettoyés pour n'avoir qu'1 seul élément entre les markers
  */
 function processRepeatedSection(
   html: string,
@@ -75,12 +76,12 @@ function processRepeatedSection(
   const templateStart = startIndex + startMarker.length;
   const itemTemplate = html.substring(templateStart, endIndex).trim();
   
-  const renderedItems = items.map(item => renderItem(itemTemplate, item)).join('\n');
+  const renderedItems = items.map(item => renderItem(itemTemplate, item)).join('\n            ');
   
   const before = html.substring(0, startIndex);
   const after = html.substring(endIndex + endMarker.length);
   
-  return before + renderedItems + after;
+  return before + '\n            ' + renderedItems + '\n            ' + after;
 }
 
 /**

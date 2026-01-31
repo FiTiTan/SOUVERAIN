@@ -28,6 +28,7 @@ function replacePlaceholder(html: string, key: string, value: string): string {
 
 /**
  * Parse et remplace une section répétée (services, projects, etc.)
+ * Note: Les templates HTML ont été nettoyés pour n'avoir qu'1 seul élément entre les markers
  */
 function processRepeatedSection(
   html: string,
@@ -45,18 +46,18 @@ function processRepeatedSection(
     return html; // Section not found, skip
   }
   
-  // Extract template between markers
+  // Extract template between markers (now cleaned to have only 1 element)
   const templateStart = startIndex + startMarker.length;
   const itemTemplate = html.substring(templateStart, endIndex).trim();
   
   // Generate HTML for all items
-  const renderedItems = items.map((item, index) => renderItem(itemTemplate, item, index)).join('\n');
+  const renderedItems = items.map((item, index) => renderItem(itemTemplate, item, index)).join('\n            ');
   
   // Replace entire section (including markers) with rendered items
   const before = html.substring(0, startIndex);
   const after = html.substring(endIndex + endMarker.length);
   
-  return before + renderedItems + after;
+  return before + '\n            ' + renderedItems + '\n            ' + after;
 }
 
 /**
