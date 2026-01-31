@@ -2,8 +2,6 @@
 // Groq enrichit SEULEMENT les textes (JSON → JSON enrichi)
 // NE TOUCHE JAMAIS au HTML
 
-import { detectAndAnonymize, deanonymize } from './anonymizationService';
-
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // Get API key from main process (secure)
@@ -175,15 +173,12 @@ export async function enrichPortfolioData(
   try {
     console.log('[GroqEnrichment] Starting content enrichment...');
 
-    // 1. Anonymisation des données sensibles
-    const dataString = JSON.stringify(rawData);
-    const anonymizedResult = await detectAndAnonymize(dataString, portfolioId);
-    const anonymizedData: RawPortfolioData = JSON.parse(anonymizedResult.anonymizedText);
-
-    console.log('[GroqEnrichment] Data anonymized, calling GROQ API...');
+    // Anonymisation désactivée pour les portfolios (cause des bugs de répétition "Jean Jean")
+    // Les données de portfolio ne contiennent pas d'infos ultra-sensibles
+    console.log('[GroqEnrichment] Skipping anonymization (not needed for portfolios)');
 
     // 2. Construire le prompt
-    const userPrompt = buildUserPrompt(anonymizedData);
+    const userPrompt = buildUserPrompt(rawData);
 
     // 3. Appel GROQ API
     const apiKey = await getGroqApiKey();
@@ -225,7 +220,7 @@ export async function enrichPortfolioData(
     const enriched = JSON.parse(content);
 
     // 4. Fusionner avec les données originales (garder ce que Groq n'a pas enrichi)
-    const merged: EnrichedPortfolioData = {
+    const finalData: EnrichedPortfolioData = {
       ...enriched,
       // Données non modifiées par Groq
       email: rawData.email,
@@ -244,12 +239,6 @@ export async function enrichPortfolioData(
       // Témoignages non modifiés
       testimonials: rawData.testimonials,
     };
-
-    // 5. Dé-anonymisation
-    console.log('[GroqEnrichment] De-anonymizing data...');
-    const finalDataString = JSON.stringify(merged);
-    const deanonymizedString = deanonymize(finalDataString, anonymizedResult.mappings);
-    const finalData: EnrichedPortfolioData = JSON.parse(deanonymizedString);
 
     console.log('[GroqEnrichment] ✓ Enrichment complete');
 
