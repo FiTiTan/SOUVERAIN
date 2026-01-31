@@ -12,6 +12,9 @@ export interface PortfolioFlags {
   hasPhone: boolean;
   hasAddress: boolean;
   hasOpeningHours: boolean;
+  hasAboutImage: boolean;
+  hasValueProp: boolean;
+  hasHeroImage: boolean;
   profileType: string;
 }
 
@@ -24,6 +27,9 @@ export function computeFlags(data: EnrichedPortfolioData): PortfolioFlags {
     hasPhone: !!data.phone,
     hasAddress: !!data.address,
     hasOpeningHours: !!data.openingHours,
+    hasAboutImage: !!data.aboutImage,
+    hasValueProp: !!data.valueProp,
+    hasHeroImage: !!data.heroImage,
     profileType: data.heroTitle ? 'defined' : 'unknown',
   };
 }
@@ -172,26 +178,19 @@ function processRepeat<T>(
 function processConditionalZones(html: string, flags: PortfolioFlags): string {
   let result = html;
 
-  const conditions: Record<string, boolean> = {
-    'showPracticalInfo': flags.showPracticalInfo,
-    'showSocialShowcase': flags.showSocialShowcase,
-    'showProjects': flags.showProjects,
-    'showTestimonials': flags.showTestimonials,
-    'hasPhone': flags.hasPhone,
-    'hasAddress': flags.hasAddress,
-    'hasOpeningHours': flags.hasOpeningHours,
-  };
+  // 1. Traiter les IF: NOT xxx (AVANT les IF normaux)
+  const notRegex = /<!-- IF: NOT (\w+) -->([\s\S]*?)<!-- ENDIF: NOT \1 -->/g;
+  result = result.replace(notRegex, (match, conditionName, content) => {
+    const conditionValue = flags[conditionName as keyof PortfolioFlags];
+    return !conditionValue ? content : ''; // Inversé !
+  });
 
-  for (const [conditionName, conditionValue] of Object.entries(conditions)) {
-    const regex = new RegExp(
-      `<!-- IF: ${conditionName} -->([\\s\\S]*?)<!-- ENDIF: ${conditionName} -->`,
-      'g'
-    );
-
-    result = result.replace(regex, (match, content) => {
-      return conditionValue ? content : '';
-    });
-  }
+  // 2. Traiter les IF: xxx normaux
+  const ifRegex = /<!-- IF: (\w+) -->([\s\S]*?)<!-- ENDIF: \1 -->/g;
+  result = result.replace(ifRegex, (match, conditionName, content) => {
+    const conditionValue = flags[conditionName as keyof PortfolioFlags];
+    return conditionValue ? content : '';
+  });
 
   return result;
 }
