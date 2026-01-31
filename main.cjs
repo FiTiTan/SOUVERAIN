@@ -1981,8 +1981,9 @@ ipcMain.handle('db-get-all-portfolios', async () => {
 });
 
 // Créer un nouveau portfolio
-ipcMain.handle('db-create-portfolio', async (event, { name }) => {
+ipcMain.handle('db-create-portfolio', async (event, args) => {
   try {
+    const { name } = args;
     console.log('[IPC] Creating portfolio:', name);
     const crypto = require('crypto');
     const id = crypto.randomUUID();
