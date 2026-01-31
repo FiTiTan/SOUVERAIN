@@ -28,10 +28,10 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
       setPhase('skeleton');
     }, 3000);
 
-    // Minimum time: 8s (branding moment)
+    // Minimum time: 5s (proof of value readability + config compatibility)
     const minTimer = setTimeout(() => {
       setMinTimeElapsed(true);
-    }, 8000);
+    }, 5000);
 
     return () => {
       clearTimeout(logoTimer);
