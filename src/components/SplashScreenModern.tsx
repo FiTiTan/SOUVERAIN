@@ -19,16 +19,16 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
   const [phase, setPhase] = useState<'logo' | 'skeleton' | 'done'>('logo');
 
   useEffect(() => {
-    // Phase 1: Logo (2.5s)
+    // Phase 1: Logo (3s)
     const logoTimer = setTimeout(() => {
       setPhase('skeleton');
-    }, 2500);
+    }, 3000);
 
-    // Phase 2: Skeleton → Done (5s total, fade 0.8s)
+    // Phase 2: Skeleton → Done (total 8s with fade)
     const doneTimer = setTimeout(() => {
       setPhase('done');
       setTimeout(onComplete, 800); // Smooth fade out
-    }, 7500);
+    }, 8000);
 
     return () => {
       clearTimeout(logoTimer);
