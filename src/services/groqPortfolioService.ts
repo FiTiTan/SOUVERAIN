@@ -20,36 +20,37 @@ async function getGroqApiKey(): Promise<string> {
   }
 }
 
-const SYSTEM_PROMPT = `Tu es un expert en création de portfolios web professionnels. Ta mission est de générer un portfolio HTML complet et personnalisé à partir d'un template et des données utilisateur.
+const SYSTEM_PROMPT = `Tu es un moteur de template HTML intelligent. Ta mission est de REMPLIR un template existant avec les données utilisateur, PAS de générer un nouveau design.
 
-RÈGLES ABSOLUES :
-1. NE JAMAIS modifier le CSS dans le bloc <style> marqué "STYLE PROTÉGÉ"
-2. NE JAMAIS inventer d'informations non fournies
-3. TOUJOURS supprimer les sections sans données (ne pas laisser de placeholder)
-4. TOUJOURS adapter le ton selon le type de profil
-5. TOUJOURS retourner du HTML valide et complet
+🚨 RÈGLES ABSOLUES - RESPECTE LA STRUCTURE DU TEMPLATE :
+1. NE JAMAIS modifier la structure HTML du template (balises, classes, IDs)
+2. NE JAMAIS modifier ou supprimer le CSS existant
+3. NE JAMAIS créer de nouvelles sections ou blocs non présents dans le template
+4. SEULEMENT remplacer les placeholders {{...}} par les vraies données
+5. SEULEMENT dupliquer/supprimer les zones marquées REPEAT/IF
+6. SEULEMENT améliorer la formulation du contenu texte (storytelling)
 
-SECTIONS CONDITIONNELLES :
-- Section "Infos Pratiques" : Afficher UNIQUEMENT si adresse OU horaires fournis
-- Section "Social Showcase" : Afficher en prominence UNIQUEMENT si socialIsMain = true
-- Section "Projets" : Afficher UNIQUEMENT si au moins 1 projet fourni
-- Section "Témoignages" : Afficher UNIQUEMENT si au moins 1 témoignage fourni
-- Section "Services" : TOUJOURS afficher (données obligatoires)
+📋 TON TRAVAIL :
+- Remplace {{NAME}} par le vrai nom
+- Remplace {{TAGLINE}} par une version améliorée/reformulée de la tagline
+- Remplace {{SERVICES}} par une liste HTML bien formatée
+- Améliore la formulation des descriptions (storytelling) tout en gardant le sens
+- NE PAS inventer de fausses informations
+- NE PAS ajouter de sections non demandées
 
-ADAPTATION DU TON SELON LE PROFIL :
+🎭 ADAPTATION DU TON (amélioration textuelle uniquement) :
 - freelance : Professionnel, orienté valeur et résultats
 - commerce : Chaleureux, proximité, confiance
 - creative : Visuel, personnalité, artistique
 - student : Dynamique, potentiel, apprentissage
 - employee : Crédible, expérience, expertise
 
-POUR LES ZONES REPEAT :
-- Duplique le bloc HTML pour chaque élément du tableau
-- Supprime entièrement la zone si le tableau est vide
+⚙️ TRAITEMENT DES ZONES SPÉCIALES :
+- <!-- REPEAT: projects --> ... <!-- END REPEAT --> : Duplique le bloc pour chaque projet
+- <!-- IF: showProjects --> ... <!-- ENDIF --> : Garde/supprime selon le flag
+- Si une section est vide, supprime-la proprement (pas de placeholders vides)
 
-POUR LES ZONES IF :
-- Garde le contenu si la condition est vraie
-- Supprime entièrement le bloc (y compris les balises) si fausse`;
+✅ FORMAT DE SORTIE : HTML complet et valide, structure identique au template d'entrée`;
 
 interface PortfolioData {
   name: string;
@@ -105,33 +106,39 @@ function buildUserPrompt(
   data: PortfolioData,
   flags: GroqFlags
 ): string {
-  return `TEMPLATE HTML :
+  return `🎯 MISSION : Remplis ce template HTML avec les données utilisateur. GARDE LA STRUCTURE EXACTE DU TEMPLATE.
+
+📄 TEMPLATE À REMPLIR (NE CHANGE PAS LA STRUCTURE, REMPLIS SEULEMENT) :
 """
 ${template}
 """
 
-DONNÉES UTILISATEUR :
+📊 DONNÉES UTILISATEUR (utilise ces valeurs pour remplir le template) :
 """
 ${JSON.stringify(data, null, 2)}
 """
 
-FLAGS :
+🚦 FLAGS CONDITIONNELS (pour les blocs <!-- IF: ... -->) :
 """
 ${JSON.stringify(flags, null, 2)}
 """
 
-INSTRUCTIONS :
-1. Remplace toutes les variables {{...}} par les données correspondantes
-2. Pour chaque zone <!-- REPEAT: xxx --> ... <!-- END REPEAT: xxx --> :
-   - Duplique le bloc pour chaque élément du tableau correspondant
-   - Supprime la zone entière si le tableau est vide
-3. Pour chaque zone <!-- IF: condition --> ... <!-- ENDIF: condition --> :
-   - Garde le contenu si la condition est vraie dans FLAGS
-   - Supprime entièrement si fausse
-4. Pour chaque <!-- SECTION: xxx (OPTIONNEL) --> :
-   - Supprime la section entière si elle n'a pas de données
-5. Adapte les textes génériques au ton du profil (${data.profileType})
-6. Retourne UNIQUEMENT le HTML final, sans explication ni markdown`;
+✅ ÉTAPES EXACTES À SUIVRE :
+1. Prends le template HTML tel quel
+2. Remplace SEULEMENT les placeholders {{NAME}}, {{TAGLINE}}, {{EMAIL}}, etc. par les vraies valeurs
+3. Pour {{TAGLINE}}, reformule intelligemment pour un storytelling captivant (profil: ${data.profileType})
+4. Pour les zones <!-- REPEAT: projects --> : duplique le bloc pour chaque projet du tableau
+5. Pour les zones <!-- IF: showProjects --> : garde si flags.showProjects = true, supprime sinon
+6. NE TOUCHE PAS au CSS, aux classes, à la structure HTML
+7. Retourne le HTML complet et valide
+
+⚠️ INTERDIT :
+- Créer de nouvelles sections
+- Modifier le design ou le CSS
+- Inventer des données non fournies
+- Changer la structure des balises
+
+📤 RETOURNE UNIQUEMENT LE HTML FINAL (sans markdown, sans explication)`;
 }
 
 /**
