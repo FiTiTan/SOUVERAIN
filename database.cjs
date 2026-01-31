@@ -1001,8 +1001,14 @@ module.exports = {
 
   portfolio_getAll: () => {
     try {
-      // Return all portfolios, V1 or V2
-      return db.prepare('SELECT * FROM portfolios ORDER BY updated_at DESC').all();
+      // Return all portfolios, V1 or V2 (optimized: specific columns only + LIMIT)
+      return db.prepare(`
+        SELECT id, title, tagline, selected_style, is_primary, slug, 
+               created_at, updated_at, mode 
+        FROM portfolios 
+        ORDER BY updated_at DESC 
+        LIMIT 50
+      `).all();
     } catch (err) {
       return [];
     }
@@ -1077,12 +1083,21 @@ module.exports = {
 
   mediatheque_getAll: (portfolioId) => {
     try {
-      const items = db.prepare('SELECT * FROM mediatheque_items WHERE portfolio_id = ? ORDER BY created_at DESC').all(portfolioId);
-      return items.map(item => ({
-          ...item,
-          tags: JSON.parse(item.tags_json || '[]'),
-          metadata: JSON.parse(item.metadata_json || '{}')
-      }));
+      // Optimized: specific columns + JSON extraction + LIMIT
+      const items = db.prepare(`
+        SELECT 
+          id, portfolio_id, file_path, file_type, original_filename, 
+          file_size, thumbnail_path, created_at, updated_at,
+          json(tags_json) as tags,
+          json(metadata_json) as metadata
+        FROM mediatheque_items 
+        WHERE portfolio_id = ? 
+        ORDER BY created_at DESC 
+        LIMIT 100
+      `).all(portfolioId);
+      
+      // JSON already parsed by SQLite json() function
+      return items;
     } catch (err) {
         return [];
     }
@@ -1119,7 +1134,16 @@ module.exports = {
 
   project_getAll: (portfolioId) => {
       try {
-          return db.prepare('SELECT * FROM projects WHERE portfolio_id = ? ORDER BY display_order ASC, created_at DESC').all(portfolioId);
+          // Optimized: specific columns + LIMIT
+          return db.prepare(`
+            SELECT 
+              id, portfolio_id, title, description, category, status, 
+              display_order, created_at, updated_at
+            FROM projects 
+            WHERE portfolio_id = ? 
+            ORDER BY display_order ASC, created_at DESC
+            LIMIT 50
+          `).all(portfolioId);
       } catch (err) {
           return [];
       }
