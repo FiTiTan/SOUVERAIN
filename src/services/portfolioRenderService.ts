@@ -55,69 +55,75 @@ const escapeHtml = (text: string): string => {
  * Fonction principale V2 : génère le HTML complet du portfolio
  * Architecture : GROQ enrichit les textes → Code injecte dans le template
  */
-export const renderPortfolioHTML = async (options: RenderOptions): Promise<string> => {
-  const { formData, templateId } = options;
+export const renderPortfolioHTML = async (options: RenderOptions): Promise<{ success: boolean; html?: string; error?: string }> => {
+  try {
+    const { formData, templateId } = options;
 
-  console.log('[PortfolioRender] Starting V2 generation (GROQ enrichment + template injection)');
+    console.log('[PortfolioRender] Starting V2 generation (GROQ enrichment + template injection)');
 
-  // 1. Charger le template HTML
-  const templateHTML = await loadTemplateHTML(templateId);
+    // 1. Charger le template HTML
+    const templateHTML = await loadTemplateHTML(templateId);
 
-  // 2. Convertir formData en RawPortfolioData
-  const rawData: RawPortfolioData = {
-    name: formData.name,
-    profileType: formData.profileType || 'freelance',
-    tagline: formData.tagline,
-    services: formData.services.filter(s => s.trim().length > 0),
-    valueProp: formData.valueProp,
-    email: formData.email,
-    phone: formData.phone,
-    address: formData.address,
-    openingHours: formData.openingHours,
-    socialLinks: (formData.socialLinks || []).map(link => ({
-      platform: link.platform === 'other' ? 'website' : link.platform,
-      url: link.url || '#',
-      label: link.label || undefined,
-    })).filter(link => link.url !== '#'),
-    socialIsMain: formData.socialIsMain || false,
-    projects: (formData.projects || []).map(p => ({
-      title: p.title || 'Projet',
-      description: p.description || '',
-      image: p.image || undefined,
-      category: p.category || undefined,
-      link: p.link || undefined,
-    })),
-    testimonials: (formData.testimonials || []).map(t => ({
-      text: t.text || '',
-      author: t.author || '',
-      role: t.role || undefined,
-    })),
-    aboutImage: undefined, // TODO: ajouter support dans le wizard
-  };
+    // 2. Convertir formData en RawPortfolioData
+    const rawData: RawPortfolioData = {
+      name: formData.name,
+      profileType: formData.profileType || 'freelance',
+      tagline: formData.tagline,
+      services: formData.services.filter(s => s.trim().length > 0),
+      valueProp: formData.valueProp,
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.address,
+      openingHours: formData.openingHours,
+      socialLinks: (formData.socialLinks || []).map(link => ({
+        platform: link.platform === 'other' ? 'website' : link.platform,
+        url: link.url || '#',
+        label: link.label || undefined,
+      })).filter(link => link.url !== '#'),
+      socialIsMain: formData.socialIsMain || false,
+      projects: (formData.projects || []).map(p => ({
+        title: p.title || 'Projet',
+        description: p.description || '',
+        image: p.image || undefined,
+        category: p.category || undefined,
+        link: p.link || undefined,
+      })),
+      testimonials: (formData.testimonials || []).map(t => ({
+        text: t.text || '',
+        author: t.author || '',
+        role: t.role || undefined,
+      })),
+      aboutImage: undefined, // TODO: ajouter support dans le wizard
+    };
 
-  // 3. ÉTAPE 1 : Enrichissement GROQ (JSON → JSON enrichi)
-  const portfolioId = `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  const enrichmentResult = await enrichPortfolioData(rawData, portfolioId);
+    // 3. ÉTAPE 1 : Enrichissement GROQ (JSON → JSON enrichi)
+    const portfolioId = `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const enrichmentResult = await enrichPortfolioData(rawData, portfolioId);
 
-  if (!enrichmentResult.success || !enrichmentResult.data) {
-    console.warn('[PortfolioRender] GROQ enrichment failed, using fallback data');
+    if (!enrichmentResult.success || !enrichmentResult.data) {
+      console.warn('[PortfolioRender] GROQ enrichment failed, using fallback data');
+    }
+
+    const enrichedData = enrichmentResult.data!;
+
+    // 4. ÉTAPE 2 : Injection dans le template (code local, 100% déterministe)
+    const flags = computeFlags(enrichedData);
+    const renderedHTML = injectDataIntoTemplate(templateHTML, enrichedData, flags);
+
+    // 5. Ajouter métadonnées SEO
+    const finalHTML = renderedHTML.replace(
+      '<title>',
+      `<meta name="description" content="${escapeHtml(formData.tagline)}">\n  <title>`
+    );
+
+    console.log('[PortfolioRender] ✓ V2 generation complete');
+
+    return { success: true, html: finalHTML };
+    
+  } catch (error: any) {
+    console.error('[PortfolioRender] Generation error:', error);
+    return { success: false, error: error?.message || 'Portfolio generation failed' };
   }
-
-  const enrichedData = enrichmentResult.data!;
-
-  // 4. ÉTAPE 2 : Injection dans le template (code local, 100% déterministe)
-  const flags = computeFlags(enrichedData);
-  const renderedHTML = injectDataIntoTemplate(templateHTML, enrichedData, flags);
-
-  // 5. Ajouter métadonnées SEO
-  const finalHTML = renderedHTML.replace(
-    '<title>',
-    `<meta name="description" content="${escapeHtml(formData.tagline)}">\n  <title>`
-  );
-
-  console.log('[PortfolioRender] ✓ V2 generation complete');
-
-  return finalHTML;
 };
 
 /**

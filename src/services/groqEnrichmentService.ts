@@ -2,6 +2,8 @@
 // Groq enrichit SEULEMENT les textes (JSON → JSON enrichi)
 // NE TOUCHE JAMAIS au HTML
 
+import { detectAndAnonymize, deanonymize } from './anonymizationService';
+
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // Get API key from main process (secure)
@@ -21,28 +23,34 @@ async function getGroqApiKey(): Promise<string> {
 
 const SYSTEM_PROMPT = `Tu es un expert en copywriting et personal branding. Ta mission est d'enrichir les données d'un portfolio professionnel pour les rendre plus impactantes et engageantes.
 
-🚨 RÈGLES ABSOLUES :
+RÈGLES ABSOLUES :
 1. Tu retournes UNIQUEMENT du JSON valide, rien d'autre
 2. Tu NE génères PAS de HTML
 3. Tu NE inventes PAS d'informations factuelles (dates, chiffres, entreprises)
 4. Tu ENRICHIS et REFORMULES les textes fournis
 5. Tu GÉNÈRES les descriptions manquantes à partir du contexte
 
-🎭 ADAPTATION DU TON SELON LE PROFIL :
+⚠️ RÈGLES CRITIQUES POUR LE NOM :
+6. heroTitle = COPIE EXACTE du champ "name" fourni, SANS AUCUNE MODIFICATION
+7. NE JAMAIS répéter le nom (pas de "Jean Jean", "Marie Marie", etc.)
+8. NE JAMAIS ajouter de titre ou suffixe au nom
+9. Si name = "Jean Dupont", alors heroTitle = "Jean Dupont" (identique)
+
+ADAPTATION DU TON SELON LE PROFIL :
 - freelance : Professionnel, orienté valeur et résultats, expertise technique
 - commerce : Chaleureux, proximité, confiance, service client
 - creative : Artistique, unique, personnalité forte, vision
 - student : Dynamique, potentiel, curiosité, apprentissage rapide
 - employee : Crédible, expérience solide, leadership, impact
 
-📏 LONGUEURS RECOMMANDÉES :
+LONGUEURS RECOMMANDÉES :
 - heroSubtitle : 10-20 mots (accroche percutante)
 - heroEyebrow : 2-5 mots (contexte rapide)
 - aboutText : 50-100 mots (paragraphe engageant)
 - serviceDesc : 15-30 mots par service
 - valueProp : 20-40 mots
 
-✍️ STYLE D'ÉCRITURE :
+STYLE D'ÉCRITURE :
 - Évite les clichés ("passionné", "dynamique", "expert reconnu")
 - Privilégie les verbes d'action
 - Sois spécifique plutôt que générique
@@ -122,10 +130,10 @@ export interface EnrichedPortfolioData {
 }
 
 function buildUserPrompt(data: RawPortfolioData): string {
-  return `🎯 PROFIL : ${data.profileType}
-👤 NOM : ${data.name}
+  return `PROFIL : ${data.profileType}
+NOM EXACT (à copier tel quel dans heroTitle) : ${data.name}
 
-📊 DONNÉES BRUTES :
+DONNÉES BRUTES :
 ${JSON.stringify({
   tagline: data.tagline,
   services: data.services,
@@ -133,33 +141,33 @@ ${JSON.stringify({
   projects: data.projects?.map(p => ({ title: p.title, description: p.description, category: p.category })),
 }, null, 2)}
 
+${data.linkedInData ? `CONTEXTE LINKEDIN :\n${data.linkedInData}` : ''}
+${data.notionData ? `CONTEXTE NOTION :\n${data.notionData}` : ''}
+
 ---
 
-📤 Génère un JSON avec les champs suivants. Enrichis les textes pour les rendre plus impactants.
+Génère un JSON avec les champs suivants.
+
+⚠️ ATTENTION : heroTitle DOIT être exactement "${data.name}" sans modification.
 
 {
   "heroTitle": "${data.name}",
-  "heroSubtitle": "Accroche enrichie et percutante (10-20 mots)",
-  "heroEyebrow": "Contexte rapide (2-5 mots, ex: 'Freelance à Paris', 'Depuis 2015')",
-  "heroCta": "Texte du bouton principal (ex: 'Me contacter', 'Voir mes projets')",
-  "aboutText": "Paragraphe de présentation enrichi et engageant (50-100 mots)",
+  "heroSubtitle": "Accroche enrichie basée sur la tagline (10-20 mots)",
+  "heroEyebrow": "Contexte court (2-5 mots, ex: Freelance, Depuis 2015)",
+  "heroCta": "Texte bouton (ex: Me contacter, Voir mes projets)",
+  "aboutText": "Paragraphe de présentation enrichi (50-100 mots)",
   "valueProp": "Proposition de valeur reformulée (20-40 mots)",
   "services": [
-    {
-      "title": "Titre du service (garder l'original ou légèrement améliorer)",
-      "description": "Description enrichie du service (15-30 mots)"
-    }
+    { "title": "Titre service original ou légèrement amélioré", "description": "Description enrichie (15-30 mots)" }
   ],
   "projects": [
-    {
-      "title": "Titre du projet",
-      "description": "Description enrichie du projet",
-      "category": "Catégorie"
-    }
+    { "title": "Titre projet", "description": "Description enrichie", "category": "Catégorie" }
   ]
 }
 
-⚠️ IMPORTANT : Retourne UNIQUEMENT le JSON, sans backticks, sans explication.`;
+IMPORTANT : 
+- Retourne UNIQUEMENT le JSON, sans backticks, sans explication
+- heroTitle = "${data.name}" (COPIE EXACTE)`;
 }
 
 /**
@@ -173,12 +181,15 @@ export async function enrichPortfolioData(
   try {
     console.log('[GroqEnrichment] Starting content enrichment...');
 
-    // Anonymisation désactivée pour les portfolios (cause des bugs de répétition "Jean Jean")
-    // Les données de portfolio ne contiennent pas d'infos ultra-sensibles
-    console.log('[GroqEnrichment] Skipping anonymization (not needed for portfolios)');
+    // 1. Anonymisation des données sensibles
+    const dataString = JSON.stringify(rawData);
+    const anonymizedResult = await detectAndAnonymize(dataString, portfolioId);
+    const anonymizedData: RawPortfolioData = JSON.parse(anonymizedResult.anonymizedText);
+
+    console.log('[GroqEnrichment] Data anonymized, calling GROQ API...');
 
     // 2. Construire le prompt
-    const userPrompt = buildUserPrompt(rawData);
+    const userPrompt = buildUserPrompt(anonymizedData);
 
     // 3. Appel GROQ API
     const apiKey = await getGroqApiKey();
@@ -220,7 +231,7 @@ export async function enrichPortfolioData(
     const enriched = JSON.parse(content);
 
     // 4. Fusionner avec les données originales (garder ce que Groq n'a pas enrichi)
-    const finalData: EnrichedPortfolioData = {
+    const merged: EnrichedPortfolioData = {
       ...enriched,
       // Données non modifiées par Groq
       email: rawData.email,
@@ -239,6 +250,12 @@ export async function enrichPortfolioData(
       // Témoignages non modifiés
       testimonials: rawData.testimonials,
     };
+
+    // 5. Dé-anonymisation
+    console.log('[GroqEnrichment] De-anonymizing data...');
+    const finalDataString = JSON.stringify(merged);
+    const deanonymizedString = deanonymize(finalDataString, anonymizedResult.mappings);
+    const finalData: EnrichedPortfolioData = JSON.parse(deanonymizedString);
 
     console.log('[GroqEnrichment] ✓ Enrichment complete');
 

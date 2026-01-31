@@ -241,36 +241,45 @@ export const PortfolioHub: React.FC = () => {
                 throw new Error('No template selected');
             }
 
-            const html = await renderPortfolioHTML({
+            const result = await renderPortfolioHTML({
                 formData: data,
                 templateId: data.selectedTemplateId,
             });
 
-            if (!html || html.length === 0) {
+            // ✅ Vérifier que result existe avant d'accéder à success
+            if (!result) {
+                throw new Error('Aucune réponse du service de génération');
+            }
+
+            if (!result.success) {
+                throw new Error(result.error || 'Portfolio generation failed');
+            }
+
+            if (!result.html || result.html.length === 0) {
                 throw new Error('Portfolio generation returned empty HTML');
             }
 
-            setGeneratedHTML(html);
+            setGeneratedHTML(result.html);
 
             // Create portfolio in DB if needed
             if (!portfolioId) {
                 // @ts-ignore
-                const result = await window.electron.invoke('db-create-portfolio', {
+                const dbResult = await window.electron.invoke('db-create-portfolio', {
                     name: data.name,
                 });
 
-                if (result && result.success && result.id) {
-                    setPortfolioId(result.id);
+                if (dbResult && dbResult.success && dbResult.id) {
+                    setPortfolioId(dbResult.id);
 
                     // Save the generated HTML
-                    await savePortfolioToDB(result.id, html, data);
+                    await savePortfolioToDB(dbResult.id, result.html, data);
                 } else {
-                    console.warn('[PortfolioHub] Failed to create portfolio in DB:', result);
+                    console.warn('[PortfolioHub] Failed to create portfolio in DB:', dbResult);
                     // Continue anyway with generated HTML
                 }
             } else {
                 // Update existing portfolio
-                await savePortfolioToDB(portfolioId, html, data);
+                await savePortfolioToDB(portfolioId, result.html, data);
             }
 
             setIsGenerating(false);
