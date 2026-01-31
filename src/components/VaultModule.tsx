@@ -3,7 +3,7 @@
  * Stockage sécurisé de documents professionnels (chiffré AES-256)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTheme } from '../ThemeContext';
 import { typography, borderRadius, transitions } from '../design-system';
 import { VaultDocumentCard } from './VaultDocumentCard';
@@ -165,7 +165,7 @@ export const VaultModule: React.FC = () => {
     setAvailableTags(Array.from(allTags).sort());
   }, [documents]);
 
-  const loadDocuments = async () => {
+  const loadDocuments = useCallback(async () => {
     setLoading(true);
     try {
       const filters = {
@@ -188,7 +188,7 @@ export const VaultModule: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategories, selectedYears, selectedMonths, selectedTags, favoritesOnly, searchQuery, sortBy, sortOrder]);
 
   const loadDocumentCount = async () => {
     try {
@@ -245,59 +245,61 @@ export const VaultModule: React.FC = () => {
     }
   };
 
-  // Handler de tri par colonne
-  const handleSort = (column: string) => {
+  // Handler de tri par colonne (mémoïsé)
+  const handleSort = useCallback((column: string) => {
     if (column === sortBy) {
       // Toggle l'ordre si on clique sur la même colonne
-      setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
+      setSortOrder(prev => prev === 'ASC' ? 'DESC' : 'ASC');
     } else {
       // Nouvelle colonne : trier par ASC par défaut
       setSortBy(column as SortBy);
       setSortOrder('ASC');
     }
-  };
+  }, [sortBy]);
 
-  // Handler pour appliquer les filtres du dropdown
-  const handleApplyFilters = (filters: any) => {
+  // Handler pour appliquer les filtres du dropdown (mémoïsé)
+  const handleApplyFilters = useCallback((filters: any) => {
     setSelectedYears(filters.years);
     setSelectedMonths(filters.months);
     setSelectedCategories(filters.categories);
     setSelectedTags(filters.tags);
     setFavoritesOnly(filters.favoritesOnly);
-  };
+  }, []);
 
-  // Handler pour effacer tous les filtres
-  const handleClearAllFilters = () => {
+  // Handler pour effacer tous les filtres (mémoïsé)
+  const handleClearAllFilters = useCallback(() => {
     setSelectedYears([]);
     setSelectedMonths([]);
     setSelectedCategories([]);
     setSelectedTags([]);
     setFavoritesOnly(false);
-  };
+  }, []);
 
-  // Compter les filtres actifs
-  const activeFiltersCount = [
-    selectedYears.length > 0 ? 1 : 0,
-    selectedMonths.length > 0 ? 1 : 0,
-    selectedCategories.length > 0 ? 1 : 0,
-    selectedTags.length > 0 ? 1 : 0,
-    favoritesOnly ? 1 : 0,
-  ].reduce((sum, val) => sum + val, 0);
+  // Compter les filtres actifs (mémoïsé)
+  const activeFiltersCount = useMemo(() => {
+    return [
+      selectedYears.length > 0 ? 1 : 0,
+      selectedMonths.length > 0 ? 1 : 0,
+      selectedCategories.length > 0 ? 1 : 0,
+      selectedTags.length > 0 ? 1 : 0,
+      favoritesOnly ? 1 : 0,
+    ].reduce((sum, val) => sum + val, 0);
+  }, [selectedYears, selectedMonths, selectedCategories, selectedTags, favoritesOnly]);
 
   // Recharger quand les filtres changent
   useEffect(() => {
     loadDocuments();
   }, [selectedYears, selectedMonths, selectedCategories, selectedTags, favoritesOnly, searchQuery, sortBy, sortOrder]);
 
-  const handleImportSuccess = () => {
+  const handleImportSuccess = useCallback(() => {
     loadDocuments();
     loadDocumentCount();
     loadTotalStorage();
     loadAvailableYears(); // Recharger les années car un nouveau document peut avoir une nouvelle année
     setShowImportModal(false);
-  };
+  }, [loadDocuments]);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm('Supprimer ce document ?')) return;
 
     try {
@@ -310,18 +312,18 @@ export const VaultModule: React.FC = () => {
     } catch (error) {
       console.error('Erreur suppression document:', error);
     }
-  };
+  }, [loadDocuments]);
 
-  const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
+  const handleToggleFavorite = useCallback(async (id: string, isFavorite: boolean) => {
     try {
       await window.electron.vault.updateDocument(id, { is_favorite: !isFavorite });
       loadDocuments();
     } catch (error) {
       console.error('Erreur toggle favori:', error);
     }
-  };
+  }, [loadDocuments]);
 
-  const handleDownload = async (id: string) => {
+  const handleDownload = useCallback(async (id: string) => {
     try {
       const result = await window.electron.vault.downloadDocument(id);
       if (!result.success) {
@@ -330,16 +332,16 @@ export const VaultModule: React.FC = () => {
     } catch (error) {
       console.error('Erreur téléchargement:', error);
     }
-  };
+  }, []);
 
-  const handleUpdate = async (id: string, updates: Partial<VaultDocument>) => {
+  const handleUpdate = useCallback(async (id: string, updates: Partial<VaultDocument>) => {
     try {
       await window.electron.vault.updateDocument(id, updates);
       loadDocuments();
     } catch (error) {
       console.error('Erreur mise à jour:', error);
     }
-  };
+  }, [loadDocuments]);
 
   // Formater le stockage en MB
   const formatStorage = (bytes: number): string => {
