@@ -242,8 +242,18 @@ ipcMain.handle('process-image', async (event, { filePath, type = 'general' }) =>
 });
 
 // ============================================================
-// ANALYSE CV - WORKFLOW PRINCIPAL
+// HANDLERS LEGACY - DISABLED (now in modular handlers/)
 // ============================================================
+// These handlers are now in handlers/cv.js, handlers/vault.js, handlers/portfolio.js
+// They are loaded via registerXXXHandlers() in app.whenReady()
+// Keeping them here commented for reference during testing phase
+// TODO: Delete after successful testing
+
+// ============================================================
+// ANALYSE CV - DISABLED (now in handlers/cv.js)
+// ============================================================
+
+if (false) { // DISABLED - handlers now in handlers/cv.js
 
 ipcMain.handle('analyze-cv', async (event, { cvText, filename, skipAnonymization }) => {
   const startTime = Date.now();
@@ -461,9 +471,13 @@ ipcMain.handle('save-pdf', async (e, buffer) => {
   }
 });
 
+} // END if(false) - CV handlers disabled
+
 // ============================================================
-// VAULT HANDLERS
+// VAULT HANDLERS - DISABLED (now in handlers/vault.js)
 // ============================================================
+
+if (false) { // DISABLED - handlers now in handlers/vault.js
 
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
@@ -754,9 +768,13 @@ ipcMain.handle('vault-delete-category', async (event, id) => {
   }
 });
 
+} // END if(false) - Vault handlers disabled
+
 // ============================================================
-// PORTFOLIO HANDLERS (HUB V2)
+// PORTFOLIO HANDLERS (HUB V2) - DISABLED (now in handlers/portfolio.js)
 // ============================================================
+
+if (false) { // DISABLED - handlers now in handlers/portfolio.js
 
 // --- PORTFOLIOS ---
 
@@ -912,8 +930,10 @@ ipcMain.handle('external-account-delete', async (event, id) => {
   }
 });
 
+} // END if(false) - Portfolio handlers disabled
+
 // ============================================================
-// PORTFOLIO SOURCES
+// PORTFOLIO SOURCES (ACTIVE - not yet modularized)
 // ============================================================
 
 ipcMain.handle('portfolio-source-connect', async (event, { type, credentials }) => {
