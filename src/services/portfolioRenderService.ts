@@ -2,10 +2,13 @@
  * portfolioRenderService.ts
  *
  * Service de rendu HTML pour le Portfolio Maître V2
- * Remplace les placeholders des templates HTML avec les données du formulaire
+ * Architecture V2 : GROQ enrichit les textes, le code injecte dans le template
+ * GROQ ne voit JAMAIS le HTML
  */
 
 import type { PortfolioFormData } from '../components/portfolio/wizard/types';
+import { enrichPortfolioData, type RawPortfolioData } from './groqEnrichmentService';
+import { injectDataIntoTemplate, computeFlags } from './templateInjectorService';
 
 interface RenderOptions {
   formData: PortfolioFormData;
@@ -40,77 +43,6 @@ export const loadTemplateHTML = async (templateId: string): Promise<string> => {
 };
 
 /**
- * Génère le HTML des services pour injection
- */
-const renderServices = (services: string[]): string => {
-  const validServices = services.filter(s => s.trim().length > 0);
-
-  return validServices
-    .map(service => `<div class="service-item">${escapeHtml(service)}</div>`)
-    .join('\n          ');
-};
-
-/**
- * Génère le HTML des liens sociaux pour injection
- */
-const renderSocialLinks = (formData: PortfolioFormData): string => {
-  if (formData.socialLinks.length === 0) return '';
-
-  return formData.socialLinks
-    .map(link => {
-      const label = link.platform === 'other' && link.label
-        ? link.label
-        : capitalizeFirst(link.platform);
-
-      return `<a href="${escapeHtml(link.url)}" class="social-link" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
-    })
-    .join('\n          ');
-};
-
-/**
- * Génère le HTML du téléphone (optionnel)
- */
-const renderPhone = (phone: string): string => {
-  if (!phone || phone.trim().length === 0) return '';
-  return `<div class="contact-item">📞 ${escapeHtml(phone)}</div>`;
-};
-
-/**
- * Génère le HTML de l'adresse (optionnel)
- */
-const renderAddress = (address: string, openingHours: string): string => {
-  if (!address || address.trim().length === 0) return '';
-
-  let html = `<div class="contact-item">📍 ${escapeHtml(address)}</div>`;
-
-  if (openingHours && openingHours.trim().length > 0) {
-    html += `\n          <div class="contact-item">🕒 ${escapeHtml(openingHours)}</div>`;
-  }
-
-  return html;
-};
-
-/**
- * Génère le HTML des projets (optionnel)
- */
-const renderProjects = (projects: PortfolioFormData['projects']): string => {
-  if (projects.length === 0) return '';
-
-  return projects
-    .slice(0, 6) // Limiter à 6 projets pour l'affichage
-    .map(project => `
-      <div class="bento-card project-card">
-        ${project.image ? `<img src="${escapeHtml(project.image)}" alt="${escapeHtml(project.title)}" class="project-image" />` : ''}
-        <h3>${escapeHtml(project.title)}</h3>
-        ${project.description ? `<p>${escapeHtml(project.description)}</p>` : ''}
-        ${project.category ? `<span class="category">${escapeHtml(project.category)}</span>` : ''}
-        ${project.link ? `<a href="${escapeHtml(project.link)}" target="_blank" rel="noopener noreferrer" class="project-link">Voir le projet →</a>` : ''}
-      </div>
-    `)
-    .join('\n      ');
-};
-
-/**
  * Échappe les caractères HTML pour éviter les injections
  */
 const escapeHtml = (text: string): string => {
@@ -120,132 +52,72 @@ const escapeHtml = (text: string): string => {
 };
 
 /**
- * Capitalise la première lettre
- */
-const capitalizeFirst = (text: string): string => {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-};
-
-/**
- * Remplace tous les placeholders dans le template HTML
- */
-export const replaceTemplatePlaceholders = (
-  templateHTML: string,
-  formData: PortfolioFormData
-): string => {
-  let html = templateHTML;
-
-  // Données de base
-  html = html.replace(/\{\{NAME\}\}/g, escapeHtml(formData.name));
-  html = html.replace(/\{\{TAGLINE\}\}/g, escapeHtml(formData.tagline));
-  html = html.replace(/\{\{EMAIL\}\}/g, escapeHtml(formData.email));
-  html = html.replace(/\{\{VALUE_PROP\}\}/g, escapeHtml(formData.valueProp || ''));
-
-  // Services
-  html = html.replace(/\{\{SERVICES\}\}/g, renderServices(formData.services));
-
-  // Liens sociaux
-  html = html.replace(/\{\{SOCIAL_LINKS\}\}/g, renderSocialLinks(formData));
-
-  // Téléphone (optionnel)
-  html = html.replace(/\{\{PHONE\}\}/g, renderPhone(formData.phone));
-
-  // Adresse + horaires (optionnels)
-  html = html.replace(/\{\{ADDRESS\}\}/g, renderAddress(formData.address, formData.openingHours));
-
-  // Projets (optionnels)
-  html = html.replace(/\{\{PROJECTS\}\}/g, renderProjects(formData.projects));
-
-  return html;
-};
-
-/**
- * Fonction principale : génère le HTML complet du portfolio
+ * Fonction principale V2 : génère le HTML complet du portfolio
+ * Architecture : GROQ enrichit les textes → Code injecte dans le template
  */
 export const renderPortfolioHTML = async (options: RenderOptions): Promise<string> => {
   const { formData, templateId } = options;
 
+  console.log('[PortfolioRender] Starting V2 generation (GROQ enrichment + template injection)');
+
   // 1. Charger le template HTML
   const templateHTML = await loadTemplateHTML(templateId);
 
-  // 2. Tentative de génération avec GROQ (IA) - Prompt amélioré pour respecter le template
-  try {
-    console.log('[PortfolioRender] Attempting GROQ generation with strict template preservation...');
-    
-    // Import dynamique pour éviter les erreurs si le module n'est pas disponible
-    const { generatePortfolioWithGroq } = await import('./groqPortfolioService');
-    
-    // Convertir formData en format PortfolioData pour GROQ
-    const portfolioData = {
-      name: formData.name,
-      profileType: formData.profileType || 'freelance',
-      tagline: formData.tagline,
-      services: formData.services.filter(s => s.trim().length > 0),
-      valueProp: formData.valueProp,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address,
-      openingHours: formData.openingHours,
-      socialLinks: (formData.socialLinks || []).map(link => ({
-        platform: link.platform === 'other' ? (link.label || 'Website') : (link.platform || 'Website'),
-        url: link.url || '#'
-      })).filter(link => link.url !== '#'),
-      socialIsMain: formData.socialIsMain || false,
-      projects: (formData.projects || []).map(p => ({
-        title: p.title || 'Projet',
-        description: p.description || '',
-        image: p.image || '',
-        category: p.category || '',
-        link: p.link || ''
-      })),
-      testimonials: (formData.testimonials || []).map(t => ({
-        text: t.text || '',
-        author: t.author || '',
-        role: t.role || ''
-      })),
-      media: []
-    };
-    
-    const portfolioId = `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const result = await generatePortfolioWithGroq(templateHTML, portfolioData, portfolioId);
-    
-    if (result.success && result.html) {
-      console.log('[PortfolioRender] ✓ GROQ generation successful');
-      
-      // Ajouter métadonnées SEO
-      const finalHTML = result.html.replace(
-        '<title>',
-        `<meta name="description" content="${escapeHtml(formData.tagline)}">\n  <title>`
-      );
-      
-      return finalHTML;
-    }
-    
-    console.warn('[PortfolioRender] GROQ generation failed, falling back to manual replacement');
-    
-  } catch (error) {
-    console.warn('[PortfolioRender] GROQ error, falling back to manual replacement:', error);
+  // 2. Convertir formData en RawPortfolioData
+  const rawData: RawPortfolioData = {
+    name: formData.name,
+    profileType: formData.profileType || 'freelance',
+    tagline: formData.tagline,
+    services: formData.services.filter(s => s.trim().length > 0),
+    valueProp: formData.valueProp,
+    email: formData.email,
+    phone: formData.phone,
+    address: formData.address,
+    openingHours: formData.openingHours,
+    socialLinks: (formData.socialLinks || []).map(link => ({
+      platform: link.platform === 'other' ? 'website' : link.platform,
+      url: link.url || '#',
+      label: link.label || undefined,
+    })).filter(link => link.url !== '#'),
+    socialIsMain: formData.socialIsMain || false,
+    projects: (formData.projects || []).map(p => ({
+      title: p.title || 'Projet',
+      description: p.description || '',
+      image: p.image || undefined,
+      category: p.category || undefined,
+      link: p.link || undefined,
+    })),
+    testimonials: (formData.testimonials || []).map(t => ({
+      text: t.text || '',
+      author: t.author || '',
+      role: t.role || undefined,
+    })),
+    aboutImage: undefined, // TODO: ajouter support dans le wizard
+  };
+
+  // 3. ÉTAPE 1 : Enrichissement GROQ (JSON → JSON enrichi)
+  const portfolioId = `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const enrichmentResult = await enrichPortfolioData(rawData, portfolioId);
+
+  if (!enrichmentResult.success || !enrichmentResult.data) {
+    console.warn('[PortfolioRender] GROQ enrichment failed, using fallback data');
   }
 
-  // 3. Fallback : Remplacer les placeholders manuellement
-  console.log('[PortfolioRender] Using manual placeholder replacement (fallback)');
-  
-  try {
-    const renderedHTML = replaceTemplatePlaceholders(templateHTML, formData);
+  const enrichedData = enrichmentResult.data!;
 
-    // 4. Ajouter des métadonnées (SEO)
-    const finalHTML = renderedHTML.replace(
-      '<title>',
-      `<meta name="description" content="${escapeHtml(formData.tagline)}">\n  <title>`
-    );
+  // 4. ÉTAPE 2 : Injection dans le template (code local, 100% déterministe)
+  const flags = computeFlags(enrichedData);
+  const renderedHTML = injectDataIntoTemplate(templateHTML, enrichedData, flags);
 
-    return finalHTML;
-  } catch (fallbackError) {
-    console.error('[PortfolioRender] Fallback also failed:', fallbackError);
-    
-    // Dernier fallback : retourner template brut
-    return templateHTML;
-  }
+  // 5. Ajouter métadonnées SEO
+  const finalHTML = renderedHTML.replace(
+    '<title>',
+    `<meta name="description" content="${escapeHtml(formData.tagline)}">\n  <title>`
+  );
+
+  console.log('[PortfolioRender] ✓ V2 generation complete');
+
+  return finalHTML;
 };
 
 /**
