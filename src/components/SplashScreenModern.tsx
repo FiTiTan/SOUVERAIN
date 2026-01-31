@@ -42,6 +42,7 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
       inset: 0,
       backgroundColor: theme.bg.primary,
       zIndex: 9999,
+      pointerEvents: 'all', // Block all clicks
     }}>
       <AnimatePresence mode="wait">
         {phase === 'logo' && (
@@ -153,6 +154,8 @@ const SkeletonScreen: React.FC<{ theme: any }> = ({ theme }) => {
         display: 'flex',
         flexDirection: 'column',
         gap: '1rem',
+        pointerEvents: 'none', // Non-cliquable
+        userSelect: 'none', // Non-sélectionnable
       }}>
         {/* Logo area */}
         <motion.div
@@ -189,6 +192,8 @@ const SkeletonScreen: React.FC<{ theme: any }> = ({ theme }) => {
         display: 'flex',
         flexDirection: 'column',
         gap: '1.5rem',
+        pointerEvents: 'none', // Non-cliquable
+        userSelect: 'none', // Non-sélectionnable
       }}>
         {/* Header */}
         <motion.div
