@@ -115,6 +115,17 @@ ipcMain.handle('open-file', async (event, filePath) => {
   }
 });
 
+// File dialog handler pour sélection de fichiers
+ipcMain.handle('file-open-dialog', async (event, options) => {
+  try {
+    const result = await dialog.showOpenDialog(mainWindow, options);
+    return result;
+  } catch (error) {
+    console.error('[SOUVERAIN] ❌ Erreur file dialog:', error);
+    return { canceled: true, filePaths: [] };
+  }
+});
+
 // ============================================================
 // IMAGE PROCESSING - PORTFOLIO WIZARD
 // ============================================================

@@ -100,9 +100,11 @@ const renderProjects = (projects: PortfolioFormData['projects']): string => {
     .slice(0, 6) // Limiter à 6 projets pour l'affichage
     .map(project => `
       <div class="bento-card project-card">
+        ${project.image ? `<img src="${escapeHtml(project.image)}" alt="${escapeHtml(project.title)}" class="project-image" />` : ''}
         <h3>${escapeHtml(project.title)}</h3>
         ${project.description ? `<p>${escapeHtml(project.description)}</p>` : ''}
         ${project.category ? `<span class="category">${escapeHtml(project.category)}</span>` : ''}
+        ${project.link ? `<a href="${escapeHtml(project.link)}" target="_blank" rel="noopener noreferrer" class="project-link">Voir le projet →</a>` : ''}
       </div>
     `)
     .join('\n      ');
@@ -166,64 +168,9 @@ export const renderPortfolioHTML = async (options: RenderOptions): Promise<strin
   // 1. Charger le template HTML
   const templateHTML = await loadTemplateHTML(templateId);
 
-  // 2. Tentative de génération avec GROQ (IA)
-  try {
-    console.log('[PortfolioRender] Attempting GROQ generation...');
-    
-    // Import dynamique pour éviter les erreurs si le module n'est pas disponible
-    const { generatePortfolioWithGroq } = await import('./groqPortfolioService');
-    
-    // Convertir formData en format PortfolioData pour GROQ
-    const portfolioData = {
-      name: formData.name,
-      profileType: formData.profileType || 'freelance',
-      tagline: formData.tagline,
-      services: formData.services.filter(s => s.trim().length > 0),
-      valueProp: formData.valueProp,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address,
-      openingHours: formData.openingHours,
-      socialLinks: (formData.socialLinks || []).map(link => ({
-        platform: link.platform === 'other' ? (link.label || 'Website') : (link.platform || 'Website'),
-        url: link.url || '#'
-      })).filter(link => link.url !== '#'),
-      socialIsMain: formData.socialIsMain || false,
-      projects: (formData.projects || []).map(p => ({
-        title: p.title || 'Projet',
-        description: p.description || '',
-        image: p.imageUrl || '',
-        category: p.category || '',
-        link: p.liveUrl || ''
-      })),
-      testimonials: (formData.testimonials || []).map(t => ({
-        text: t.text || '',
-        author: t.author || '',
-        role: t.role || ''
-      })),
-      media: []
-    };
-    
-    const portfolioId = `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const result = await generatePortfolioWithGroq(templateHTML, portfolioData, portfolioId);
-    
-    if (result.success && result.html) {
-      console.log('[PortfolioRender] ✓ GROQ generation successful');
-      
-      // Ajouter métadonnées SEO
-      const finalHTML = result.html.replace(
-        '<title>',
-        `<meta name="description" content="${escapeHtml(formData.tagline)}">\n  <title>`
-      );
-      
-      return finalHTML;
-    }
-    
-    console.warn('[PortfolioRender] GROQ generation failed, falling back to manual replacement');
-    
-  } catch (error) {
-    console.warn('[PortfolioRender] GROQ error, falling back to manual replacement:', error);
-  }
+  // 2. GROQ désactivé temporairement - bugs de répétition et génération HTML incorrecte
+  // TODO: Fix GROQ pour qu'il remplisse le template au lieu de tout regénérer
+  console.log('[PortfolioRender] Skipping GROQ, using direct template replacement');
 
   // 3. Fallback : Remplacer les placeholders manuellement
   console.log('[PortfolioRender] Using manual placeholder replacement (fallback)');
