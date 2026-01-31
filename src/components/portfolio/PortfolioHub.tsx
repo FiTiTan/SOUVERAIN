@@ -254,12 +254,19 @@ export const PortfolioHub: React.FC = () => {
             });
 
             // Vérifier le résultat
+            console.log('[PortfolioHub] 🔍 CHECKING RESULT:', result);
+            console.log('[PortfolioHub] typeof result:', typeof result);
+            console.log('[PortfolioHub] result?.success:', result?.success);
+            console.log('[PortfolioHub] result?.html length:', result?.html?.length);
+            
             if (!result) {
+                console.error('[PortfolioHub] ❌ Result is null/undefined');
                 throw new Error('Aucun résultat de génération');
             }
 
             // Si c'est directement le HTML (string)
             if (typeof result === 'string') {
+                console.log('[PortfolioHub] ✅ Result is string, length:', result.length);
                 setGeneratedHTML(result);
                 setIsGenerating(false);
                 setMpfScreen('preview');
@@ -269,6 +276,7 @@ export const PortfolioHub: React.FC = () => {
 
             // Si c'est un objet { success, html }
             if (result.success && result.html) {
+                console.log('[PortfolioHub] ✅ Result is object with success=true and html');
                 setGeneratedHTML(result.html);
                 setIsGenerating(false);
                 setMpfScreen('preview');
@@ -282,7 +290,8 @@ export const PortfolioHub: React.FC = () => {
             }
 
             // Erreur de génération
-            throw new Error(result.error || 'Erreur de génération');
+            console.error('[PortfolioHub] ❌ Result exists but invalid:', result);
+            throw new Error(result?.error || 'Erreur de génération');
 
         } catch (error: any) {
             console.error('[PortfolioHub] Generation error:', error);
