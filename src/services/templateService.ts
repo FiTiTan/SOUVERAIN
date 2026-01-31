@@ -102,7 +102,7 @@ export async function getTemplateById(id: string): Promise<Template | null> {
 export async function getTemplateHTML(id: string): Promise<string | null> {
   try {
     // @ts-ignore
-    const result = await window.electron.invoke('template-get-html', id);
+    const result = await window.electron.templates.getHTML(id);
     return result.html || null;
   } catch (error) {
     console.error('[TemplateService] Error getting template HTML:', error);

@@ -26,7 +26,8 @@ export const PreviewPortfolio: React.FC<PreviewPortfolioProps> = ({
       setError(null);
       try {
         const palette = getStyleById(styleId);
-        const html = await generatePortfolioHTML(portfolio, projects, palette);
+        const templateId = portfolio.template_id || 'bento-grid';
+        const html = await generatePortfolioHTML(portfolio, projects, palette, templateId);
         setHtmlContent(html);
       } catch (err) {
         console.error('[PreviewPortfolio] Generation error:', err);
