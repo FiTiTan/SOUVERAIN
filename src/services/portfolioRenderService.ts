@@ -58,7 +58,10 @@ export const renderPortfolioHTML = async (options: RenderOptions): Promise<{ suc
   try {
     const { formData, templateId } = options;
 
-    console.log('[PortfolioRender] Starting V3 generation (Full workflow)');
+    console.log('[PortfolioRender] ========== STARTING V3 GENERATION ==========');
+    console.log('[PortfolioRender] formData received:', formData);
+    console.log('[PortfolioRender] uploadedFiles from formData:', formData.uploadedFiles);
+    console.log('[PortfolioRender] uploadedFiles count:', formData.uploadedFiles?.length || 0);
 
     // Préparer l'input pour le workflow V3
     const generationInput: GenerationInputV3 = {
@@ -68,6 +71,9 @@ export const renderPortfolioHTML = async (options: RenderOptions): Promise<{ suc
       notionData: formData.notionData,
       templateId,
     };
+
+    console.log('[PortfolioRender] generationInput prepared:', generationInput);
+    console.log('[PortfolioRender] ================================================');
 
     // Utiliser le workflow V3 complet
     const result = await generatePortfolioV3(generationInput);

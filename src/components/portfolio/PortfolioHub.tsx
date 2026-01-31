@@ -227,7 +227,14 @@ export const PortfolioHub: React.FC = () => {
 
     // Handler: Wizard completed - generate HTML
     const handleWizardComplete = useCallback(async (data: PortfolioFormData) => {
-        console.log('[PortfolioHub] Wizard completed with data:', data);
+        console.log('[PortfolioHub] ========== WIZARD COMPLETE ==========');
+        console.log('[PortfolioHub] Full data:', data);
+        console.log('[PortfolioHub] uploadedFiles:', data.uploadedFiles);
+        console.log('[PortfolioHub] uploadedFiles count:', data.uploadedFiles?.length || 0);
+        console.log('[PortfolioHub] media:', data.media);
+        console.log('[PortfolioHub] media count:', data.media?.length || 0);
+        console.log('[PortfolioHub] ====================================');
+        
         setWizardData(data);
         setMpfScreen('generating');
         setIsGenerating(true);
