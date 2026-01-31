@@ -457,5 +457,6 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
           </div>
         </div>
       )}
-
+    </motion.div>
+  );
 };
