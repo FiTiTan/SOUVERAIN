@@ -148,7 +148,7 @@ export const loadingTips: LoadingTip[] = [
   },
   {
     category: 'vault',
-    text: "Un système organisé réduit le stress lors de candidatures urgentes.",
+    text: "Une candidature urgente? Pas de panique ! Retrouvez l'ensemble de vos dossiers professionnels dans le Coffre-Fort sécurisé.",
   },
   {
     category: 'vault',
