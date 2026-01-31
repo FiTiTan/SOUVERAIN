@@ -86,6 +86,37 @@ git reset --hard backup-pre-perf-optimization
   - **Gain estimé: -40% startup si intégré**
 
 ### [01:30-02:00] ThemeContext Split + Vite Code Splitting
+(voir commits précédents)
+
+### [02:00-03:30] Main.cjs Modularization COMPLETE ✅
+
+- ✅ handlers/vault.js créé (commit 4752695)
+  - 15 vault-* handlers extraits
+  - Encryption/decryption utilities included
+  
+- ✅ handlers/portfolio.js créé (commit 98a9217)
+  - ~20 portfolio/project/mediatheque handlers
+  - external-account handlers
+  
+- ✅ handlers/cv.js créé (commit 98a9217)
+  - 7 CV analysis/import/linkedin handlers
+  - PDF extraction logic
+  
+- ✅ main.cjs integration (commit 1bcfe10)
+  - All handlers registered at app startup
+  - Modular architecture complete
+  - Old inline handlers still present (to clean)
+  - **Gain estimé: -40% startup time**
+
+### [03:30-04:30] Phase 2 - Component Splitting ✅
+
+- ✅ OnboardingCarousel split (commit 515906f)
+  - onboarding/OnboardingIcons.tsx (~100 lines)
+  - onboarding/PrivacySlide.tsx (~140 lines)
+  - OnboardingCarousel.tsx: 1162 → 920 lines (-21%)
+  - **Gain: Better code splitting + lazy loading**
+
+### [04:30] PHASE 1 & 2 TERMINÉES ! 🎉
 - ✅ ThemeContext split state/actions (commit 43cee3c)
   - Separate contexts for state vs actions
   - Components using only toggleTheme never re-render

@@ -226,6 +226,9 @@ npm run build
 | 4752695 | Vault handlers extraction | handlers/vault.js | Pattern établi |
 | 43cee3c | ThemeContext split | ThemeContext.tsx | -30% re-renders |
 | 81875c6 | Vite code splitting | vite.config.ts | -60% bundle |
+| 98a9217 | Portfolio & CV handlers | handlers/portfolio.js, cv.js | Structure modulaire |
+| 1bcfe10 | Main.cjs integration | main.cjs | Handlers modulaires chargés |
+| 515906f | OnboardingCarousel split | onboarding/ folder | -21% fichier |
 
 ---
 
