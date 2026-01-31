@@ -42,12 +42,16 @@ export const PortfolioHub: React.FC = () => {
 
     // Fetch portfolio ID and counts
     useEffect(() => {
+        let isMounted = true;
+        
         const fetchData = async () => {
             console.log('[PortfolioHub] Starting data fetch...');
             try {
                 // @ts-ignore
                 const portfolioResult = await window.electron.portfolio.getAll();
                 console.log('[PortfolioHub] Portfolio result:', portfolioResult);
+
+                if (!isMounted) return;
 
                 if (portfolioResult.success && portfolioResult.portfolios.length > 0) {
                     const primary = portfolioResult.portfolios.find((p: any) => p.is_primary) || portfolioResult.portfolios[0];
@@ -57,19 +61,21 @@ export const PortfolioHub: React.FC = () => {
                     // Fetch project count for the primary portfolio
                     // @ts-ignore
                     const projectsResult = await window.electron.portfolio.getAllProjects(primary.id);
-                    if (projectsResult.success) {
+                    if (isMounted && projectsResult.success) {
                         setProjectCount(projectsResult.projects.length);
                     }
 
                     // Fetch media count for the primary portfolio
                     // @ts-ignore
                     const mediaResult = await window.electron.mediatheque.getAll(primary.id);
-                    if (mediaResult) {
+                    if (isMounted && mediaResult) {
                         setMediaCount(mediaResult.length || 0);
                     }
                     
                     // Force hasCompletedOnboarding to be checked
-                    setHasCompletedOnboarding(null);
+                    if (isMounted) {
+                        setHasCompletedOnboarding(null);
+                    }
                 } else {
                     // No portfolio found - trigger onboarding flow
                     console.log('[PortfolioHub] No portfolio found, initializing onboarding flow');
@@ -78,72 +84,113 @@ export const PortfolioHub: React.FC = () => {
                 }
             } catch (e) {
                 console.error("[PortfolioHub] Failed to fetch portfolio data:", e);
-                setHasCompletedOnboarding(false);
+                if (isMounted) {
+                    setHasCompletedOnboarding(false);
+                }
             }
         };
         
         // Timeout de sécurité : 5 secondes max
         const timeout = setTimeout(() => {
-            console.warn('[PortfolioHub] Fetch timeout - forcing completion');
-            setHasCompletedOnboarding(false);
+            if (isMounted) {
+                console.warn('[PortfolioHub] Fetch timeout - forcing completion');
+                setHasCompletedOnboarding(false);
+            }
         }, 5000);
         
         fetchData().finally(() => clearTimeout(timeout));
+        
+        return () => {
+            isMounted = false;
+            clearTimeout(timeout);
+        };
     }, []);
 
     // Check premium status
     useEffect(() => {
+        let isMounted = true;
+        
         const checkPremium = async () => {
             console.log('[PortfolioHub] Checking premium status...');
             try {
                 // @ts-ignore
                 const status = await window.electron.invoke('get-premium-status');
-                console.log('[PortfolioHub] Premium status:', status);
-                setIsPremium(status?.isPremium || false);
+                if (isMounted) {
+                    console.log('[PortfolioHub] Premium status:', status);
+                    setIsPremium(status?.isPremium || false);
+                }
             } catch (e) {
                 console.error("[PortfolioHub] Failed to check premium status:", e);
-                setIsPremium(false);
+                if (isMounted) {
+                    setIsPremium(false);
+                }
             }
         };
         
         // Timeout de sécurité : 2 secondes max
         const timeout = setTimeout(() => {
-            console.warn('[PortfolioHub] Premium check timeout');
-            setIsPremium(false);
+            if (isMounted) {
+                console.warn('[PortfolioHub] Premium check timeout');
+                setIsPremium(false);
+            }
         }, 2000);
         
         checkPremium().finally(() => clearTimeout(timeout));
+        
+        return () => {
+            isMounted = false;
+            clearTimeout(timeout);
+        };
     }, []);
 
     // Check onboarding status
     useEffect(() => {
+        let isMounted = true;
+        
         const checkOnboarding = async () => {
             console.log('[PortfolioHub] Checking onboarding for portfolioId:', portfolioId);
             
             if (!portfolioId) {
                 console.log('[PortfolioHub] No portfolio ID - skipping onboarding');
-                setHasCompletedOnboarding(false);
+                if (isMounted) {
+                    setHasCompletedOnboarding(false);
+                }
                 return;
             }
 
             try {
                 const completed = await hasCompletedIntention(portfolioId);
                 console.log('[PortfolioHub] Onboarding completed:', completed);
-                setHasCompletedOnboarding(completed);
+                if (isMounted) {
+                    setHasCompletedOnboarding(completed);
+                }
             } catch (error) {
                 console.error('[PortfolioHub] Error checking onboarding:', error);
                 // En cas d'erreur, considérer comme non complété
-                setHasCompletedOnboarding(false);
+                if (isMounted) {
+                    setHasCompletedOnboarding(false);
+                }
             }
         };
         
-        // Timeout de sécurité : 3 secondes max
+        // Timeout de sécurité : 1.5 secondes max (réduit pour réactivité)
         const timeout = setTimeout(() => {
-            console.warn('[PortfolioHub] Onboarding check timeout - forcing false');
-            setHasCompletedOnboarding(false);
-        }, 3000);
+            if (isMounted) {
+                console.warn('[PortfolioHub] Onboarding check timeout - forcing false');
+                setHasCompletedOnboarding(false);
+            }
+        }, 1500);
         
-        checkOnboarding().finally(() => clearTimeout(timeout));
+        checkOnboarding().finally(() => {
+            if (isMounted) {
+                clearTimeout(timeout);
+            }
+        });
+        
+        return () => {
+            isMounted = false;
+            clearTimeout(timeout);
+        };
     }, [portfolioId]);
 
     // Memoized styles
