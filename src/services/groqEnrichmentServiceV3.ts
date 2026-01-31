@@ -226,12 +226,28 @@ export async function enrichPortfolioDataV3(
     enrichedData.aboutImage = extractedData.formData.aboutImage;
 
     // Réinjecter les chemins d'images dans les projets
-    if (enrichedData.projects && extractedData.projectContexts) {
-      enrichedData.projects = enrichedData.projects.map((project: any, i: number) => ({
-        ...project,
-        image: extractedData.projectContexts[i]?.images[0] || extractedData.formData.projects?.[i]?.image,
-        link: extractedData.formData.projects?.[i]?.link,
-      }));
+    if (enrichedData.projects) {
+      enrichedData.projects = enrichedData.projects.map((project: any, i: number) => {
+        // Chercher l'image dans cet ordre :
+        // 1. projectContexts (images extraites des PDF)
+        // 2. formData.projects (images uploadées spécifiques au projet)
+        // 3. formData.media (images générales converties en data URLs)
+        let projectImage = 
+          extractedData.projectContexts?.[i]?.images[0] || 
+          extractedData.formData.projects?.[i]?.image;
+        
+        // Si pas d'image trouvée et qu'il y a des media convertis, utiliser le premier
+        if (!projectImage && extractedData.formData.media && extractedData.formData.media.length > 0) {
+          const mediaItem = extractedData.formData.media[0];
+          projectImage = mediaItem?.url || mediaItem;
+        }
+
+        return {
+          ...project,
+          image: projectImage,
+          link: extractedData.formData.projects?.[i]?.link,
+        };
+      });
     }
 
     // Témoignages non modifiés
