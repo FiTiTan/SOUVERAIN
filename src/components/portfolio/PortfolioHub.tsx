@@ -279,14 +279,30 @@ export const PortfolioHub: React.FC = () => {
                     setPortfolioId(dbResult.id);
 
                     // Save the generated HTML
-                    await savePortfolioToDB(dbResult.id, result.html, data);
+                    try {
+                        const saved = await savePortfolioToDB(dbResult.id, result.html, data);
+                        if (!saved) {
+                            console.warn('[PortfolioHub] Save to DB failed, but continuing');
+                        }
+                    } catch (saveError) {
+                        console.error('[PortfolioHub] Error saving to DB:', saveError);
+                        // Continue anyway with generated HTML
+                    }
                 } else {
                     console.warn('[PortfolioHub] Failed to create portfolio in DB:', dbResult);
                     // Continue anyway with generated HTML
                 }
             } else {
                 // Update existing portfolio
-                await savePortfolioToDB(portfolioId, result.html, data);
+                try {
+                    const saved = await savePortfolioToDB(portfolioId, result.html, data);
+                    if (!saved) {
+                        console.warn('[PortfolioHub] Update DB failed, but continuing');
+                    }
+                } catch (saveError) {
+                    console.error('[PortfolioHub] Error updating DB:', saveError);
+                    // Continue anyway
+                }
             }
 
             setIsGenerating(false);
