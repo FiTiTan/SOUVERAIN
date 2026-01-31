@@ -19,16 +19,16 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
   const [phase, setPhase] = useState<'logo' | 'skeleton' | 'done'>('logo');
 
   useEffect(() => {
-    // Phase 1: Logo (1.5s)
+    // Phase 1: Logo (2.5s)
     const logoTimer = setTimeout(() => {
       setPhase('skeleton');
-    }, 1500);
+    }, 2500);
 
-    // Phase 2: Skeleton → Done (3s total, fade 0.5s)
+    // Phase 2: Skeleton → Done (5s total, fade 0.8s)
     const doneTimer = setTimeout(() => {
       setPhase('done');
-      setTimeout(onComplete, 500); // Smooth fade out
-    }, 4500);
+      setTimeout(onComplete, 800); // Smooth fade out
+    }, 7500);
 
     return () => {
       clearTimeout(logoTimer);
@@ -40,7 +40,7 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
     <motion.div
       initial={{ opacity: 1 }}
       animate={{ opacity: phase === 'done' ? 0 : 1 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.8 }}
       style={{
         position: 'fixed',
         inset: 0,
@@ -55,7 +55,7 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
             style={{
               width: '100%',
               height: '100%',
@@ -140,7 +140,7 @@ const SkeletonScreen: React.FC<{ theme: any }> = ({ theme }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.8 }}
       style={{
         width: '100%',
         height: '100%',
