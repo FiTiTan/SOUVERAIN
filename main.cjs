@@ -2722,6 +2722,20 @@ ipcMain.handle('template-purchase', async (event, { templateId, amountPaid, isPr
   }
 });
 
+// Get GROQ API Key (secure)
+ipcMain.handle('get-groq-api-key', async () => {
+  try {
+    if (!GROQ_API_KEY) {
+      console.error('[IPC] GROQ API key not configured');
+      return { success: false, error: 'API key not configured' };
+    }
+    return { success: true, key: GROQ_API_KEY };
+  } catch (error) {
+    console.error('[IPC] get-groq-api-key error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // ==================== END TEMPLATE HANDLERS ====================
 
 // APP LIFECYCLE

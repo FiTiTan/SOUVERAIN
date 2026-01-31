@@ -77,8 +77,8 @@ export const Step7Template: React.FC<Step7TemplateProps> = ({
   };
 
   const tabs: { id: TemplateTab; label: string; count?: number }[] = [
-    { id: 'free', label: 'Gratuits', count: 5 },
-    { id: 'owned', label: 'Mes achats' },
+    { id: 'free', label: 'Gratuits', count: templates.filter(t => t.category === 'free').length },
+    { id: 'owned', label: 'Mes achats', count: templates.filter(t => t.is_owned === 1).length },
   ];
 
   return (

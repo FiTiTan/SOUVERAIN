@@ -25,31 +25,22 @@ const MOCK_DATA = {
   socialGithub: 'https://github.com/jeandupont',
   socialTwitter: 'https://twitter.com/jeandupont',
   services: [
-    { icon: '💻', title: 'Développement Web', desc: 'Création de sites et applications modernes avec React, Node.js et TypeScript' },
-    { icon: '🎨', title: 'Design UI/UX', desc: 'Interfaces intuitives et esthétiques centrées sur l\'expérience utilisateur' },
-    { icon: '📱', title: 'Applications Mobile', desc: 'Développement d\'applications iOS et Android performantes' }
+    { icon: '💻', title: 'Développement Web', desc: 'Création de sites et applications modernes avec React, Node.js et TypeScript' }
   ],
   projects: [
     {
       title: 'Plateforme E-commerce',
       desc: 'Solution complète de vente en ligne avec paiement sécurisé et gestion de stock',
       category: 'Web',
-      image: 'https://placehold.co/600x400/667eea/ffffff?text=E-commerce',
+      image: 'https://placehold.co/600x400/667eea/ffffff?text=E-commerce+Project',
       link: '#'
-    },
+    }
+  ],
+  testimonials: [
     {
-      title: 'Application de Fitness',
-      desc: 'App mobile pour suivi d\'entraînement avec coach virtuel IA',
-      category: 'Mobile',
-      image: 'https://placehold.co/600x400/764ba2/ffffff?text=Fitness+App',
-      link: '#'
-    },
-    {
-      title: 'Dashboard Analytics',
-      desc: 'Tableau de bord temps réel pour visualisation de données business',
-      category: 'Web',
-      image: 'https://placehold.co/600x400/f093fb/ffffff?text=Analytics',
-      link: '#'
+      text: 'Un travail exceptionnel ! Jean a su transformer notre vision en une application performante et élégante.',
+      author: 'Marie Dubois',
+      role: 'CEO, TechStart'
     }
   ]
 };
@@ -198,14 +189,20 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
           return item;
         });
         
-        // Testimonials (vide pour preview)
-        html = processRepeatedSection(html, 'testimonials', [], () => '');
+        // Testimonials
+        html = processRepeatedSection(html, 'testimonials', MOCK_DATA.testimonials, (tpl, testimonial) => {
+          let item = tpl;
+          item = replacePlaceholder(item, 'TESTIMONIAL_TEXT', testimonial.text);
+          item = replacePlaceholder(item, 'TESTIMONIAL_AUTHOR', testimonial.author);
+          item = replacePlaceholder(item, 'TESTIMONIAL_ROLE', testimonial.role);
+          return item;
+        });
         
         // === CONDITIONS GLOBALES ===
         html = processConditionals(html, {
           showProjects: MOCK_DATA.projects.length > 0,
           showSocialShowcase: socialLinks.length > 0,
-          showTestimonials: false,
+          showTestimonials: MOCK_DATA.testimonials.length > 0,
           showPracticalInfo: false,
           hasAboutImage: !!MOCK_DATA.aboutImage,
           hasValueProp: !!MOCK_DATA.valueProp,
