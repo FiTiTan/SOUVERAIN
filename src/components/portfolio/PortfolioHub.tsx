@@ -23,6 +23,47 @@ import { ModernLoader } from '../ui/ModernLoader';
 type PortfolioView = 'landing' | 'mpf' | 'projects' | 'mediatheque' | 'config';
 type MPFScreen = 'selector' | 'wizard' | 'generating' | 'preview' | 'mpf-view';
 
+/**
+ * Convert File objects in media array to data URLs
+ */
+async function convertMediaToDataURLs(data: PortfolioFormData): Promise<PortfolioFormData> {
+    if (!data.media || data.media.length === 0) {
+        return data;
+    }
+
+    const convertedMedia = await Promise.all(
+        data.media.map(async (item: any) => {
+            // Si c'est déjà un objet Media avec url, on le garde
+            if (item && typeof item === 'object' && 'url' in item) {
+                return item;
+            }
+
+            // Si c'est un File, on le convertit en data URL
+            if (item instanceof File) {
+                return new Promise<{url: string, alt?: string}>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        resolve({
+                            url: reader.result as string,
+                            alt: item.name
+                        });
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(item);
+                });
+            }
+
+            // Sinon on retourne tel quel
+            return item;
+        })
+    );
+
+    return {
+        ...data,
+        media: convertedMedia
+    };
+}
+
 export const PortfolioHub: React.FC = () => {
     const { theme } = useTheme();
     const toast = useToast();
@@ -243,14 +284,19 @@ export const PortfolioHub: React.FC = () => {
             // Wait for animation
             await new Promise(r => setTimeout(r, 2000));
 
+            // Convert File objects to data URLs for media
+            console.log('[PortfolioHub] Converting media to data URLs...');
+            const convertedData = await convertMediaToDataURLs(data);
+            console.log('[PortfolioHub] Converted media:', convertedData.media);
+
             // Generate HTML from template
-            if (!data.selectedTemplateId) {
+            if (!convertedData.selectedTemplateId) {
                 throw new Error('No template selected');
             }
 
             const result = await renderPortfolioHTML({
-                formData: data,
-                templateId: data.selectedTemplateId,
+                formData: convertedData,
+                templateId: convertedData.selectedTemplateId,
             });
 
             // Vérifier le résultat
