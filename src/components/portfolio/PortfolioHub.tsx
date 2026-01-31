@@ -253,66 +253,41 @@ export const PortfolioHub: React.FC = () => {
                 templateId: data.selectedTemplateId,
             });
 
-            // ✅ Vérifier que result existe avant d'accéder à success
+            // Vérifier le résultat
             if (!result) {
-                throw new Error('Aucune réponse du service de génération');
+                throw new Error('Aucun résultat de génération');
             }
 
-            if (!result.success) {
-                throw new Error(result.error || 'Portfolio generation failed');
+            // Si c'est directement le HTML (string)
+            if (typeof result === 'string') {
+                setGeneratedHTML(result);
+                setIsGenerating(false);
+                setMpfScreen('preview');
+                toast.success('Succès', 'Portfolio généré avec succès !');
+                return;
             }
 
-            if (!result.html || result.html.length === 0) {
-                throw new Error('Portfolio generation returned empty HTML');
-            }
+            // Si c'est un objet { success, html }
+            if (result.success && result.html) {
+                setGeneratedHTML(result.html);
+                setIsGenerating(false);
+                setMpfScreen('preview');
+                toast.success('Succès', 'Portfolio généré avec succès !');
 
-            setGeneratedHTML(result.html);
-
-            // Create portfolio in DB if needed
-            if (!portfolioId) {
-                // @ts-ignore
-                const dbResult = await window.electron.invoke('db-create-portfolio', {
-                    name: data.name,
+                // Save en background (non bloquant)
+                savePortfolioToDB(portfolioId || '', result.html, data).catch(err => {
+                    console.warn('[PortfolioHub] Save failed:', err);
                 });
-
-                if (dbResult && dbResult.success && dbResult.id) {
-                    setPortfolioId(dbResult.id);
-
-                    // Save the generated HTML
-                    try {
-                        const saved = await savePortfolioToDB(dbResult.id, result.html, data);
-                        if (!saved) {
-                            console.warn('[PortfolioHub] Save to DB failed, but continuing');
-                        }
-                    } catch (saveError) {
-                        console.error('[PortfolioHub] Error saving to DB:', saveError);
-                        // Continue anyway with generated HTML
-                    }
-                } else {
-                    console.warn('[PortfolioHub] Failed to create portfolio in DB:', dbResult);
-                    // Continue anyway with generated HTML
-                }
-            } else {
-                // Update existing portfolio
-                try {
-                    const saved = await savePortfolioToDB(portfolioId, result.html, data);
-                    if (!saved) {
-                        console.warn('[PortfolioHub] Update DB failed, but continuing');
-                    }
-                } catch (saveError) {
-                    console.error('[PortfolioHub] Error updating DB:', saveError);
-                    // Continue anyway
-                }
+                return;
             }
 
-            setIsGenerating(false);
-            setMpfScreen('preview');
-            toast.success('Succès', 'Portfolio généré avec succès !');
+            // Erreur de génération
+            throw new Error(result.error || 'Erreur de génération');
 
         } catch (error: any) {
             console.error('[PortfolioHub] Generation error:', error);
             setIsGenerating(false);
-            toast.error('Erreur', error?.message || 'Échec de la génération');
+            toast.error('Erreur', error?.message || 'La génération a échoué');
             setMpfScreen('wizard');
         }
     }, [portfolioId, toast]);
