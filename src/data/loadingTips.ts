@@ -11,140 +11,105 @@ export interface LoadingTip {
 }
 
 export const loadingTips: LoadingTip[] = [
-  // CV Tips
+  // CV Tips - VÉRIFIÉ
   {
     category: 'cv',
     text: "Les recruteurs passent en moyenne 7 secondes sur un CV.",
-    stat: "7 secondes",
-    source: "Étude TheLadders 2023"
+    stat: "7.4 sec",
+    source: "TheLadders Eye-Tracking Study 2018"
   },
   {
     category: 'cv',
-    text: "75% des CV sont filtrés par des ATS avant d'atteindre un humain.",
-    stat: "75%",
-    source: "Jobscan 2024"
+    text: "90% des entreprises utilisent un système de tri automatique (ATS).",
+    stat: "90%",
+    source: "Harvard Business School + Accenture 2025"
   },
   {
     category: 'cv',
-    text: "Un CV optimisé augmente vos chances d'entretien de 40%.",
-    stat: "+40%",
-    source: "LinkedIn Talent Solutions"
+    text: "88% des employeurs disent que l'ATS peut filtrer des candidats qualifiés.",
+    stat: "88%",
+    source: "Harvard Business School 2025"
   },
   {
     category: 'cv',
-    text: "60% des candidats ne personnalisent jamais leur CV par poste.",
-    stat: "60%",
-  },
-  {
-    category: 'cv',
-    text: "Les CV avec des verbes d'action obtiennent 2x plus de réponses.",
-    stat: "2x plus",
+    text: "Un CV bien structuré passe les filtres ATS et atteint les recruteurs.",
   },
 
-  // Portfolio Tips
+  // Portfolio Tips - GÉNÉRIQUE (pas de stats vérifiées)
   {
     category: 'portfolio',
-    text: "Les freelances avec portfolio reçoivent 3x plus de demandes.",
-    stat: "3x plus",
-    source: "Malt 2024"
+    text: "Un portfolio montre concrètement vos compétences aux clients.",
   },
   {
     category: 'portfolio',
-    text: "70% des recruteurs tech visitent le portfolio avant l'entretien.",
-    stat: "70%",
-    source: "Stack Overflow Developer Survey"
+    text: "Les freelances expérimentés avec portfolio facturent $100-200/h vs $25-50/h débutants.",
+    stat: "x2-4",
+    source: "Consensus marché freelance 2025"
   },
   {
     category: 'portfolio',
-    text: "Un portfolio professionnel augmente vos tarifs de 35% en moyenne.",
-    stat: "+35%",
-    source: "Freelance.com"
-  },
-  {
-    category: 'portfolio',
-    text: "86% des clients choisissent un prestataire grâce à son portfolio.",
-    stat: "86%",
-  },
-  {
-    category: 'portfolio',
-    text: "Les portfolios avec études de cas convertissent 5x mieux.",
-    stat: "5x mieux",
+    text: "Un bon portfolio vous différencie face à des centaines de candidats.",
   },
 
-  // LinkedIn Tips
+  // LinkedIn Tips - VÉRIFIÉ
   {
     category: 'linkedin',
-    text: "Les profils LinkedIn complets reçoivent 40x plus de vues.",
-    stat: "40x plus",
-    source: "LinkedIn"
+    text: "Un profil LinkedIn complet génère 21x plus de vues.",
+    stat: "21x",
+    source: "Omnicore Agency 2024"
   },
   {
     category: 'linkedin',
-    text: "87% des recruteurs utilisent LinkedIn pour sourcer des candidats.",
-    stat: "87%",
-    source: "LinkedIn Recruiting"
+    text: "Les profils complets reçoivent 36x plus de messages de recruteurs.",
+    stat: "36x",
+    source: "Omnicore Agency 2024"
   },
   {
     category: 'linkedin',
-    text: "Un profil avec photo obtient 14x plus de vues.",
-    stat: "14x plus",
-    source: "LinkedIn"
+    text: "Un profil complet augmente vos callbacks de 15.8% pour les postes entry-level.",
+    stat: "+15.8%",
+    source: "Statista 2024"
   },
   {
     category: 'linkedin',
-    text: "Les profils actifs (1 post/semaine) ont 2x plus d'opportunités.",
-    stat: "2x plus",
-  },
-  {
-    category: 'linkedin',
-    text: "70% des embauches se font via le réseau, pas les annonces.",
-    stat: "70%",
+    text: "Votre réseau est votre meilleur atout pour trouver des opportunités.",
   },
 
-  // Job Match Tips
+  // Job Match Tips - VÉRIFIÉ
   {
     category: 'jobmatch',
-    text: "Les candidats qualifiés ont 50% de chances d'obtenir le poste.",
-    stat: "50%",
+    text: "50 à 70% des postes se remplissent sans annonce publique (marché caché).",
+    stat: "50-70%",
+    source: "The Interview Guys 2025, Management Consulted 2024"
   },
   {
     category: 'jobmatch',
-    text: "80% des offres ne sont jamais publiées (marché caché).",
-    stat: "80%",
-    source: "Harvard Business Review"
+    text: "Les candidats recommandés en interne ont 15x plus de chances d'être embauchés.",
+    stat: "15x",
+    source: "OpenArc 2025"
   },
   {
     category: 'jobmatch',
-    text: "Postuler dans les 24h augmente vos chances de 10x.",
-    stat: "10x",
-    source: "Indeed"
+    text: "Votre réseau professionnel ouvre plus de portes que les candidatures en ligne.",
   },
   {
     category: 'jobmatch',
-    text: "Les candidatures personnalisées ont 3x plus de retours.",
-    stat: "3x plus",
-  },
-  {
-    category: 'jobmatch',
-    text: "50% des recruteurs écartent les candidats sur-qualifiés.",
-    stat: "50%",
+    text: "Personnaliser sa candidature fait la différence entre 100 CV identiques.",
   },
 
-  // Vault / Security Tips
-  {
-    category: 'vault',
-    text: "77% des candidats perdent des documents importants entre deux jobs.",
-    stat: "77%",
-  },
-  {
-    category: 'vault',
-    text: "Un coffre-fort numérique réduit le stress de recherche de 65%.",
-    stat: "-65%",
-  },
+  // Vault / Security Tips - FACTUEL
   {
     category: 'vault',
     text: "Vos données restent sur votre appareil. Aucun cloud tiers.",
     stat: "100% local",
+  },
+  {
+    category: 'vault',
+    text: "Centralisez vos documents pour ne jamais chercher votre CV pendant 30 minutes.",
+  },
+  {
+    category: 'vault',
+    text: "Un système organisé réduit le stress lors de candidatures urgentes.",
   },
 ];
 
