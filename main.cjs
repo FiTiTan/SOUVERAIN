@@ -2750,10 +2750,11 @@ ipcMain.handle('get-groq-api-key', async () => {
 // Extract PDF text
 ipcMain.handle('extract-pdf-text', async (event, filePath) => {
   try {
-    const { PDFParse: pdfParse } = require('pdf-parse');
+    const { PDFParse } = require('pdf-parse');
     const buffer = fs.readFileSync(filePath);
-    const data = await pdfParse(buffer);
-    return { success: true, text: data.text, pages: data.numpages };
+    const parser = new PDFParse({ data: buffer });
+    const result = await parser.getText();
+    return { success: true, text: result.text, pages: result.numPages || 0 };
   } catch (error) {
     console.error('[IPC] extract-pdf-text error:', error);
     return { success: false, error: error.message };

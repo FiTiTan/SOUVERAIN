@@ -78,14 +78,23 @@ export const renderPortfolioHTML = async (options: RenderOptions): Promise<{ suc
     // Utiliser le workflow V3 complet
     const result = await generatePortfolioV3(generationInput);
 
-    if (result.success) {
+    console.log('[PortfolioRender] Result received:', result);
+    console.log('[PortfolioRender] Result type:', typeof result);
+    console.log('[PortfolioRender] Result.success:', result?.success);
+
+    if (result && result.success) {
       console.log('[PortfolioRender] ✓ V3 generation complete');
       if (result.debug) {
         console.log('[PortfolioRender] Debug:', result.debug);
       }
+      return result;
+    } else if (result && !result.success) {
+      console.error('[PortfolioRender] Generation failed:', result.error);
+      return result;
+    } else {
+      console.error('[PortfolioRender] Result is undefined or invalid');
+      return { success: false, error: 'No result from generator' };
     }
-
-    return result;
     
   } catch (error: any) {
     console.error('[PortfolioRender] Generation error:', error);

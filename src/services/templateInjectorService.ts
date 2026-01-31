@@ -53,7 +53,7 @@ export function injectDataIntoTemplate(
   // 2. Traiter les zones REPEAT
   html = processRepeatZones(html, data);
 
-  // 3. Traiter les zones IF/ENDIF
+  // 3. Traiter les zones IF/ENDIF (APRÈS REPEAT pour traiter les IF dans les blocs dupliqués)
   html = processConditionalZones(html, flags);
 
   // 4. Nettoyer les sections vides
@@ -120,6 +120,9 @@ function processRepeatZones(html: string, data: EnrichedPortfolioData): string {
     'PROJECT_IMAGE': project.image || '',
     'PROJECT_CATEGORY': project.category || '',
     'PROJECT_LINK': project.link || '#',
+  }), (project) => ({
+    hasProjectLink: !!(project.link && project.link !== '#'),
+    hasProjectImage: !!project.image,
   }));
 
   // REPEAT: testimonials
@@ -146,7 +149,8 @@ function processRepeat<T>(
   html: string,
   zoneName: string,
   items: T[],
-  getReplacements: (item: T) => Record<string, string>
+  getReplacements: (item: T) => Record<string, string>,
+  getLocalFlags?: (item: T) => Record<string, boolean>
 ): string {
   const regex = new RegExp(
     `<!-- REPEAT: ${zoneName} -->([\\s\\S]*?)<!-- END REPEAT: ${zoneName} -->`,
@@ -162,6 +166,19 @@ function processRepeat<T>(
       let block = blockContent;
       const replacements = getReplacements(item);
       
+      // 1. Traiter les IF locaux si des flags sont fournis
+      if (getLocalFlags) {
+        const localFlags = getLocalFlags(item);
+        for (const [flagName, flagValue] of Object.entries(localFlags)) {
+          const ifRegex = new RegExp(
+            `<!-- IF: ${flagName} -->([\\s\\S]*?)<!-- ENDIF: ${flagName} -->`,
+            'g'
+          );
+          block = block.replace(ifRegex, (m, content) => flagValue ? content : '');
+        }
+      }
+      
+      // 2. Remplacer les variables
       for (const [key, value] of Object.entries(replacements)) {
         const varRegex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
         block = block.replace(varRegex, escapeHtml(value));
