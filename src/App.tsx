@@ -110,11 +110,23 @@ const AppContent: React.FC = () => {
 
   // Splash Screen State
   const [showSplash, setShowSplash] = useState(true);
+  const [isAppReady, setIsAppReady] = useState(false);
 
   // Pré-chargement du moteur IA Local (WebLLM)
   useEffect(() => {
     webLlamaService.initialize().catch(err => console.warn('[App] Background AI load:', err));
   }, []);
+
+  // Track app readiness (mark ready after initial render + theme loaded)
+  useEffect(() => {
+    // Wait for theme to be stable and DOM to be ready
+    const readyTimer = setTimeout(() => {
+      setIsAppReady(true);
+      console.log('[App] App is ready to display');
+    }, 1000); // Small delay to ensure everything is mounted
+
+    return () => clearTimeout(readyTimer);
+  }, [theme]);
 
 
 
@@ -575,7 +587,7 @@ const AppContent: React.FC = () => {
 
   const renderCVContent = () => {
     if (showSplash) {
-      return <SplashScreenModern onComplete={() => setShowSplash(false)} />;
+      return <SplashScreenModern onComplete={() => setShowSplash(false)} isAppReady={isAppReady} />;
     }
 
     // Choice state

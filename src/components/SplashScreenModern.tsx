@@ -12,11 +12,13 @@ import { typography, borderRadius } from '../design-system';
 
 interface SplashScreenModernProps {
   onComplete: () => void;
+  isAppReady?: boolean; // Signal from App that everything is loaded
 }
 
-export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComplete }) => {
+export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComplete, isAppReady = false }) => {
   const { theme } = useTheme();
   const [phase, setPhase] = useState<'logo' | 'skeleton' | 'done'>('logo');
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
   useEffect(() => {
     // Phase 1: Logo (3s)
@@ -24,17 +26,24 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
       setPhase('skeleton');
     }, 3000);
 
-    // Phase 2: Skeleton → Done (total 8s with fade)
-    const doneTimer = setTimeout(() => {
-      setPhase('done');
-      setTimeout(onComplete, 800); // Smooth fade out
+    // Minimum time: 8s (branding moment)
+    const minTimer = setTimeout(() => {
+      setMinTimeElapsed(true);
     }, 8000);
 
     return () => {
       clearTimeout(logoTimer);
-      clearTimeout(doneTimer);
+      clearTimeout(minTimer);
     };
-  }, [onComplete]);
+  }, []);
+
+  // Wait for BOTH: minimum time elapsed AND app ready
+  useEffect(() => {
+    if (minTimeElapsed && isAppReady) {
+      setPhase('done');
+      setTimeout(onComplete, 800); // Smooth fade out
+    }
+  }, [minTimeElapsed, isAppReady, onComplete]);
 
   return (
     <motion.div
