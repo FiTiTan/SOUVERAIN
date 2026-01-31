@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../ThemeContext';
 import { typography, borderRadius } from '../design-system';
+import { getRandomTip, type LoadingTip } from '../data/loadingTips';
 
 interface SplashScreenModernProps {
   onComplete: () => void;
@@ -19,6 +20,7 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
   const { theme } = useTheme();
   const [phase, setPhase] = useState<'logo' | 'skeleton' | 'done'>('logo');
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const [tip] = useState<LoadingTip>(() => getRandomTip());
 
   useEffect(() => {
     // Phase 1: Logo (3s)
@@ -128,7 +130,7 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
         )}
 
           {phase === 'skeleton' && (
-            <SkeletonScreen theme={theme} />
+            <SkeletonScreen theme={theme} tip={tip} />
           )}
         </AnimatePresence>
       )}
@@ -144,7 +146,7 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
 };
 
 // Skeleton Screen Component
-const SkeletonScreen: React.FC<{ theme: any }> = ({ theme }) => {
+const SkeletonScreen: React.FC<{ theme: any; tip: LoadingTip }> = ({ theme, tip }) => {
   return (
     <motion.div
       key="skeleton"
@@ -243,6 +245,75 @@ const SkeletonScreen: React.FC<{ theme: any }> = ({ theme }) => {
             />
           ))}
         </div>
+
+        {/* Loading Tip */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2, duration: 0.6 }}
+          style={{
+            padding: '1.5rem',
+            backgroundColor: theme.bg.elevated,
+            borderRadius: borderRadius.lg,
+            border: `1px solid ${theme.border.light}`,
+            marginTop: 'auto',
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '1rem',
+          }}>
+            {/* Icon */}
+            <div style={{
+              fontSize: '2rem',
+              flexShrink: 0,
+            }}>
+              💡
+            </div>
+
+            {/* Content */}
+            <div style={{ flex: 1 }}>
+              <p style={{
+                fontSize: typography.fontSize.sm,
+                color: theme.text.secondary,
+                margin: 0,
+                lineHeight: typography.lineHeight.relaxed,
+              }}>
+                {tip.text}
+              </p>
+              {tip.source && (
+                <p style={{
+                  fontSize: typography.fontSize.xs,
+                  color: theme.text.tertiary,
+                  margin: '0.5rem 0 0 0',
+                  fontStyle: 'italic',
+                }}>
+                  Source : {tip.source}
+                </p>
+              )}
+            </div>
+
+            {/* Stat Badge */}
+            {tip.stat && (
+              <div style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: `${theme.accent.primary}20`,
+                borderRadius: borderRadius.md,
+                border: `1px solid ${theme.accent.primary}40`,
+                flexShrink: 0,
+              }}>
+                <span style={{
+                  fontSize: typography.fontSize.lg,
+                  fontWeight: typography.fontWeight.bold,
+                  color: theme.accent.primary,
+                }}>
+                  {tip.stat}
+                </span>
+              </div>
+            )}
+          </div>
+        </motion.div>
       </div>
     </motion.div>
   );
