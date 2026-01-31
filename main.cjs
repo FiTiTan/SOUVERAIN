@@ -18,9 +18,9 @@ const sharp = require('sharp');
 const os = require('os');
 
 // Handler modules
-const { registerVaultHandlers } = require('./handlers/vault');
-const { registerPortfolioHandlers } = require('./handlers/portfolio');
-const { registerCVHandlers } = require('./handlers/cv');
+const { registerVaultHandlers } = require('./handlers/vault.cjs');
+const { registerPortfolioHandlers } = require('./handlers/portfolio.cjs');
+const { registerCVHandlers } = require('./handlers/cv.cjs');
 
 const pdfExtract = new PDFExtract();
 let groqClient = null;
