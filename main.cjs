@@ -2745,6 +2745,55 @@ ipcMain.handle('get-groq-api-key', async () => {
   }
 });
 
+// ==================== EXTRACTION HANDLERS (V3) ====================
+
+// Extract PDF text
+ipcMain.handle('extract-pdf-text', async (event, filePath) => {
+  try {
+    const pdfParse = require('pdf-parse');
+    const buffer = fs.readFileSync(filePath);
+    const data = await pdfParse(buffer);
+    return { success: true, text: data.text, pages: data.numpages };
+  } catch (error) {
+    console.error('[IPC] extract-pdf-text error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Extract image metadata
+ipcMain.handle('extract-image-metadata', async (event, filePath) => {
+  try {
+    const sharp = require('sharp');
+    const metadata = await sharp(filePath).metadata();
+    const stats = fs.statSync(filePath);
+    
+    return {
+      success: true,
+      filename: path.basename(filePath),
+      metadata: {
+        width: metadata.width,
+        height: metadata.height,
+        format: metadata.format,
+        size: stats.size,
+      },
+    };
+  } catch (error) {
+    console.error('[IPC] extract-image-metadata error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Read text file
+ipcMain.handle('read-text-file', async (event, filePath) => {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    return { success: true, content };
+  } catch (error) {
+    console.error('[IPC] read-text-file error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // ==================== END TEMPLATE HANDLERS ====================
 
 // APP LIFECYCLE

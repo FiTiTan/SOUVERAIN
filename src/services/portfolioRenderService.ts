@@ -1,14 +1,13 @@
 /**
  * portfolioRenderService.ts
  *
- * Service de rendu HTML pour le Portfolio Maître V2
- * Architecture V2 : GROQ enrichit les textes, le code injecte dans le template
- * GROQ ne voit JAMAIS le HTML
+ * Service de rendu HTML pour le Portfolio Maître V3
+ * Architecture V3 : Extraction PDF + Anonymisation + Enrichissement GROQ + Injection template
+ * Workflow complet : Documents → Texte → Anonymisé → Enrichi → Désanonymisé → HTML
  */
 
 import type { PortfolioFormData } from '../components/portfolio/wizard/types';
-import { enrichPortfolioData, type RawPortfolioData } from './groqEnrichmentService';
-import { injectDataIntoTemplate, computeFlags } from './templateInjectorService';
+import { generatePortfolioV3, type GenerationInputV3 } from './portfolioGeneratorServiceV3';
 
 interface RenderOptions {
   formData: PortfolioFormData;
@@ -59,66 +58,28 @@ export const renderPortfolioHTML = async (options: RenderOptions): Promise<{ suc
   try {
     const { formData, templateId } = options;
 
-    console.log('[PortfolioRender] Starting V2 generation (GROQ enrichment + template injection)');
+    console.log('[PortfolioRender] Starting V3 generation (Full workflow)');
 
-    // 1. Charger le template HTML
-    const templateHTML = await loadTemplateHTML(templateId);
-
-    // 2. Convertir formData en RawPortfolioData
-    const rawData: RawPortfolioData = {
-      name: formData.name,
-      profileType: formData.profileType || 'freelance',
-      tagline: formData.tagline,
-      services: formData.services.filter(s => s.trim().length > 0),
-      valueProp: formData.valueProp,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address,
-      openingHours: formData.openingHours,
-      socialLinks: (formData.socialLinks || []).map(link => ({
-        platform: link.platform === 'other' ? 'website' : link.platform,
-        url: link.url || '#',
-        label: link.label || undefined,
-      })).filter(link => link.url !== '#'),
-      socialIsMain: formData.socialIsMain || false,
-      projects: (formData.projects || []).map(p => ({
-        title: p.title || 'Projet',
-        description: p.description || '',
-        image: p.image || undefined,
-        category: p.category || undefined,
-        link: p.link || undefined,
-      })),
-      testimonials: (formData.testimonials || []).map(t => ({
-        text: t.text || '',
-        author: t.author || '',
-        role: t.role || undefined,
-      })),
-      aboutImage: undefined, // TODO: ajouter support dans le wizard
+    // Préparer l'input pour le workflow V3
+    const generationInput: GenerationInputV3 = {
+      formData,
+      uploadedFiles: formData.uploadedFiles || [],
+      linkedInData: formData.linkedInData,
+      notionData: formData.notionData,
+      templateId,
     };
 
-    // 3. ÉTAPE 1 : Enrichissement GROQ (JSON → JSON enrichi)
-    const portfolioId = `portfolio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const enrichmentResult = await enrichPortfolioData(rawData, portfolioId);
+    // Utiliser le workflow V3 complet
+    const result = await generatePortfolioV3(generationInput);
 
-    if (!enrichmentResult.success || !enrichmentResult.data) {
-      console.warn('[PortfolioRender] GROQ enrichment failed, using fallback data');
+    if (result.success) {
+      console.log('[PortfolioRender] ✓ V3 generation complete');
+      if (result.debug) {
+        console.log('[PortfolioRender] Debug:', result.debug);
+      }
     }
 
-    const enrichedData = enrichmentResult.data!;
-
-    // 4. ÉTAPE 2 : Injection dans le template (code local, 100% déterministe)
-    const flags = computeFlags(enrichedData);
-    const renderedHTML = injectDataIntoTemplate(templateHTML, enrichedData, flags);
-
-    // 5. Ajouter métadonnées SEO
-    const finalHTML = renderedHTML.replace(
-      '<title>',
-      `<meta name="description" content="${escapeHtml(formData.tagline)}">\n  <title>`
-    );
-
-    console.log('[PortfolioRender] ✓ V2 generation complete');
-
-    return { success: true, html: finalHTML };
+    return result;
     
   } catch (error: any) {
     console.error('[PortfolioRender] Generation error:', error);
