@@ -99,7 +99,7 @@ const Icons = {
   ),
 };
 
-import { SplashScreen } from './components/SplashScreen';
+import { SplashScreenModern } from './components/SplashScreenModern';
 
 // ============================================================
 // MAIN APP CONTENT
@@ -575,7 +575,7 @@ const AppContent: React.FC = () => {
 
   const renderCVContent = () => {
     if (showSplash) {
-      return <SplashScreen onComplete={() => setShowSplash(false)} />;
+      return <SplashScreenModern onComplete={() => setShowSplash(false)} />;
     }
 
     // Choice state
