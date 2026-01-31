@@ -231,15 +231,36 @@ export async function enrichPortfolioDataV3(
         // Chercher l'image dans cet ordre :
         // 1. projectContexts (images extraites des PDF)
         // 2. formData.projects (images uploadées spécifiques au projet)
-        // 3. formData.media (images générales converties en data URLs)
+        // 3. formData.media avec matching par tag
         let projectImage = 
           extractedData.projectContexts?.[i]?.images[0] || 
           extractedData.formData.projects?.[i]?.image;
         
-        // Si pas d'image trouvée et qu'il y a des media convertis, utiliser le premier
+        // Si pas d'image trouvée, chercher dans media avec matching intelligent
         if (!projectImage && extractedData.formData.media && extractedData.formData.media.length > 0) {
-          const mediaItem = extractedData.formData.media[0];
-          projectImage = mediaItem?.url || mediaItem;
+          // 1. Chercher une image taguée spécifiquement pour ce projet
+          const taggedImage = extractedData.formData.media.find((m: any) => 
+            m.tag === 'project' && 
+            m.projectName && 
+            project.title &&
+            m.projectName.toLowerCase().includes(project.title.toLowerCase().substring(0, 5))
+          );
+          
+          if (taggedImage) {
+            projectImage = taggedImage.url || taggedImage;
+          } else {
+            // 2. Sinon, chercher la première image taguée "project" sans nom spécifique
+            const genericProjectImage = extractedData.formData.media.find((m: any) => m.tag === 'project');
+            if (genericProjectImage) {
+              projectImage = genericProjectImage.url || genericProjectImage;
+            } else {
+              // 3. En dernier recours, utiliser la première image non taguée
+              const unttaggedImage = extractedData.formData.media.find((m: any) => !m.tag);
+              if (unttaggedImage) {
+                projectImage = unttaggedImage.url || unttaggedImage;
+              }
+            }
+          }
         }
 
         return {
@@ -248,6 +269,19 @@ export async function enrichPortfolioDataV3(
           link: extractedData.formData.projects?.[i]?.link,
         };
       });
+    }
+
+    // Assigner l'image de profil si taguée
+    if (extractedData.formData.media) {
+      const profileImage = extractedData.formData.media.find((m: any) => m.tag === 'profile');
+      if (profileImage) {
+        enrichedData.aboutImage = profileImage.url || profileImage;
+      }
+
+      const businessImage = extractedData.formData.media.find((m: any) => m.tag === 'business');
+      if (businessImage) {
+        enrichedData.heroImage = businessImage.url || businessImage;
+      }
     }
 
     // Témoignages non modifiés

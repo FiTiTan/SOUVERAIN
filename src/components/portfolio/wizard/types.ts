@@ -46,6 +46,8 @@ export interface Media {
   optimized?: boolean;
   originalSize?: number;
   optimizedSize?: number;
+  tag?: 'profile' | 'business' | 'project';
+  projectName?: string;
 }
 
 export interface UploadedFile {

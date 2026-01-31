@@ -4,6 +4,7 @@ import { Upload, X, Check, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../../../ThemeContext';
 import type { Media } from '../types';
 import { ImageIcon } from '../icons';
+import { MediaTaggingModal, type MediaTag } from '../MediaTaggingModal';
 
 interface MediaUploaderProps {
   media: Media[];
@@ -23,6 +24,12 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onChange })
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Tagging modal state
+  const [showTaggingModal, setShowTaggingModal] = useState(false);
+  const [filesToTag, setFilesToTag] = useState<File[]>([]);
+  const [currentTagIndex, setCurrentTagIndex] = useState(0);
+  const [processedMedia, setProcessedMedia] = useState<Media[]>([]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -110,12 +117,16 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onChange })
       }
     }
 
-    onChange([...media, ...newMedia]);
-
-    // Clear uploading files after 3 seconds
+    // Clear uploading files display
     setTimeout(() => {
       setUploadingFiles([]);
-    }, 3000);
+    }, 1500);
+
+    // Store processed media and original files, then open tagging modal
+    setProcessedMedia(newMedia);
+    setFilesToTag(files);
+    setCurrentTagIndex(0);
+    setShowTaggingModal(true);
   };
 
   const saveFileTemporarily = async (file: File): Promise<string> => {
@@ -135,6 +146,51 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onChange })
 
   const handleClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleTag = (tag: MediaTag) => {
+    // Apply tag to current media item
+    const updatedMedia = [...processedMedia];
+    updatedMedia[currentTagIndex] = {
+      ...updatedMedia[currentTagIndex],
+      tag: tag.type,
+      projectName: tag.projectName,
+    };
+    setProcessedMedia(updatedMedia);
+
+    // Move to next image or finish
+    if (currentTagIndex < filesToTag.length - 1) {
+      setCurrentTagIndex(currentTagIndex + 1);
+    } else {
+      // All images tagged, save to parent
+      onChange([...media, ...updatedMedia]);
+      setShowTaggingModal(false);
+      setFilesToTag([]);
+      setProcessedMedia([]);
+      setCurrentTagIndex(0);
+    }
+  };
+
+  const handleSkip = () => {
+    // Skip tagging for this image (no tag)
+    if (currentTagIndex < filesToTag.length - 1) {
+      setCurrentTagIndex(currentTagIndex + 1);
+    } else {
+      // Finish without tags for remaining images
+      onChange([...media, ...processedMedia]);
+      setShowTaggingModal(false);
+      setFilesToTag([]);
+      setProcessedMedia([]);
+      setCurrentTagIndex(0);
+    }
+  };
+
+  const handleCloseModal = () => {
+    // Close modal without saving any new media
+    setShowTaggingModal(false);
+    setFilesToTag([]);
+    setProcessedMedia([]);
+    setCurrentTagIndex(0);
   };
 
   return (
@@ -334,6 +390,17 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onChange })
             ))}
           </div>
         </div>
+      )}
+
+      {/* Tagging Modal */}
+      {showTaggingModal && filesToTag.length > 0 && (
+        <MediaTaggingModal
+          images={filesToTag}
+          currentIndex={currentTagIndex}
+          onTag={handleTag}
+          onSkip={handleSkip}
+          onClose={handleCloseModal}
+        />
       )}
     </div>
   );
