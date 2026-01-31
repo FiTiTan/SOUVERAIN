@@ -116,7 +116,14 @@ git reset --hard backup-pre-perf-optimization
   - OnboardingCarousel.tsx: 1162 → 920 lines (-21%)
   - **Gain: Better code splitting + lazy loading**
 
-### [04:30] PHASE 1 & 2 TERMINÉES ! 🎉
+### [04:30-05:30] Phase 3 - Cleanup & Virtualisation
+
+En cours:
+⏳ Install react-window pour virtualisation listes longues
+⏸️ Cleanup handlers doublons main.cjs (sera fait après tests)
+⏸️ CVWizard split (762 lignes - complexe, Phase 4)
+
+### [05:30] PHASE 1 & 2 TERMINÉES ! Phase 3 en cours 🚀
 - ✅ ThemeContext split state/actions (commit 43cee3c)
   - Separate contexts for state vs actions
   - Components using only toggleTheme never re-render
