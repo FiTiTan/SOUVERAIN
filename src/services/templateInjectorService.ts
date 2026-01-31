@@ -178,6 +178,9 @@ function processRepeat<T>(
 function processConditionalZones(html: string, flags: PortfolioFlags): string {
   let result = html;
 
+  console.log('[IF] Flags reçus:', flags);
+  console.log('[IF] Conditions trouvées:', html.match(/<!-- IF: \w+ -->/g));
+
   // 1. Traiter les IF: NOT xxx (AVANT les IF normaux)
   const notRegex = /<!-- IF: NOT (\w+) -->([\s\S]*?)<!-- ENDIF: NOT \1 -->/g;
   result = result.replace(notRegex, (match, conditionName, content) => {
