@@ -53,7 +53,7 @@ export const PortfolioHub: React.FC = () => {
 
                 if (!isMounted) return;
 
-                if (portfolioResult.success && portfolioResult.portfolios.length > 0) {
+                if (portfolioResult && portfolioResult.success && portfolioResult.portfolios.length > 0) {
                     const primary = portfolioResult.portfolios.find((p: any) => p.is_primary) || portfolioResult.portfolios[0];
                     setPortfolioId(primary.id);
                     console.log('[PortfolioHub] Primary portfolio ID:', primary.id);
@@ -61,7 +61,7 @@ export const PortfolioHub: React.FC = () => {
                     // Fetch project count for the primary portfolio
                     // @ts-ignore
                     const projectsResult = await window.electron.portfolio.getAllProjects(primary.id);
-                    if (isMounted && projectsResult.success) {
+                    if (isMounted && projectsResult && projectsResult.success) {
                         setProjectCount(projectsResult.projects.length);
                     }
 
