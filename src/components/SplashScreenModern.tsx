@@ -189,25 +189,6 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
                   </p>
                 )}
               </div>
-
-              {/* Stat Badge */}
-              {tip.stat && (
-                <div style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: `${theme.accent.primary}20`,
-                  borderRadius: borderRadius.md,
-                  border: `1px solid ${theme.accent.primary}40`,
-                  flexShrink: 0,
-                }}>
-                  <span style={{
-                    fontSize: typography.fontSize.lg,
-                    fontWeight: typography.fontWeight.bold,
-                    color: theme.accent.primary,
-                  }}>
-                    {tip.stat}
-                  </span>
-                </div>
-              )}
             </div>
           </motion.div>
         </motion.div>

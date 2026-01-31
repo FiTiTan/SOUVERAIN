@@ -6,7 +6,6 @@
 export interface LoadingTip {
   category: 'cv' | 'portfolio' | 'linkedin' | 'jobmatch' | 'vault';
   text: string;
-  stat?: string; // Optional stat to highlight
   source?: string; // Optional source for credibility
 }
 
@@ -14,20 +13,17 @@ export const loadingTips: LoadingTip[] = [
   // CV Tips - VÉRIFIÉ
   {
     category: 'cv',
-    text: "Les recruteurs passent en moyenne 7 secondes sur un CV.",
-    stat: "7.4 sec",
+    text: "Les recruteurs passent en moyenne 7 secondes pour décider si votre CV mérite leur attention.",
     source: "TheLadders Eye-Tracking Study 2018"
   },
   {
     category: 'cv',
-    text: "90% des entreprises utilisent un système de tri automatique (ATS).",
-    stat: "90%",
+    text: "90% des entreprises utilisent un système de tri automatique (ATS) pour filtrer les candidatures.",
     source: "Harvard Business School + Accenture 2025"
   },
   {
     category: 'cv',
-    text: "88% des employeurs disent que l'ATS peut filtrer des candidats qualifiés.",
-    stat: "88%",
+    text: "88% des employeurs reconnaissent que l'ATS peut filtrer des candidats qualifiés par erreur.",
     source: "Harvard Business School 2025"
   },
   {
@@ -42,8 +38,7 @@ export const loadingTips: LoadingTip[] = [
   },
   {
     category: 'portfolio',
-    text: "Les freelances expérimentés avec portfolio facturent $100-200/h vs $25-50/h débutants.",
-    stat: "x2-4",
+    text: "Les freelances expérimentés avec portfolio facturent 2 à 4 fois plus que les débutants ($100-200/h vs $25-50/h).",
     source: "Consensus marché freelance 2025"
   },
   {
@@ -54,20 +49,17 @@ export const loadingTips: LoadingTip[] = [
   // LinkedIn Tips - VÉRIFIÉ
   {
     category: 'linkedin',
-    text: "Un profil LinkedIn complet génère 21x plus de vues.",
-    stat: "21x",
+    text: "Un profil LinkedIn complet génère 21 fois plus de vues qu'un profil incomplet.",
     source: "Omnicore Agency 2024"
   },
   {
     category: 'linkedin',
-    text: "Les profils complets reçoivent 36x plus de messages de recruteurs.",
-    stat: "36x",
+    text: "Les profils complets reçoivent 36 fois plus de messages de recruteurs.",
     source: "Omnicore Agency 2024"
   },
   {
     category: 'linkedin',
-    text: "Un profil complet augmente vos callbacks de 15.8% pour les postes entry-level.",
-    stat: "+15.8%",
+    text: "Un profil complet augmente vos chances de callback de 15,8% pour les postes entry-level.",
     source: "Statista 2024"
   },
 
@@ -76,13 +68,11 @@ export const loadingTips: LoadingTip[] = [
   // {
   //   category: 'linkedin',
   //   text: "50 à 70% des postes se remplissent sans annonce publique (marché caché).",
-  //   stat: "50-70%",
   //   source: "The Interview Guys 2025, Management Consulted 2024"
   // },
   // {
   //   category: 'linkedin',
-  //   text: "Les candidats recommandés en interne ont 15x plus de chances d'être embauchés.",
-  //   stat: "15x",
+  //   text: "Les candidats recommandés en interne ont 15 fois plus de chances d'être embauchés.",
   //   source: "OpenArc 2025"
   // },
   // {
@@ -93,32 +83,27 @@ export const loadingTips: LoadingTip[] = [
   // Business / Online Presence - VÉRIFIÉ
   {
     category: 'portfolio',
-    text: "76% des clients regardent votre présence en ligne avant de visiter votre boutique.",
-    stat: "76%",
+    text: "76% des clients regardent votre présence en ligne avant de visiter votre boutique physique.",
     source: "Netsertive 2021"
   },
   {
     category: 'portfolio',
     text: "96% des clients utilisent internet pour lire les avis sur les commerces locaux.",
-    stat: "96%",
     source: "Fit Small Business 2023"
   },
   {
     category: 'portfolio',
-    text: "Les avis Google ont un impact de 20% sur votre visibilité locale.",
-    stat: "20%",
+    text: "Les avis Google ont un impact de 20% sur votre visibilité locale dans les recherches.",
     source: "BridgeMedia 2025"
   },
   {
     category: 'portfolio',
-    text: "81% des consommateurs utilisent Google reviews pour évaluer les commerces.",
-    stat: "81%",
+    text: "81% des consommateurs utilisent Google reviews pour évaluer les commerces avant de s'y rendre.",
     source: "Shapo.io 2025"
   },
   {
     category: 'portfolio',
-    text: "45% visitent le magasin physique après avoir trouvé une forte présence en ligne.",
-    stat: "45%",
+    text: "45% des gens visitent le magasin physique après avoir découvert une forte présence en ligne.",
     source: "Netsertive 2021"
   },
 
@@ -126,21 +111,18 @@ export const loadingTips: LoadingTip[] = [
   {
     category: 'portfolio',
     text: "54% des 25-34 ans utilisent Instagram pour chercher des commerces locaux.",
-    stat: "54%",
     source: "Hootsuite 2025"
   },
   {
     category: 'portfolio',
-    text: "78% des commerces locaux utilisent les réseaux pour augmenter leur notoriété.",
-    stat: "78%",
+    text: "78% des commerces locaux utilisent les réseaux sociaux pour augmenter leur notoriété.",
     source: "Synup 2025"
   },
 
   // Vault / Security Tips - VÉRIFIÉ
   {
     category: 'vault',
-    text: "Vos données restent sur votre appareil. Aucun cloud tiers.",
-    stat: "100% local",
+    text: "Vos données restent à 100% sur votre appareil. Aucun cloud tiers.",
   },
   {
     category: 'vault',
@@ -152,20 +134,17 @@ export const loadingTips: LoadingTip[] = [
   },
   {
     category: 'vault',
-    text: "92% des gens s'inquiètent de leur vie privée en ligne.",
-    stat: "92%",
+    text: "92% des gens s'inquiètent de leur vie privée en ligne et de la façon dont leurs données sont utilisées.",
     source: "Usercentrics 2025"
   },
   {
     category: 'vault',
-    text: "81% des piratages sont causés par des mots de passe faibles.",
-    stat: "81%",
+    text: "81% des piratages de comptes sont causés par des mots de passe faibles ou réutilisés.",
     source: "Trust & Will"
   },
   {
     category: 'vault',
-    text: "19% des gens ont subi une fuite de données l'an dernier.",
-    stat: "19%",
+    text: "19% des gens ont été informés d'une fuite de leurs données personnelles au cours de l'année passée.",
     source: "Thales 2025"
   },
 ];
