@@ -36,15 +36,21 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
   useEffect(() => {
     if (minTimeElapsed && isAppReady) {
       setIsDone(true);
-      setTimeout(onComplete, 800); // Smooth fade out
+      setTimeout(onComplete, 1000); // Smooth fade out + scale
     }
   }, [minTimeElapsed, isAppReady, onComplete]);
 
   return (
     <motion.div
-      initial={{ opacity: 1 }}
-      animate={{ opacity: isDone ? 0 : 1 }}
-      transition={{ duration: 0.8 }}
+      initial={{ opacity: 1, scale: 1 }}
+      animate={{ 
+        opacity: isDone ? 0 : 1,
+        scale: isDone ? 0.95 : 1
+      }}
+      transition={{ 
+        duration: 1,
+        ease: [0.4, 0, 0.2, 1] // Smooth ease-out curve
+      }}
       style={{
         position: 'fixed',
         inset: 0,
@@ -139,10 +145,27 @@ export const SplashScreenModern: React.FC<SplashScreenModernProps> = ({ onComple
             }}>
               {/* Icon */}
               <div style={{
-                fontSize: '2rem',
                 flexShrink: 0,
+                width: '32px',
+                height: '32px',
               }}>
-                💡
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zM12 2C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"
+                    fill={theme.accent.primary}
+                    opacity="0.9"
+                  />
+                  <path
+                    d="M11.5 9.5L9 14h3l-.5 2.5L14 12h-3l.5-2.5z"
+                    fill={theme.bg.primary}
+                  />
+                </svg>
               </div>
 
               {/* Content */}
