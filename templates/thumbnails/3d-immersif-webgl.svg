@@ -1,4 +1,14 @@
 <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
-  <rect width="400" height="300" fill="#667eea"/>
-  <text x="200" y="150" font-family="Arial" font-size="24" fill="white" text-anchor="middle">3d-immersif-webgl</text>
+  <defs>
+    <linearGradient id="3d" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c29;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#302b63;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#24243e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#3d)"/>
+  <polygon points="200,50 280,120 240,200 160,200 120,120" fill="rgba(99,102,241,0.4)" stroke="rgba(139,92,246,0.8)" stroke-width="2"/>
+  <polygon points="200,80 250,130 220,180 180,180 150,130" fill="rgba(139,92,246,0.3)" stroke="rgba(139,92,246,0.6)" stroke-width="2"/>
+  <circle cx="200" cy="140" r="30" fill="rgba(236,72,153,0.3)" stroke="rgba(236,72,153,0.8)" stroke-width="2"/>
+  <text x="200" y="290" font-family="Arial" font-size="14" fill="white" text-anchor="middle" opacity="0.8">3D Immersif WebGL</text>
 </svg>

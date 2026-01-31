@@ -1,4 +1,9 @@
 <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
-  <rect width="400" height="300" fill="#667eea"/>
-  <text x="200" y="150" font-family="Arial" font-size="24" fill="white" text-anchor="middle">dopamine-colors</text>
+  <rect width="400" height="300" fill="#ff6b6b"/>
+  <circle cx="100" cy="80" r="50" fill="#4ecdc4"/>
+  <rect x="200" y="30" width="150" height="100" rx="15" fill="#ffe66d"/>
+  <circle cx="280" cy="200" r="60" fill="#a8dadc"/>
+  <rect x="50" y="180" width="120" height="90" rx="12" fill="#f1c40f"/>
+  <polygon points="180,160 220,200 180,240 140,200" fill="#95e1d3"/>
+  <text x="200" y="290" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="bold">Dopamine Colors</text>
 </svg>

@@ -1,4 +1,8 @@
 <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
-  <rect width="400" height="300" fill="#667eea"/>
-  <text x="200" y="150" font-family="Arial" font-size="24" fill="white" text-anchor="middle">hand-drawn-scribble</text>
+  <rect width="400" height="300" fill="#fef6e4"/>
+  <path d="M 50 60 Q 100 50, 150 60 T 250 60" stroke="#172c66" stroke-width="3" fill="none"/>
+  <circle cx="320" cy="60" r="30" stroke="#172c66" stroke-width="2" fill="none"/>
+  <rect x="50" y="100" width="300" height="80" rx="5" stroke="#172c66" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+  <path d="M 80 220 L 120 240 L 160 220 L 200 240 L 240 220 L 280 240 L 320 220" stroke="#f582ae" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <text x="200" y="285" font-family="Arial" font-size="14" fill="#172c66" text-anchor="middle">Hand-Drawn Scribble</text>
 </svg>

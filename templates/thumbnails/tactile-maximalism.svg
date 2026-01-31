@@ -1,4 +1,9 @@
 <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
-  <rect width="400" height="300" fill="#667eea"/>
-  <text x="200" y="150" font-family="Arial" font-size="24" fill="white" text-anchor="middle">tactile-maximalism</text>
+  <rect width="400" height="300" fill="#ff006e"/>
+  <rect x="10" y="10" width="180" height="130" fill="#fb5607" opacity="0.9"/>
+  <rect x="200" y="10" width="190" height="80" fill="#ffbe0b" opacity="0.8"/>
+  <circle cx="290" cy="180" r="60" fill="#8338ec" opacity="0.85"/>
+  <rect x="10" y="150" width="160" height="140" fill="#3a86ff" opacity="0.9"/>
+  <polygon points="220,120 280,100 320,140 260,160" fill="#06ffa5" opacity="0.8"/>
+  <text x="200" y="290" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="bold">Tactile Maximalism</text>
 </svg>
