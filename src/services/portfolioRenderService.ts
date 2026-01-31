@@ -269,7 +269,12 @@ export const savePortfolioToDB = async (
       },
     });
 
-    return result.success;
+    if (!result || typeof result !== 'object') {
+      console.error('[PortfolioRender] Invalid result from db-save-portfolio-v2:', result);
+      return false;
+    }
+
+    return result.success === true;
   } catch (error) {
     console.error('Error saving portfolio to DB:', error);
     return false;

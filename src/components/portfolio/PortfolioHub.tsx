@@ -212,11 +212,14 @@ export const PortfolioHub: React.FC = () => {
                     name: data.name,
                 });
 
-                if (result.success) {
+                if (result && result.success && result.id) {
                     setPortfolioId(result.id);
 
                     // Save the generated HTML
                     await savePortfolioToDB(result.id, html, data);
+                } else {
+                    console.warn('[PortfolioHub] Failed to create portfolio in DB:', result);
+                    // Continue anyway with generated HTML
                 }
             } else {
                 // Update existing portfolio
