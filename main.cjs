@@ -1133,51 +1133,6 @@ ipcMain.handle('mediatheque-import-files', async (event, portfolioId) => {
   }
 });
 
-ipcMain.handle('mediatheque-add', async (event, data) => {
-    // Used for Drag & Drop where we receive path directly
-    try {
-        const item = await processAndSaveFile(data.filePath, data.portfolioId);
-        return { success: true, item };
-    } catch (err) {
-        return { success: false, error: err.message };
-    }
-});
-
-ipcMain.handle('mediatheque-get-all', async (event, portfolioId) => {
-    try {
-        const items = dbManager.db.prepare('SELECT * FROM mediatheque_items WHERE portfolio_id = ? ORDER BY created_at DESC').all(portfolioId);
-        
-        // Parse JSON fields
-        const parsedItems = items.map(i => ({
-            ...i,
-            tags: i.tags_json ? JSON.parse(i.tags_json) : [],
-            metadata: i.metadata_json ? JSON.parse(i.metadata_json) : {}
-        }));
-
-        return { success: true, items: parsedItems };
-    } catch (err) {
-         return { success: false, error: err.message };
-    }
-});
-
-ipcMain.handle('mediatheque-delete', async (event, id) => {
-    try {
-        const fs = require('fs');
-        const item = dbManager.db.prepare('SELECT * FROM mediatheque_items WHERE id = ?').get(id);
-        if (item) {
-            // Delete files
-            if (item.file_path && fs.existsSync(item.file_path)) fs.unlinkSync(item.file_path);
-            if (item.thumbnail_path && fs.existsSync(item.thumbnail_path)) fs.unlinkSync(item.thumbnail_path);
-            
-            // Delete DB
-            dbManager.db.prepare('DELETE FROM mediatheque_items WHERE id = ?').run(id);
-        }
-        return { success: true };
-    } catch (err) {
-        return { success: false, error: err.message };
-    }
-});
-
 // File Storage (Existing)
 ipcMain.handle('portfolio-v2-save-file', async (event, { portfolioId, fileName, buffer }) => {
   try {
