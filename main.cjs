@@ -352,25 +352,23 @@ ipcMain.handle('groq-compile-vision', async (event, { analysisData, portfolioId 
 });
 
 // Génération Contenu (MPF-5)
-ipcMain.handle('groq-generate-portfolio-content', async (event, { visionContext, style, anonymizedText, projectsCount }) => {
-  if (!groqClient) {
-    if (process.env.GROQ_API_KEY) {
-      groqClient = new GroqClient(process.env.GROQ_API_KEY);
-    } else {
-      return { success: false, error: 'Groq client non initialisé.' };
-    }
-  }
-
-  console.log('[GROQ] Generating Portfolio Content...');
-  
-  // On passe visionContext comme contexte principal
-  return groqClient.generatePortfolioContent({
-    visionContext,
-    style,
-    anonymizedText,
-    structure: visionContext.suggestedSections || ['hero', 'about', 'services', 'contact']
-  });
-});
+// OBSOLETE V1 - Remplacé par groqEnrichmentService.ts (V2)
+// ipcMain.handle('groq-generate-portfolio-content', async (event, { visionContext, style, anonymizedText, projectsCount }) => {
+//   if (!groqClient) {
+//     if (process.env.GROQ_API_KEY) {
+//       groqClient = new GroqClient(process.env.GROQ_API_KEY);
+//     } else {
+//       return { success: false, error: 'Groq client non initialisé.' };
+//     }
+//   }
+//   console.log('[GROQ] Generating Portfolio Content...');
+//   return groqClient.generatePortfolioContent({
+//     visionContext,
+//     style,
+//     anonymizedText,
+//     structure: visionContext.suggestedSections || ['hero', 'about', 'services', 'contact']
+//   });
+// });
 
 
 
@@ -464,23 +462,22 @@ ipcMain.handle('portfolio-analyze-project', async (event, { sourceData, sourceTy
   }
 });
 
-ipcMain.handle('portfolio-regenerate-section', async (event, { projectId, section }) => {
-  try {
-    const project = dbManager.portfolio_project_getById(projectId);
-    if (!project) {
-      return { success: false, error: 'Projet introuvable' };
-    }
-
-    const ProjectAnalyzer = require('./services/project-analyzer.cjs');
-    const analyzer = new ProjectAnalyzer(GROQ_API_KEY);
-
-    const result = await analyzer.regenerateSection(project, section);
-    return result;
-  } catch (err) {
-    console.error('[IPC] portfolio-regenerate-section error:', err.message);
-    return { success: false, error: err.message };
-  }
-});
+// OBSOLETE V1 - Plus utilisé avec le nouveau système de génération V2
+// ipcMain.handle('portfolio-regenerate-section', async (event, { projectId, section }) => {
+//   try {
+//     const project = dbManager.portfolio_project_getById(projectId);
+//     if (!project) {
+//       return { success: false, error: 'Projet introuvable' };
+//     }
+//     const ProjectAnalyzer = require('./services/project-analyzer.cjs');
+//     const analyzer = new ProjectAnalyzer(GROQ_API_KEY);
+//     const result = await analyzer.regenerateSection(project, section);
+//     return result;
+//   } catch (err) {
+//     console.error('[IPC] portfolio-regenerate-section error:', err.message);
+//     return { success: false, error: err.message };
+//   }
+// });
 
 // ============================================================
 // PORTFOLIO GHOST MODE
