@@ -211,6 +211,7 @@ contextBridge.exposeInMainWorld('electron', {
     getHTML: (id) => ipcRenderer.invoke('template-get-html', id),
     getThumbnail: (id) => ipcRenderer.invoke('template-get-thumbnail', id),
     purchase: (templateId, amountPaid, isPremiumDiscount) => ipcRenderer.invoke('template-purchase', { templateId, amountPaid, isPremiumDiscount }),
+    generateScreenshot: (templateId) => ipcRenderer.invoke('template-generate-screenshot', { templateId }),
   },
 
   // ============================================================

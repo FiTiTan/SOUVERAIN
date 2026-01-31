@@ -2765,3 +2765,133 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
+
+// Generate template screenshot (thumbnail)
+ipcMain.handle('template-generate-screenshot', async (event, { templateId }) => {
+  try {
+    
+    
+    console.log('[IPC] Generating screenshot for template:', templateId);
+    
+    // 1. Load template HTML
+    const template = dbManager.templates_getById(templateId);
+    if (!template || !template.html_path) {
+      throw new Error('Template not found');
+    }
+    
+    const templatePath = path.join(__dirname, template.html_path);
+    let html = fs.readFileSync(templatePath, 'utf-8');
+    
+    // 2. Inject mock data
+    const mockData = {
+      HERO_TITLE: 'Jean Dupont',
+      HERO_SUBTITLE: 'Développeur Full-Stack & Designer UI/UX',
+      HERO_EYEBROW: 'Portfolio',
+      HERO_CTA_TEXT: 'Voir mes projets',
+      ABOUT_TEXT: 'Créateur d\'expériences numériques élégantes',
+      ABOUT_IMAGE: 'https://ui-avatars.com/api/?name=Jean+Dupont&size=200&background=667eea&color=fff',
+      VALUE_PROP: 'Des solutions digitales qui transforment vos idées en réalité',
+      CONTACT_EMAIL: 'jean.dupont@example.com',
+      CONTACT_PHONE: '+33 6 12 34 56 78',
+      CONTACT_ADDRESS: '42 rue de la Tech, 75001 Paris',
+      CURRENT_YEAR: new Date().getFullYear().toString(),
+      OPENING_HOURS: 'Lun-Ven : 9h-18h'
+    };
+    
+    // Replace placeholders
+    for (const [key, value] of Object.entries(mockData)) {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      html = html.replace(regex, value);
+    }
+    
+    // 3. Handle repeated sections (simplified for screenshot)
+    const serviceHTML = `
+      <div class="service-card">
+        <span class="service-icon">💻</span>
+        <h3>Développement Web</h3>
+        <p>Applications modernes React & Node.js</p>
+      </div>`;
+    html = html.replace(/<!-- REPEAT: services -->[\s\S]*?<!-- END REPEAT: services -->/g, serviceHTML);
+    
+    const projectHTML = `
+      <article class="project-card">
+        <div class="project-image">
+          <img src="https://placehold.co/600x400/667eea/ffffff?text=Projet" alt="Projet">
+        </div>
+        <div class="project-content">
+          <span class="project-category">Web</span>
+          <h3>Plateforme E-commerce</h3>
+          <p>Solution complète de vente en ligne</p>
+        </div>
+      </article>`;
+    html = html.replace(/<!-- REPEAT: projects -->[\s\S]*?<!-- END REPEAT: projects -->/g, projectHTML);
+    
+    const socialHTML = `<a href="#" class="social-link">LinkedIn</a>`;
+    html = html.replace(/<!-- REPEAT: socialLinks -->[\s\S]*?<!-- END REPEAT: socialLinks -->/g, socialHTML);
+    
+    // Remove empty sections
+    html = html.replace(/<!-- REPEAT: testimonials -->[\s\S]*?<!-- END REPEAT: testimonials -->/g, '');
+    
+    // Handle conditionals
+    html = html.replace(/<!-- IF: showProjects -->[\s\S]*?<!-- ENDIF: showProjects -->/gs, (match) => {
+      return match.replace(/<!-- IF: showProjects -->|<!-- ENDIF: showProjects -->/g, '');
+    });
+    html = html.replace(/<!-- IF: showTestimonials -->[\s\S]*?<!-- ENDIF: showTestimonials -->/gs, '');
+    html = html.replace(/<!-- IF: showSocialShowcase -->[\s\S]*?<!-- ENDIF: showSocialShowcase -->/gs, '');
+    html = html.replace(/<!-- IF: showPracticalInfo -->[\s\S]*?<!-- ENDIF: showPracticalInfo -->/gs, '');
+    html = html.replace(/<!-- IF: hasAboutImage -->[\s\S]*?<!-- ENDIF: hasAboutImage -->/gs, (match) => {
+      return match.replace(/<!-- IF: hasAboutImage -->|<!-- ENDIF: hasAboutImage -->/g, '');
+    });
+    html = html.replace(/<!-- IF: hasValueProp -->[\s\S]*?<!-- ENDIF: hasValueProp -->/gs, (match) => {
+      return match.replace(/<!-- IF: hasValueProp -->|<!-- ENDIF: hasValueProp -->/g, '');
+    });
+    
+    // 4. Create invisible window
+    const screenshotWindow = new BrowserWindow({
+      width: 1200,
+      height: 900,
+      show: false,
+      webPreferences: {
+        offscreen: true,
+      },
+    });
+    
+    // 5. Load HTML and capture
+    await screenshotWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    
+    // Wait for page to fully render
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Capture screenshot
+    const image = await screenshotWindow.webContents.capturePage();
+    
+    // Close window
+    screenshotWindow.close();
+    
+    // 6. Resize to thumbnail size (400x300)
+    const resizedBuffer = await sharp(image.toPNG())
+      .resize(400, 300, {
+        fit: 'cover',
+        position: 'top'
+      })
+      .png({ quality: 90 })
+      .toBuffer();
+    
+    // 7. Save to thumbnails directory
+    const thumbnailDir = path.join(__dirname, 'templates', 'thumbnails');
+    if (!fs.existsSync(thumbnailDir)) {
+      fs.mkdirSync(thumbnailDir, { recursive: true });
+    }
+    
+    const thumbnailPath = path.join(thumbnailDir, `${templateId}.png`);
+    fs.writeFileSync(thumbnailPath, resizedBuffer);
+    
+    console.log('[IPC] Screenshot saved:', thumbnailPath);
+    
+    return { success: true, path: `templates/thumbnails/${templateId}.png` };
+    
+  } catch (error) {
+    console.error('[IPC] template-generate-screenshot error:', error);
+    return { success: false, error: error.message };
+  }
+});
