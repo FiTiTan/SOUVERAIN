@@ -14,7 +14,8 @@ interface Step6MediaProps {
 const MediaPreviewCard: React.FC<{
   file: File;
   onRemove: () => void;
-}> = ({ file, onRemove }) => {
+  onClick: () => void;
+}> = ({ file, onRemove, onClick }) => {
   const { theme } = useTheme();
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -40,13 +41,24 @@ const MediaPreviewCard: React.FC<{
 
   return (
     <div
+      onClick={onClick}
       style={{
         background: theme.bg.secondary,
         border: `1px solid ${theme.border.light}`,
         borderRadius: borderRadius.lg,
         overflow: 'hidden',
         position: 'relative',
-        aspectRatio: '16/9',
+        aspectRatio: '1/1',
+        cursor: 'pointer',
+        transition: transitions.fast,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.2)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'none';
       }}
     >
       {/* Preview */}
@@ -107,7 +119,10 @@ const MediaPreviewCard: React.FC<{
 
         {/* Remove Button */}
         <button
-          onClick={onRemove}
+          onClick={(e) => {
+            e.stopPropagation(); // Empêcher le onClick du parent
+            onRemove();
+          }}
           style={{
             padding: '0.5rem',
             borderRadius: borderRadius.md,
@@ -137,6 +152,8 @@ const MediaPreviewCard: React.FC<{
 export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
   const { theme, mode } = useTheme();
   const [isDragging, setIsDragging] = useState(false);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -156,6 +173,23 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
 
   const handleRemove = (index: number) => {
     onChange({ media: data.media.filter((_, i) => i !== index) });
+  };
+
+  const handlePreview = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+      setPreviewFile(file);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const closePreview = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setPreviewFile(null);
   };
 
   return (
@@ -280,6 +314,7 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
                 key={`${file.name}-${index}`}
                 file={file}
                 onRemove={() => handleRemove(index)}
+                onClick={() => handlePreview(file)}
               />
             ))}
           </div>
@@ -302,6 +337,87 @@ export const Step6Media: React.FC<Step6MediaProps> = ({ data, onChange }) => {
         <LightbulbIcon size={18} color={theme.text.tertiary} />
         <span>Les médias seront automatiquement optimisés pour le web</span>
       </div>
+
+      {/* Preview Modal */}
+      {previewFile && previewUrl && (
+        <div
+          onClick={closePreview}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.9)',
+            backdropFilter: 'blur(10px)',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '2rem',
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem',
+            }}
+          >
+            <div style={{ color: '#fff', fontSize: typography.fontSize.lg, fontWeight: typography.fontWeight.semibold }}>
+              {previewFile.name}
+            </div>
+            <button
+              onClick={closePreview}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: borderRadius.md,
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontSize: typography.fontSize.sm,
+                cursor: 'pointer',
+              }}
+            >
+              Fermer ✕
+            </button>
+          </div>
+
+          {/* Preview Content */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+            }}
+          >
+            {previewFile.type.startsWith('image/') ? (
+              <img
+                src={previewUrl}
+                alt={previewFile.name}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                }}
+              />
+            ) : (
+              <video
+                src={previewUrl}
+                controls
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };
