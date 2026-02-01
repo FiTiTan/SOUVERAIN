@@ -269,7 +269,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
       <div style={headerStyle}>
         <div>
           <h2 style={{ fontSize: typography.fontSize.xl, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-            ✨ Personnalisation des images
+            Personnalisation des images
           </h2>
           <p style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary, marginTop: '0.25rem' }}>
             Glissez vos images depuis la bibliothèque vers les zones
@@ -288,7 +288,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
         <div style={{ ...columnStyle, borderRight: `1px solid ${theme.border.light}`, backgroundColor: theme.bg.secondary }}>
           <div style={columnHeaderStyle}>
             <h3 style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-              📁 Bibliothèque ({libraryImages.length})
+              Bibliothèque ({libraryImages.length})
             </h3>
           </div>
 
@@ -374,7 +374,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
         <div style={{ ...columnStyle, borderRight: `1px solid ${theme.border.light}`, backgroundColor: theme.bg.primary }}>
           <div style={columnHeaderStyle}>
             <h3 style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-              🎯 Zones
+              Zones
             </h3>
           </div>
 
@@ -522,7 +522,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
         <div style={{ ...columnStyle, backgroundColor: theme.bg.tertiary }}>
           <div style={columnHeaderStyle}>
             <h3 style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-              👁️ Aperçu final
+              Aperçu final
             </h3>
           </div>
 
