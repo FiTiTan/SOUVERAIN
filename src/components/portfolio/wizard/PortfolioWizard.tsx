@@ -10,7 +10,7 @@ import { Step2Offer } from './Step2Offer';
 import { Step3Contact } from './Step3Contact';
 import { Step4Documents } from './Step4Documents';
 import { Step5Social } from './Step5Social';
-import { Step6Media } from './Step6Media';
+// import { Step6Media } from './Step6Media'; // SKIP - images ajoutées dans EditablePreview
 import { Step7Template } from './Step7Template';
 import {
   initialFormData,
@@ -46,6 +46,15 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
   });
 
   const totalSteps = 7;
+  
+  // Map étape actuelle pour affichage (skip step 6)
+  const getDisplayStep = (actualStep: number): number => {
+    if (actualStep <= 5) return actualStep;
+    if (actualStep === 7) return 6; // Step 7 devient step 6 affiché
+    return actualStep;
+  };
+  
+  const displayTotalSteps = 6; // On affiche 6 étapes au lieu de 7
 
   const handleDataChange = (updates: Partial<PortfolioFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -113,7 +122,12 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
     }
 
     if (step < totalSteps) {
-      setStep(step + 1);
+      // Skip step 6 (Media) - passer de 5 à 7
+      if (step === 5) {
+        setStep(7);
+      } else {
+        setStep(step + 1);
+      }
     } else {
       // Final step - complete the wizard
       onComplete(formData);
@@ -122,7 +136,12 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
 
   const handleBack = () => {
     if (step > 1) {
-      setStep(step - 1);
+      // Skip step 6 en arrière - retourner de 7 à 5
+      if (step === 7) {
+        setStep(5);
+      } else {
+        setStep(step - 1);
+      }
     }
   };
 
@@ -177,7 +196,7 @@ export const PortfolioWizard: React.FC<PortfolioWizardProps> = ({
       }}>
         {/* Progress */}
         <div style={{ flexShrink: 0, marginBottom: '1.5rem' }}>
-          <WizardProgress currentStep={step} totalSteps={totalSteps} />
+          <WizardProgress currentStep={getDisplayStep(step)} totalSteps={displayTotalSteps} />
           {DEV_MODE && (
             <div
               style={{
