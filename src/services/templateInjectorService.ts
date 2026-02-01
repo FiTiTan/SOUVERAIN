@@ -162,9 +162,12 @@ function processRepeat<T>(
       return ''; // Supprimer la zone si pas d'éléments
     }
 
-    return items.map((item) => {
+    return items.map((item, index) => {
       let block = blockContent;
       const replacements = getReplacements(item);
+      
+      // 0. Ajouter l'index pour data-image-zone
+      replacements['INDEX'] = index.toString();
       
       // 1. Traiter les IF locaux si des flags sont fournis
       if (getLocalFlags) {

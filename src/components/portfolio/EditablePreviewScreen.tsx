@@ -383,10 +383,14 @@ const injectImagesIntoHtml = (html: string, assignments: ImageAssignments): stri
   // Injecter project images
   Object.entries(assignments).forEach(([key, value]) => {
     if (key.startsWith('project-') && value) {
-      const regex = new RegExp(`data-image-zone="${key}"[^>]*>[\\s\\S]*?<\\/div>`, 'g');
+      const projectIndex = key.split('-')[1];
+      const regex = new RegExp(
+        `data-image-zone="project"[^>]*data-project-index="${projectIndex}"[^>]*>[\\s\\S]*?<\\/div>`,
+        'g'
+      );
       result = result.replace(
         regex,
-        `data-image-zone="${key}"><img src="${value}" alt="Project" style="width: 100%; height: 100%; object-fit: cover;"/></div>`
+        `data-image-zone="project" data-project-index="${projectIndex}"><img src="${value}" alt="Project" style="width: 100%; height: 100%; object-fit: cover;"/></div>`
       );
     }
   });

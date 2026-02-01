@@ -1130,7 +1130,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
                 <p class="hero-subtitle">{{HERO_SUBTITLE}}</p>
                 <a href="#contact" class="btn-primary">{{HERO_CTA_TEXT}}</a>
             </div>
-            <div class="hero-visual">
+            <div class="hero-visual" data-image-zone="hero">
                 <img src="{{ABOUT_IMAGE}}" alt="{{HERO_TITLE}}" class="hero-blob-image">
             </div>
         </div>
@@ -1180,7 +1180,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
     <section class="about" id="about">
         <div class="about-container">
             <!-- IF: hasAboutImage -->
-            <div class="about-image-wrapper">
+            <div class="about-image-wrapper" data-image-zone="about">
                 <div class="about-blob">
                     <img src="{{ABOUT_IMAGE}}" alt="{{HERO_TITLE}}">
                 </div>
@@ -1219,7 +1219,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         <div class="projects-organic">
             <!-- REPEAT: projects -->
             <article class="project-item">
-                <div class="project-visual">
+                <div class="project-visual" data-image-zone="project" data-project-index="{{INDEX}}">
                     <div class="project-blob">
                         <img src="{{PROJECT_IMAGE}}" alt="{{PROJECT_TITLE}}">
                     </div>

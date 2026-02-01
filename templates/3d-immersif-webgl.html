@@ -1043,7 +1043,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
     <!-- SECTION: about (OBLIGATOIRE) -->
     <section class="about" id="about">
         <!-- IF: hasAboutImage -->
-        <div class="about-image-wrapper">
+        <div class="about-image-wrapper" data-image-zone="about">
             <img src="{{ABOUT_IMAGE}}" alt="{{HERO_TITLE}}">
         </div>
         <!-- ENDIF: hasAboutImage -->
@@ -1079,7 +1079,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         <div class="projects-grid">
             <!-- REPEAT: projects -->
             <article class="project-card">
-                <div class="project-image">
+                <div class="project-image" data-image-zone="project" data-project-index="{{INDEX}}">
                     <img src="{{PROJECT_IMAGE}}" alt="{{PROJECT_TITLE}}">
                 </div>
                 <div class="project-content">
