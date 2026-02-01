@@ -1,0 +1,185 @@
+/**
+ * SOUVERAIN - Portfolio Generator V2 Service
+ * Adapte le nouveau wizard V2 vers le système de génération existant
+ */
+
+import type { PortfolioFormDataV2 } from '../components/portfolio/types';
+import type { EnrichedPortfolioData } from './groqEnrichmentService';
+import { injectDataIntoTemplate, computeFlags } from './templateInjectorService';
+import { getLabels } from '../config/portfolioLabels';
+
+/**
+ * Charge un template HTML
+ */
+async function loadTemplateHTML(templateId: string): Promise<string> {
+  try {
+    // @ts-ignore
+    const result = await window.electron.invoke('template-get-html', templateId);
+    
+    if (typeof result === 'object' && result !== null && 'html' in result) {
+      return result.html || '';
+    }
+    return typeof result === 'string' ? result : '';
+  } catch (error) {
+    console.error(`[GeneratorV2] Error loading template:`, error);
+    throw new Error(`Impossible de charger le template`);
+  }
+}
+
+/**
+ * Convertit les données du wizard V2 vers le format EnrichedPortfolioData
+ */
+function convertToEnrichedData(formData: PortfolioFormDataV2): EnrichedPortfolioData {
+  const labels = getLabels(formData.profileContext);
+  
+  return {
+    // Hero
+    heroTitle: formData.name,
+    heroSubtitle: formData.tagline,
+    heroEyebrow: formData.title || '',
+    heroCta: 'Me contacter',
+    
+    // About
+    aboutText: `${formData.name} - ${formData.tagline}`,
+    aboutImage: formData.imageAssignments.about,
+    valueProp: formData.valueProp,
+    
+    // Services
+    services: formData.services.map(s => ({
+      title: s.title,
+      description: s.description,
+      icon: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/></svg>', // Placeholder
+    })),
+    
+    // Projects/Réalisations
+    projects: formData.realisations.map((r, index) => ({
+      title: r.title,
+      description: r.description,
+      category: r.category,
+      image: formData.imageAssignments[`project-${index}`],
+      link: '#',
+    })),
+    
+    // Contact
+    email: formData.email || 'contact@example.com',
+    phone: formData.phone,
+    address: formData.address,
+    openingHours: formData.openingHours,
+    
+    // Social
+    socialLinks: formData.socialLinks.map(s => ({
+      platform: s.platform,
+      url: s.url,
+      label: s.label || s.platform,
+    })),
+    
+    socialIsMain: false,
+  };
+}
+
+/**
+ * Génère le HTML du portfolio depuis les données du wizard V2
+ */
+export async function generatePortfolioFromWizardV2(
+  formData: PortfolioFormDataV2,
+  onProgress?: (step: string, progress: number) => void
+): Promise<{ success: boolean; html?: string; error?: string }> {
+  try {
+    console.log('[GeneratorV2] Starting generation...');
+    
+    // Étape 1 : Chargement du template
+    onProgress?.('Chargement du template...', 25);
+    const templateHTML = await loadTemplateHTML(formData.templateId);
+    
+    if (!templateHTML) {
+      throw new Error('Template HTML vide');
+    }
+    
+    // Étape 2 : Conversion des données
+    onProgress?.('Préparation des données...', 50);
+    const enrichedData = convertToEnrichedData(formData);
+    
+    // Étape 3 : Calcul des flags
+    onProgress?.('Configuration...', 75);
+    const flags = computeFlags(enrichedData);
+    
+    // Étape 4 : Injection dans le template
+    onProgress?.('Génération du HTML...', 90);
+    const labels = getLabels(formData.profileContext);
+    
+    // Ajouter les labels dans les données
+    const dataWithLabels = {
+      ...enrichedData,
+      SERVICES_LABEL: labels.services,
+      REALISATIONS_LABEL: labels.realisations,
+      REALISATIONS_SUBTITLE: labels.realisationsSubtitle,
+    };
+    
+    const renderedHTML = injectDataIntoTemplate(templateHTML, dataWithLabels, flags);
+    
+    onProgress?.('Finalisation...', 100);
+    
+    console.log('[GeneratorV2] ✅ Generation complete');
+    
+    return {
+      success: true,
+      html: renderedHTML,
+    };
+  } catch (error: any) {
+    console.error('[GeneratorV2] ❌ Error:', error);
+    return {
+      success: false,
+      error: error.message || 'Erreur lors de la génération',
+    };
+  }
+}
+
+/**
+ * Exporte le portfolio en ZIP (HTML + assets)
+ */
+export async function exportPortfolioZip(
+  formData: PortfolioFormDataV2,
+  html: string
+): Promise<{ success: boolean; path?: string; error?: string }> {
+  try {
+    console.log('[GeneratorV2] Exporting portfolio...');
+    
+    // Préparer les assets (images)
+    const assets: Array<{ name: string; data: string }> = [];
+    
+    // Collecter toutes les images
+    Object.entries(formData.imageAssignments).forEach(([key, dataUrl]) => {
+      if (dataUrl) {
+        assets.push({
+          name: `${key}.jpg`,
+          data: dataUrl,
+        });
+      }
+    });
+    
+    // Appeler le main process pour créer le ZIP
+    // @ts-ignore
+    const result = await window.electron.invoke('export-portfolio-zip', {
+      html,
+      assets,
+      filename: `${formData.name.replace(/\s+/g, '_')}_portfolio.zip`,
+    });
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Échec de l\'export');
+    }
+    
+    console.log('[GeneratorV2] ✅ Export complete:', result.path);
+    
+    return {
+      success: true,
+      path: result.path,
+    };
+  } catch (error: any) {
+    console.error('[GeneratorV2] ❌ Export error:', error);
+    return {
+      success: false,
+      error: error.message || 'Erreur lors de l\'export',
+    };
+  }
+}

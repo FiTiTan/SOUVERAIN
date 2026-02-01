@@ -198,6 +198,63 @@ ipcMain.handle('scrape-website', async (event, { url }) => {
   }
 });
 
+/**
+ * Export portfolio en ZIP (HTML + assets)
+ */
+ipcMain.handle('export-portfolio-zip', async (event, { html, assets, filename }) => {
+  try {
+    console.log('[SOUVERAIN] 🔵 Exporting portfolio ZIP:', filename);
+    
+    const JSZip = require('jszip');
+    const zip = new JSZip();
+    
+    // Ajouter le HTML
+    zip.file('index.html', html);
+    
+    // Créer le dossier assets
+    const assetsFolder = zip.folder('assets');
+    
+    // Ajouter les images
+    for (const asset of assets) {
+      if (asset.data && asset.data.startsWith('data:')) {
+        // Extraire le base64
+        const base64Data = asset.data.split(',')[1];
+        assetsFolder.file(asset.name, base64Data, { base64: true });
+      }
+    }
+    
+    // Générer le ZIP
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+    
+    // Demander où sauvegarder
+    const { filePath } = await dialog.showSaveDialog(mainWindow, {
+      title: 'Exporter le portfolio',
+      defaultPath: filename,
+      filters: [{ name: 'ZIP', extensions: ['zip'] }],
+    });
+    
+    if (!filePath) {
+      return { success: false, error: 'Export annulé' };
+    }
+    
+    // Écrire le fichier
+    fs.writeFileSync(filePath, zipBuffer);
+    
+    console.log('[SOUVERAIN] ✅ Portfolio exported:', filePath);
+    
+    return {
+      success: true,
+      path: filePath,
+    };
+  } catch (error) {
+    console.error('[SOUVERAIN] ❌ Export error:', error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+});
+
 // ============================================================
 // IMAGE PROCESSING - PORTFOLIO WIZARD
 // ============================================================

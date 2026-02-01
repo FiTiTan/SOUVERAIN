@@ -4,6 +4,7 @@ import { PortfolioLanding } from './PortfolioLanding';
 import { MasterPortfolioView } from './master/MasterPortfolioView';
 import { PortfolioSelector } from './master/PortfolioSelector';
 import { PortfolioWizard } from './wizard/PortfolioWizard';
+import { PortfolioWizardV2 } from './wizard/PortfolioWizardV2';
 import { PortfolioFinalPreview } from './master/PortfolioFinalPreview';
 import { MediathequeView } from './mediatheque/MediathequeView';
 import { ProjectHub } from './projects/ProjectHub';
@@ -455,10 +456,34 @@ export const PortfolioHub: React.FC = () => {
                     )}
 
                     {mpfScreen === 'wizard' && (
-                        <PortfolioWizard
-                            onComplete={handleWizardComplete}
+                        <PortfolioWizardV2
+                            onComplete={(data) => {
+                                // Convertir les données V2 vers l'ancien format pour compatibilité
+                                const legacyData: PortfolioFormData = {
+                                    firstName: data.name.split(' ')[0] || data.name,
+                                    lastName: data.name.split(' ').slice(1).join(' ') || '',
+                                    title: data.title || '',
+                                    tagline: data.tagline,
+                                    email: data.email || '',
+                                    phone: data.phone || '',
+                                    socialLinks: data.socialLinks,
+                                    bio: data.valueProp,
+                                    aboutText: data.valueProp,
+                                    services: data.services.map(s => ({ title: s.title, description: s.description })),
+                                    media: [],
+                                    projects: data.realisations,
+                                    templateId: data.templateId,
+                                };
+                                handleWizardComplete(legacyData);
+                            }}
                             onCancel={() => setMpfScreen('selector')}
                         />
+                        
+                        // Ancien wizard (backup):
+                        // <PortfolioWizard
+                        //     onComplete={handleWizardComplete}
+                        //     onCancel={() => setMpfScreen('selector')}
+                        // />
                     )}
 
                     {mpfScreen === 'generating' && (

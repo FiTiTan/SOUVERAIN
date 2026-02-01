@@ -22,15 +22,27 @@ export const WizardStepExport: React.FC<WizardStepProps> = ({
     setIsExporting(true);
 
     try {
-      // TODO: Appeler le service d'export réel
-      // const result = await exportService.exportPortfolio(formData);
+      // Import dynamique du service
+      const { exportPortfolioZip } = await import('../../../services/portfolioGeneratorV2Service');
       
-      // Simuler l'export
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // @ts-ignore - Récupérer le HTML généré
+      const html = formData._generatedHTML;
       
-      setExportPath('/path/to/portfolio.zip');
-    } catch (error) {
+      if (!html) {
+        throw new Error('HTML non généré. Revenez à l\'étape précédente.');
+      }
+      
+      // Appel du service d'export
+      const result = await exportPortfolioZip(formData, html);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Échec de l\'export');
+      }
+      
+      setExportPath(result.path || 'Portfolio exporté');
+    } catch (error: any) {
       console.error('[Export] Error:', error);
+      alert(`Erreur d'export: ${error.message}`);
     } finally {
       setIsExporting(false);
     }

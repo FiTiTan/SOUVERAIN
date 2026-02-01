@@ -25,28 +25,24 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
 
   const generatePortfolio = async () => {
     try {
-      // Étape 1 : Données analysées
-      setCurrentStep('Analyse des données...');
-      setProgress(25);
-      await sleep(800);
+      // Import dynamique du service
+      const { generatePortfolioFromWizardV2 } = await import('../../../services/portfolioGeneratorV2Service');
+      
+      // Appel du service de génération avec callback de progression
+      const result = await generatePortfolioFromWizardV2(formData, (step, progressValue) => {
+        setCurrentStep(step);
+        setProgress(progressValue);
+      });
 
-      // Étape 2 : Contenu enrichi
-      setCurrentStep('Enrichissement du contenu...');
-      setProgress(50);
-      await sleep(1000);
+      if (!result.success) {
+        throw new Error(result.error || 'Échec de la génération');
+      }
 
-      // TODO: Appeler le service de génération réel
-      // const result = await portfolioGeneratorService.generate(formData);
-
-      // Étape 3 : Mise en page
-      setCurrentStep('Mise en page...');
-      setProgress(75);
-      await sleep(800);
-
-      // Étape 4 : Finalisation
-      setCurrentStep('Finalisation...');
-      setProgress(100);
-      await sleep(500);
+      // Stocker le HTML généré dans formData pour le Step 6
+      onUpdate({ 
+        // @ts-ignore - On ajoute temporairement le HTML généré
+        _generatedHTML: result.html 
+      });
 
       setIsComplete(true);
 
@@ -54,10 +50,10 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
       setTimeout(() => {
         onNext();
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('[Generation] Error:', error);
-      setCurrentStep('Erreur lors de la génération');
-      // TODO: Gérer l'erreur
+      setCurrentStep(`Erreur: ${error.message}`);
+      setProgress(0);
     }
   };
 
