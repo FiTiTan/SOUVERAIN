@@ -206,7 +206,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   const mainStyle: React.CSSProperties = {
     flex: 1,
     display: 'grid',
-    gridTemplateColumns: '240px 260px 1fr',
+    gridTemplateColumns: '240px 160px 1fr',
     gap: 0,
     overflow: 'hidden',
   };
@@ -378,7 +378,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             </h3>
           </div>
 
-          <div style={{ flex: 1, padding: '1rem', overflowY: 'auto' }}>
+          <div style={{ flex: 1, padding: '1rem 0.5rem', overflowY: 'auto' }}>
             
             {/* Hero */}
             <div style={{ marginBottom: '1.5rem' }}>
