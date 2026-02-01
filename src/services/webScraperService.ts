@@ -12,7 +12,7 @@ import type { ScrapedWebsite } from '../components/portfolio/types';
 export async function scrapeWebsite(url: string): Promise<ScrapedWebsite> {
   try {
     // @ts-ignore
-    const result = await window.electron.invoke('scrape-website', { url });
+    const result = await window.electron.scrapeWebsite(url);
     
     if (!result.success) {
       throw new Error(result.error || 'Échec du scraping');

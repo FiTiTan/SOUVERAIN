@@ -127,6 +127,78 @@ ipcMain.handle('file-open-dialog', async (event, options) => {
 });
 
 // ============================================================
+// WEB SCRAPER - PORTFOLIO WIZARD V2
+// ============================================================
+
+/**
+ * Scrape un site web pour extraire les informations pertinentes
+ * Utilisé dans Step 1 du wizard pour import automatique
+ */
+ipcMain.handle('scrape-website', async (event, { url }) => {
+  try {
+    console.log('[SOUVERAIN] 🔵 Scraping website:', url);
+
+    // Fetch HTML
+    const response = await axios.get(url, {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+
+    const html = response.data;
+
+    // Extraction basique (sans bibliothèque de parsing pour garder ça simple)
+    const extractMetaTag = (name) => {
+      const regex = new RegExp(`<meta[^>]*(?:name|property)=["']${name}["'][^>]*content=["']([^"']*)["']`, 'i');
+      const match = html.match(regex);
+      return match ? match[1] : null;
+    };
+
+    const extractTitle = () => {
+      const match = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+      return match ? match[1].trim() : null;
+    };
+
+    const extractEmails = () => {
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+      const matches = html.match(emailRegex);
+      return matches ? matches[0] : null; // Premier email trouvé
+    };
+
+    const extractPhones = () => {
+      const phoneRegex = /(?:\+33|0)[1-9](?:[\s.-]?\d{2}){4}/g;
+      const matches = html.match(phoneRegex);
+      return matches ? matches[0] : null; // Premier téléphone trouvé
+    };
+
+    // Extraction des données
+    const scrapedData = {
+      name: extractMetaTag('og:site_name') || extractMetaTag('twitter:site') || extractTitle(),
+      title: extractMetaTag('og:title') || extractTitle(),
+      tagline: extractMetaTag('description') || extractMetaTag('og:description'),
+      description: extractMetaTag('description') || extractMetaTag('og:description'),
+      email: extractEmails(),
+      phone: extractPhones(),
+      // TODO: Extraction plus avancée pour services, réalisations, etc.
+    };
+
+    console.log('[SOUVERAIN] ✅ Website scraped:', scrapedData.name);
+
+    return {
+      success: true,
+      data: scrapedData,
+    };
+  } catch (error) {
+    console.error('[SOUVERAIN] ❌ Erreur scraping:', error.message);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+});
+
+// ============================================================
 // IMAGE PROCESSING - PORTFOLIO WIZARD
 // ============================================================
 

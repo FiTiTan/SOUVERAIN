@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld('electron', {
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
   openFile: (filePath) => ipcRenderer.invoke('open-file', filePath),
   readFileAsBase64: (filePath) => ipcRenderer.invoke('read-file-base64', filePath),
+  scrapeWebsite: (url) => ipcRenderer.invoke('scrape-website', { url }),
 
   // ============================================================
   // ANALYSE CV
