@@ -110,6 +110,7 @@ function processRepeatZones(html: string, data: EnrichedPortfolioData): string {
     'SERVICE_TITLE': service.title,
     'SERVICE_DESC': service.description,
     'SERVICE_DESCRIPTION': service.description,
+    'SERVICE_ICON': service.icon,
   }));
 
   // REPEAT: projects
@@ -184,7 +185,9 @@ function processRepeat<T>(
       // 2. Remplacer les variables
       for (const [key, value] of Object.entries(replacements)) {
         const varRegex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-        block = block.replace(varRegex, escapeHtml(value));
+        // SERVICE_ICON contient du SVG, ne pas échapper
+        const finalValue = key === 'SERVICE_ICON' ? value : escapeHtml(value);
+        block = block.replace(varRegex, finalValue);
       }
       
       return block;

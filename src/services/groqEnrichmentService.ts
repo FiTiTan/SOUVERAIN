@@ -50,6 +50,13 @@ LONGUEURS RECOMMANDÉES :
 - serviceDesc : 15-30 mots par service
 - valueProp : 20-40 mots
 
+ICÔNES SVG POUR LES SERVICES :
+- Génère une icône SVG minimaliste et abstraite pour chaque service
+- Format : viewBox='0 0 48 48', pas de couleur fill/stroke (utilise currentColor si nécessaire)
+- Style : géométrique, simple, clean (pas d'emojis, pas de détails complexes)
+- Formes abstraites : cercles, rectangles, lignes, paths simples
+- Exemples de concepts : écran/laptop pour dev web, palette pour design, mobile pour apps
+
 STYLE D'ÉCRITURE :
 - Évite les clichés ("passionné", "dynamique", "expert reconnu")
 - Privilégie les verbes d'action
@@ -100,6 +107,7 @@ export interface EnrichedPortfolioData {
   services: Array<{
     title: string;
     description: string;
+    icon: string; // SVG inline
   }>;
   
   // Projects (enrichis)
@@ -158,7 +166,11 @@ Génère un JSON avec les champs suivants.
   "aboutText": "Paragraphe de présentation enrichi (50-100 mots)",
   "valueProp": "Proposition de valeur reformulée (20-40 mots)",
   "services": [
-    { "title": "Titre service original ou légèrement amélioré", "description": "Description enrichie (15-30 mots)" }
+    { 
+      "title": "Titre service original ou légèrement amélioré", 
+      "description": "Description enrichie (15-30 mots)",
+      "icon": "<svg viewBox='0 0 48 48' fill='none' xmlns='http://www.w3.org/2000/svg'><!-- icône SVG minimaliste et abstraite --></svg>"
+    }
   ],
   "projects": [
     { "title": "Titre projet", "description": "Description enrichie", "category": "Catégorie" }

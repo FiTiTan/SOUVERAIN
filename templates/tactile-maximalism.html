@@ -506,13 +506,17 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
 
         .service-icon-wrapper {
             margin-bottom: 1.5rem;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .service-icon {
-            width: 48px;
-            height: 48px;
+        .service-icon-wrapper svg {
+            width: 100%;
+            height: 100%;
             color: currentColor;
-            opacity: 0.8;
         }
 
         .service-card h3 {
@@ -1092,10 +1096,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             <!-- REPEAT: services -->
             <div class="service-card">
                 <div class="service-icon-wrapper">
-                    <svg class="service-icon" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="6" y="6" width="36" height="36" rx="8" stroke="currentColor" stroke-width="3"/>
-                        <circle cx="24" cy="24" r="6" fill="currentColor" opacity="0.3"/>
-                    </svg>
+                    {{SERVICE_ICON}}
                 </div>
                 <h3>{{SERVICE_TITLE}}</h3>
                 <p>{{SERVICE_DESC}}</p>
