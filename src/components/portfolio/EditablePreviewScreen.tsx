@@ -8,35 +8,10 @@ import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../design-system';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { ImageLibrary } from './ImageLibrary';
-import type { LibraryImage } from './ImageLibrary';
-
-// ============================================================
-// TYPES
-// ============================================================
-
-interface Project {
-  title: string;
-  description: string;
-  category?: string;
-}
-
-interface PortfolioData {
-  firstName: string;
-  lastName: string;
-  title: string;
-  bio?: string;
-  aboutText?: string;
-  projects?: Project[];
-}
-
-interface ImageAssignments {
-  hero?: string;
-  about?: string;
-  [key: string]: string | undefined; // project-0, project-1, etc.
-}
+import type { LibraryImage, ImageAssignments, PortfolioPreviewData } from './types';
 
 interface EditablePreviewScreenProps {
-  portfolioData: PortfolioData;
+  portfolioData: PortfolioPreviewData;
   initialHtml: string;
   onBack: () => void;
   onExport: (html: string) => void;

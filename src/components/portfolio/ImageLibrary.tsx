@@ -6,16 +6,7 @@
 import React, { useRef } from 'react';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../design-system';
-
-// ============================================================
-// TYPES
-// ============================================================
-
-export interface LibraryImage {
-  id: string;
-  filename: string;
-  dataUrl: string;
-}
+import type { LibraryImage } from './types';
 
 interface ImageLibraryProps {
   images: LibraryImage[];
