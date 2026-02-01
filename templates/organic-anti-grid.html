@@ -1179,15 +1179,15 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
     <!-- SECTION: about (OBLIGATOIRE) -->
     <section class="about" id="about">
         <div class="about-container">
-            <!-- IF: hasAboutImage -->
             <div class="about-image-wrapper" data-image-zone="about">
+                <!-- IF: hasAboutImage -->
                 <div class="about-blob">
                     <img src="{{ABOUT_IMAGE}}" alt="{{HERO_TITLE}}">
                 </div>
                 <div class="about-decor about-decor-1"></div>
                 <div class="about-decor about-decor-2"></div>
+                <!-- ENDIF: hasAboutImage -->
             </div>
-            <!-- ENDIF: hasAboutImage -->
             <div class="about-content">
                 <h2>À propos</h2>
                 <p>{{ABOUT_TEXT}}</p>
