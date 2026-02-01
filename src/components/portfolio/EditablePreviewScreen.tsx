@@ -143,8 +143,15 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     e.dataTransfer.effectAllowed = 'copy';
   }, []);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragOver = useCallback((e: React.DragEvent, zoneId: string) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setDragOverZone(zoneId);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverZone(null);
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent, zoneId: string) => {
@@ -379,9 +386,8 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
               </label>
               <div
                 style={dropZoneStyle('hero')}
-                onDragOver={handleDragOver}
-                onDragEnter={() => setDragOverZone('hero')}
-                onDragLeave={() => setDragOverZone(null)}
+                onDragOver={(e) => handleDragOver(e, 'hero')}
+                onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, 'hero')}
               >
                 {assignments.hero ? (
@@ -418,9 +424,8 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
               </label>
               <div
                 style={dropZoneStyle('about')}
-                onDragOver={handleDragOver}
-                onDragEnter={() => setDragOverZone('about')}
-                onDragLeave={() => setDragOverZone(null)}
+                onDragOver={(e) => handleDragOver(e, 'about')}
+                onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, 'about')}
               >
                 {assignments.about ? (
@@ -467,9 +472,8 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
                         </label>
                         <div
                           style={dropZoneStyle(zoneId)}
-                          onDragOver={handleDragOver}
-                          onDragEnter={() => setDragOverZone(zoneId)}
-                          onDragLeave={() => setDragOverZone(null)}
+                          onDragOver={(e) => handleDragOver(e, zoneId)}
+                          onDragLeave={handleDragLeave}
                           onDrop={(e) => handleDrop(e, zoneId)}
                         >
                           {assignments[zoneId] ? (
