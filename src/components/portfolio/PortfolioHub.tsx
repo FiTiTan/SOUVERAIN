@@ -9,6 +9,7 @@ import { MediathequeView } from './mediatheque/MediathequeView';
 import { ProjectHub } from './projects/ProjectHub';
 import { ConfigView } from './config/ConfigView';
 import { IntentionForm } from './intention/IntentionForm';
+import { EditablePreviewScreen } from './EditablePreviewScreen';
 import {
     hasCompletedIntention,
     saveIntention,
@@ -21,7 +22,7 @@ import { AnalysisAnimation } from '../AnalysisAnimation';
 import { ModernLoader } from '../ui/ModernLoader';
 
 type PortfolioView = 'landing' | 'mpf' | 'projects' | 'mediatheque' | 'config';
-type MPFScreen = 'selector' | 'wizard' | 'generating' | 'preview' | 'mpf-view';
+type MPFScreen = 'selector' | 'wizard' | 'generating' | 'editable-preview' | 'preview' | 'mpf-view';
 
 /**
  * Convert File objects in media array to data URLs
@@ -315,7 +316,7 @@ export const PortfolioHub: React.FC = () => {
                 console.log('[PortfolioHub] ✅ Result is string, length:', result.length);
                 setGeneratedHTML(result);
                 setIsGenerating(false);
-                setMpfScreen('preview');
+                setMpfScreen('editable-preview'); // Passer à l'écran éditable
                 toast.success('Succès', 'Portfolio généré avec succès !');
                 return;
             }
@@ -325,7 +326,7 @@ export const PortfolioHub: React.FC = () => {
                 console.log('[PortfolioHub] ✅ Result is object with success=true and html');
                 setGeneratedHTML(result.html);
                 setIsGenerating(false);
-                setMpfScreen('preview');
+                setMpfScreen('editable-preview'); // Passer à l'écran éditable
                 toast.success('Succès', 'Portfolio généré avec succès !');
 
                 // Save en background (non bloquant)
@@ -352,6 +353,18 @@ export const PortfolioHub: React.FC = () => {
         toast.success('Succès', 'Portfolio sauvegardé !');
         setMpfScreen('selector');
         setCurrentView('landing');
+    }, [toast]);
+
+    // Handler: Back from editable preview
+    const handleEditablePreviewBack = useCallback(() => {
+        setMpfScreen('wizard');
+    }, []);
+
+    // Handler: Export from editable preview
+    const handleEditablePreviewExport = useCallback((html: string) => {
+        setGeneratedHTML(html);
+        setMpfScreen('preview');
+        toast.success('Succès', 'Portfolio personnalisé ! Vous pouvez maintenant l\'exporter.');
     }, [toast]);
 
     // Handler: View existing portfolio
@@ -458,6 +471,22 @@ export const PortfolioHub: React.FC = () => {
                                 { id: 'analyzing', label: 'Génération du HTML' },
                                 { id: 'complete', label: 'Finalisation' }
                             ]}
+                        />
+                    )}
+
+                    {mpfScreen === 'editable-preview' && generatedHTML && wizardData && (
+                        <EditablePreviewScreen
+                            portfolioData={{
+                                firstName: wizardData.name?.split(' ')[0] || '',
+                                lastName: wizardData.name?.split(' ').slice(1).join(' ') || '',
+                                title: wizardData.tagline || '',
+                                bio: wizardData.valueProp,
+                                aboutText: wizardData.valueProp,
+                                projects: wizardData.projects || [],
+                            }}
+                            initialHtml={generatedHTML}
+                            onBack={handleEditablePreviewBack}
+                            onExport={handleEditablePreviewExport}
                         />
                     )}
 

@@ -1,6 +1,15 @@
-import React, { useRef, useCallback } from 'react';
-import { X, Plus, GripVertical } from 'lucide-react';
+/**
+ * SOUVERAIN - Image Library
+ * Bibliothèque d'images draggable
+ */
+
+import React, { useRef } from 'react';
 import { useTheme } from '../../ThemeContext';
+import { typography, borderRadius, transitions } from '../../design-system';
+
+// ============================================================
+// TYPES
+// ============================================================
 
 export interface LibraryImage {
   id: string;
@@ -14,204 +23,271 @@ interface ImageLibraryProps {
   onRemoveImage: (id: string) => void;
 }
 
-export const ImageLibrary = React.memo<ImageLibraryProps>(({
-  images,
-  onAddImages,
-  onRemoveImage,
-}) => {
-  const theme = useTheme();
+// ============================================================
+// COMPONENT
+// ============================================================
+
+export const ImageLibrary: React.FC<ImageLibraryProps> = ({ images, onAddImages, onRemoveImage }) => {
+  const { theme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDragStart = useCallback((e: React.DragEvent, image: LibraryImage) => {
+  const handleDragStart = (e: React.DragEvent, image: LibraryImage) => {
     e.dataTransfer.setData('imageId', image.id);
     e.dataTransfer.setData('imageDataUrl', image.dataUrl);
     e.dataTransfer.effectAllowed = 'copy';
-    
-    // Créer une image de prévisualisation pour le drag
-    const dragImage = new Image();
-    dragImage.src = image.dataUrl;
-    dragImage.width = 100;
-    dragImage.height = 100;
-    e.dataTransfer.setDragImage(dragImage, 50, 50);
-  }, []);
+  };
 
-  const handleImportClick = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
+  // ============================================================
+  // STYLES
+  // ============================================================
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      onAddImages(files);
-      // Reset input pour permettre de re-sélectionner les mêmes fichiers
-      e.target.value = '';
-    }
-  }, [onAddImages]);
+  const containerStyle: React.CSSProperties = {
+    backgroundColor: theme.bg.secondary,
+    borderTop: `1px solid ${theme.border.light}`,
+    padding: '1.5rem 2rem',
+  };
+
+  const headerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '1rem',
+  };
+
+  const titleStyle: React.CSSProperties = {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    color: theme.text.primary,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  };
+
+  const countStyle: React.CSSProperties = {
+    color: theme.text.tertiary,
+    fontWeight: typography.fontWeight.normal,
+  };
+
+  const importButtonStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.625rem 1rem',
+    backgroundColor: theme.accent.primary,
+    color: '#FFFFFF',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    borderRadius: borderRadius.lg,
+    border: 'none',
+    cursor: 'pointer',
+    transition: transitions.fast,
+  };
+
+  const emptyStateStyle: React.CSSProperties = {
+    textAlign: 'center',
+    padding: '2rem 0',
+    color: theme.text.tertiary,
+  };
+
+  const gridStyle: React.CSSProperties = {
+    display: 'flex',
+    gap: '0.75rem',
+    overflowX: 'auto',
+    paddingBottom: '0.5rem',
+  };
+
+  const imageCardStyle: React.CSSProperties = {
+    position: 'relative',
+    flexShrink: 0,
+    width: '96px',
+    height: '96px',
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    cursor: 'grab',
+    border: `2px solid ${theme.border.light}`,
+    transition: transitions.fast,
+  };
+
+  const imageStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  };
+
+  const gripIndicatorStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '4px',
+    left: '4px',
+    padding: '4px',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: borderRadius.md,
+    opacity: 0,
+    transition: transitions.fast,
+  };
+
+  const removeButtonStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '4px',
+    right: '4px',
+    padding: '4px',
+    backgroundColor: theme.semantic.error,
+    borderRadius: borderRadius.full,
+    border: 'none',
+    cursor: 'pointer',
+    opacity: 0,
+    transition: transitions.fast,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+
+  const filenameStyle: React.CSSProperties = {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    padding: '0.25rem',
+    fontSize: '10px',
+    color: '#FFFFFF',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  };
+
+  const hintStyle: React.CSSProperties = {
+    fontSize: typography.fontSize.xs,
+    color: theme.text.tertiary,
+    marginTop: '0.75rem',
+  };
+
+  // ============================================================
+  // RENDER
+  // ============================================================
 
   return (
-    <div 
-      className="border-t p-4"
-      style={{
-        backgroundColor: theme.background.primary,
-        borderColor: theme.border.default,
-      }}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <h3 
-          className="text-sm font-semibold flex items-center gap-2"
-          style={{ color: theme.text.primary }}
-        >
-          <span aria-hidden="true">📁</span>
-          <span>Bibliothèque d'images</span>
-          <span 
-            className="font-normal"
-            style={{ color: theme.text.secondary }}
-          >
-            ({images.length})
-          </span>
+    <div style={containerStyle}>
+      {/* Header */}
+      <div style={headerStyle}>
+        <h3 style={titleStyle}>
+          <span>📁</span>
+          Bibliothèque d'images
+          <span style={countStyle}>({images.length})</span>
         </h3>
-        
+
         <button
-          onClick={handleImportClick}
-          className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
-          style={{
-            backgroundColor: theme.accent.primary,
-            color: '#FFFFFF',
+          onClick={() => fileInputRef.current?.click()}
+          style={importButtonStyle}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)';
+            e.currentTarget.style.boxShadow = theme.shadow.md;
           }}
-          aria-label="Importer des images"
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
         >
-          <Plus size={16} aria-hidden="true" />
-          <span>Importer</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Importer
         </button>
-        
+
         <input
           ref={fileInputRef}
           type="file"
           multiple
           accept="image/*"
-          onChange={handleFileChange}
-          className="hidden"
-          aria-label="Sélectionner des images à importer"
+          onChange={(e) => e.target.files && onAddImages(e.target.files)}
+          style={{ display: 'none' }}
         />
       </div>
 
+      {/* Content */}
       {images.length === 0 ? (
-        <div 
-          className="text-center py-8"
-          style={{ color: theme.text.secondary }}
-        >
-          <p className="text-sm">Importez des images pour personnaliser votre portfolio</p>
-          <p className="text-xs mt-1" style={{ opacity: 0.7 }}>
+        <div style={emptyStateStyle}>
+          <p style={{ fontSize: typography.fontSize.sm, marginBottom: '0.5rem' }}>
+            Importez des images pour personnaliser votre portfolio
+          </p>
+          <p style={{ fontSize: typography.fontSize.xs }}>
             Glissez-les ensuite sur les zones du portfolio
           </p>
         </div>
       ) : (
-        <div 
-          className="flex gap-3 overflow-x-auto pb-2"
-          role="list"
-          aria-label="Liste des images importées"
-        >
-          {images.map((image) => (
-            <LibraryImageCard
-              key={image.id}
-              image={image}
-              onDragStart={(e) => handleDragStart(e, image)}
-              onRemove={() => onRemoveImage(image.id)}
-            />
-          ))}
-        </div>
+        <>
+          <div style={gridStyle}>
+            {images.map((image) => (
+              <div
+                key={image.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, image)}
+                style={imageCardStyle}
+                className="library-image-card"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = theme.accent.primary;
+                  const grip = e.currentTarget.querySelector('.grip-indicator') as HTMLElement;
+                  const remove = e.currentTarget.querySelector('.remove-button') as HTMLElement;
+                  if (grip) grip.style.opacity = '1';
+                  if (remove) remove.style.opacity = '1';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = theme.border.light;
+                  const grip = e.currentTarget.querySelector('.grip-indicator') as HTMLElement;
+                  const remove = e.currentTarget.querySelector('.remove-button') as HTMLElement;
+                  if (grip) grip.style.opacity = '0';
+                  if (remove) remove.style.opacity = '0';
+                }}
+                onDragEnd={(e) => {
+                  e.currentTarget.style.cursor = 'grab';
+                }}
+              >
+                <img src={image.dataUrl} alt={image.filename} style={imageStyle} />
+
+                {/* Grip indicator */}
+                <div style={gripIndicatorStyle} className="grip-indicator">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
+                    <circle cx="9" cy="5" r="1" fill="#FFFFFF" />
+                    <circle cx="9" cy="12" r="1" fill="#FFFFFF" />
+                    <circle cx="9" cy="19" r="1" fill="#FFFFFF" />
+                    <circle cx="15" cy="5" r="1" fill="#FFFFFF" />
+                    <circle cx="15" cy="12" r="1" fill="#FFFFFF" />
+                    <circle cx="15" cy="19" r="1" fill="#FFFFFF" />
+                  </svg>
+                </div>
+
+                {/* Remove button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveImage(image.id);
+                  }}
+                  style={removeButtonStyle}
+                  className="remove-button"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#DC2626'; // darker red
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.semantic.error;
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+
+                {/* Filename */}
+                <div style={filenameStyle}>{image.filename}</div>
+              </div>
+            ))}
+          </div>
+
+          <p style={hintStyle}>
+            💡 Astuce : Glissez les images vers les zones en pointillés du portfolio
+          </p>
+        </>
       )}
-      
-      <p 
-        className="text-xs mt-2"
-        style={{ color: theme.text.secondary, opacity: 0.7 }}
-      >
-        💡 Astuce : Glissez les images vers les zones en pointillés du portfolio
-      </p>
     </div>
   );
-});
-
-ImageLibrary.displayName = 'ImageLibrary';
-
-// Sous-composant pour éviter re-renders de toute la liste
-interface LibraryImageCardProps {
-  image: LibraryImage;
-  onDragStart: (e: React.DragEvent) => void;
-  onRemove: () => void;
-}
-
-const LibraryImageCard = React.memo<LibraryImageCardProps>(({
-  image,
-  onDragStart,
-  onRemove,
-}) => {
-  const theme = useTheme();
-
-  return (
-    <div
-      draggable
-      onDragStart={onDragStart}
-      className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden cursor-grab active:cursor-grabbing group border-2 transition-colors"
-      style={{
-        borderColor: theme.border.default,
-      }}
-      role="listitem"
-      tabIndex={0}
-      aria-label={`Image ${image.filename}, glissez pour placer dans le portfolio`}
-      onKeyDown={(e) => {
-        if (e.key === 'Delete' || e.key === 'Backspace') {
-          e.preventDefault();
-          onRemove();
-        }
-      }}
-    >
-      <img
-        src={image.dataUrl}
-        alt={image.filename}
-        className="w-full h-full object-cover"
-        loading="lazy"
-      />
-      
-      {/* Indicateur drag */}
-      <div 
-        className="absolute top-1 left-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ backgroundColor: `${theme.background.primary}80` }}
-        aria-hidden="true"
-      >
-        <GripVertical size={12} style={{ color: theme.text.inverse }} />
-      </div>
-      
-      {/* Bouton supprimer */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
-        className="absolute top-1 right-1 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{
-          backgroundColor: '#DC2626',
-        }}
-        aria-label={`Supprimer ${image.filename}`}
-      >
-        <X size={12} style={{ color: '#FFFFFF' }} />
-      </button>
-      
-      {/* Nom du fichier */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 px-1 py-0.5"
-        style={{ backgroundColor: `${theme.background.primary}99` }}
-      >
-        <p 
-          className="text-[10px] truncate"
-          style={{ color: theme.text.primary }}
-          title={image.filename}
-        >
-          {image.filename}
-        </p>
-      </div>
-    </div>
-  );
-});
-
-LibraryImageCard.displayName = 'LibraryImageCard';
+};
