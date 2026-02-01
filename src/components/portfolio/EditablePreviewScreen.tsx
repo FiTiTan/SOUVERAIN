@@ -7,7 +7,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../design-system';
 import { ImagePlaceholder } from './ImagePlaceholder';
-import { ImageLibrary, LibraryImage } from './ImageLibrary';
+import { ImageLibrary } from './ImageLibrary';
+import type { LibraryImage } from './ImageLibrary';
 
 // ============================================================
 // TYPES
