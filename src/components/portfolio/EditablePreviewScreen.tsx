@@ -94,7 +94,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     if (assignments.about) {
       const aboutZone = doc.querySelector('[data-image-zone="about"]');
       if (aboutZone) {
-        aboutZone.innerHTML = `<img src="${assignments.about}" alt="About" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+        aboutZone.innerHTML = `<img src="${assignments.about}" alt="About" style="width: 100%; height: 100%; object-fit: cover;">`;
         console.log('[EditablePreview] Injected about image');
       } else {
         console.warn('[EditablePreview] About zone not found in HTML');
@@ -220,14 +220,13 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     const hasImage = !!assignments[zoneId];
     const isHovered = dragOverZone === zoneId;
     
-    // Toutes les zones en carré sauf about qui reste rond
-    const size = zoneId === 'about' ? '100px' : '100px';
+    const size = '100px';
 
     return {
       position: 'relative',
       height: size,
       width: size,
-      borderRadius: zoneId === 'about' ? '50%' : borderRadius.lg,
+      borderRadius: borderRadius.lg,
       border: `2px dashed ${isHovered ? theme.accent.primary : hasImage ? theme.semantic.success : theme.border.default}`,
       backgroundColor: isHovered ? theme.accent.muted : theme.bg.tertiary,
       display: 'flex',
@@ -415,7 +414,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             {/* About */}
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.medium, color: theme.text.secondary, marginBottom: '0.5rem' }}>
-                Photo profil
+                À propos
               </label>
               <div
                 style={dropZoneStyle('about')}
@@ -426,7 +425,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
               >
                 {assignments.about ? (
                   <>
-                    <img src={assignments.about} alt="About" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    <img src={assignments.about} alt="About" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button
                       onClick={() => handleRemoveAssignment('about')}
                       style={{
@@ -437,7 +436,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
                         backgroundColor: theme.semantic.error,
                         color: '#FFFFFF',
                         border: 'none',
-                        borderRadius: borderRadius.full,
+                        borderRadius: borderRadius.md,
                         cursor: 'pointer',
                         fontSize: '10px',
                       }}
@@ -457,46 +456,51 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
                 <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.medium, color: theme.text.secondary, marginBottom: '0.75rem' }}>
                   Projets ({detectedProjectCount})
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {Array.from({ length: detectedProjectCount }).map((_, i) => {
                     const zoneId = `project-${i}`;
+                    const projectTitle = portfolioData.projects?.[i]?.title || `Projet ${i + 1}`;
                     return (
-                      <div
-                        key={i}
-                        style={dropZoneStyle(zoneId)}
-                        onDragOver={handleDragOver}
-                        onDragEnter={() => setDragOverZone(zoneId)}
-                        onDragLeave={() => setDragOverZone(null)}
-                        onDrop={(e) => handleDrop(e, zoneId)}
-                      >
-                        {assignments[zoneId] ? (
-                          <>
-                            <img src={assignments[zoneId]} alt={`Project ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveAssignment(zoneId);
-                              }}
-                              style={{
-                                position: 'absolute',
-                                top: '4px',
-                                right: '4px',
-                                padding: '4px 8px',
-                                backgroundColor: theme.semantic.error,
-                                color: '#FFFFFF',
-                                border: 'none',
-                                borderRadius: borderRadius.md,
-                                cursor: 'pointer',
-                                fontSize: '10px',
-                                zIndex: 1,
-                              }}
-                            >
-                              ✕
-                            </button>
-                          </>
-                        ) : (
-                          <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary, textAlign: 'center' }}>P{i + 1}</span>
-                        )}
+                      <div key={i}>
+                        <label style={{ display: 'block', fontSize: typography.fontSize.xs, color: theme.text.tertiary, marginBottom: '0.25rem' }}>
+                          {projectTitle}
+                        </label>
+                        <div
+                          style={dropZoneStyle(zoneId)}
+                          onDragOver={handleDragOver}
+                          onDragEnter={() => setDragOverZone(zoneId)}
+                          onDragLeave={() => setDragOverZone(null)}
+                          onDrop={(e) => handleDrop(e, zoneId)}
+                        >
+                          {assignments[zoneId] ? (
+                            <>
+                              <img src={assignments[zoneId]} alt={projectTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveAssignment(zoneId);
+                                }}
+                                style={{
+                                  position: 'absolute',
+                                  top: '4px',
+                                  right: '4px',
+                                  padding: '4px 8px',
+                                  backgroundColor: theme.semantic.error,
+                                  color: '#FFFFFF',
+                                  border: 'none',
+                                  borderRadius: borderRadius.md,
+                                  cursor: 'pointer',
+                                  fontSize: '10px',
+                                  zIndex: 1,
+                                }}
+                              >
+                                ✕
+                              </button>
+                            </>
+                          ) : (
+                            <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary, textAlign: 'center' }}>Glissez ici</span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -514,12 +518,14 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             </h3>
           </div>
 
-          <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', backgroundColor: theme.bg.tertiary }}>
+          <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', backgroundColor: theme.bg.tertiary, padding: '2rem' }}>
             <div style={{ 
               width: '1200px', 
               minHeight: '100%',
               backgroundColor: '#FFFFFF',
               boxShadow: '0 0 40px rgba(0,0,0,0.1)',
+              transform: 'scale(0.75)',
+              transformOrigin: 'top center',
             }}>
               <iframe
                 ref={iframeRef}
