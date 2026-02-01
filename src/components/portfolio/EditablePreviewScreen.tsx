@@ -526,28 +526,19 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             </h3>
           </div>
 
-          <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', backgroundColor: theme.bg.tertiary, padding: '2rem' }}>
-            <div style={{ 
-              width: '1200px', 
-              minHeight: '100%',
-              backgroundColor: '#FFFFFF',
-              boxShadow: '0 0 40px rgba(0,0,0,0.1)',
-              transform: 'scale(0.75)',
-              transformOrigin: 'top center',
-            }}>
-              <iframe
-                ref={iframeRef}
-                srcDoc={initialHtml}
-                style={{
-                  width: '1200px',
-                  height: '100%',
-                  minHeight: '100vh',
-                  border: 'none',
-                  display: 'block',
-                }}
-                title="Portfolio Preview"
-              />
-            </div>
+          <div style={{ flex: 1, overflow: 'auto', backgroundColor: '#FFFFFF' }}>
+            <iframe
+              ref={iframeRef}
+              srcDoc={initialHtml}
+              style={{
+                width: '100%',
+                height: '100%',
+                minHeight: '100vh',
+                border: 'none',
+                display: 'block',
+              }}
+              title="Portfolio Preview"
+            />
           </div>
         </div>
 
