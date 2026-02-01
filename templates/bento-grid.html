@@ -357,7 +357,7 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         }
 
         .service-card:nth-child(2) {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
             color: white;
         }
 
@@ -367,18 +367,34 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         }
 
         .service-card:nth-child(3) {
-            background: #1d1d1f;
-            color: white;
+            background: linear-gradient(135deg, #ffeceb 0%, #ffd6d3 100%);
+            color: #333;
         }
 
         .service-card:nth-child(3) h3,
         .service-card:nth-child(3) p {
-            color: white;
+            color: #333;
         }
 
         .service-card:hover {
             transform: translateY(-8px);
             box-shadow: var(--shadow-lg);
+        }
+
+        .service-icon-wrapper {
+            margin-bottom: 1.5rem;
+        }
+
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            color: currentColor;
+            opacity: 0.8;
+        }
+
+        .service-card:nth-child(2) .service-icon,
+        .service-card:nth-child(3) .service-icon {
+            opacity: 0.9;
         }
 
         .service-card h3 {
@@ -880,6 +896,13 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         <div class="services-grid">
             <!-- REPEAT: services -->
             <div class="service-card">
+                <div class="service-icon-wrapper">
+                    <svg class="service-icon" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="8" y="12" width="32" height="28" rx="4" stroke="currentColor" stroke-width="2"/>
+                        <rect x="12" y="18" width="24" height="18" rx="2" fill="currentColor" opacity="0.2"/>
+                        <circle cx="24" cy="27" r="4" fill="currentColor"/>
+                    </svg>
+                </div>
                 <h3>{{SERVICE_TITLE}}</h3>
                 <p>{{SERVICE_DESC}}</p>
             </div>

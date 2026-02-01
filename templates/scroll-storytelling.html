@@ -454,6 +454,17 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             opacity: 0.8;
         }
 
+        .service-icon-wrapper {
+            margin-bottom: 1.5rem;
+        }
+
+        .service-icon {
+            width: 42px;
+            height: 42px;
+            color: currentColor;
+            opacity: 0.7;
+        }
+
         .service-card h3 {
             font-family: var(--font-display);
             font-size: 1.5rem;
@@ -1009,6 +1020,12 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         <div class="services-grid">
             <!-- REPEAT: services -->
             <div class="service-card">
+                <div class="service-icon-wrapper">
+                    <svg class="service-icon" width="42" height="42" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M18 24h12M24 18v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <h3>{{SERVICE_TITLE}}</h3>
                 <p>{{SERVICE_DESC}}</p>
             </div>
