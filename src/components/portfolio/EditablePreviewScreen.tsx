@@ -158,7 +158,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   const mainStyle: React.CSSProperties = {
     flex: 1,
     display: 'grid',
-    gridTemplateColumns: '280px 320px 1fr',
+    gridTemplateColumns: '240px 280px 1fr',
     gap: 0,
     overflow: 'hidden',
   };
@@ -178,11 +178,14 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   const dropZoneStyle = (zoneId: string): React.CSSProperties => {
     const hasImage = !!assignments[zoneId];
     const isHovered = dragOverZone === zoneId;
+    
+    // Toutes les zones en carré sauf about qui reste rond
+    const size = zoneId === 'about' ? '100px' : '100px';
 
     return {
       position: 'relative',
-      height: zoneId === 'about' ? '120px' : '100px',
-      width: zoneId === 'about' ? '120px' : '100%',
+      height: size,
+      width: size,
       borderRadius: zoneId === 'about' ? '50%' : borderRadius.lg,
       border: `2px dashed ${isHovered ? theme.accent.primary : hasImage ? theme.semantic.success : theme.border.default}`,
       backgroundColor: isHovered ? theme.accent.muted : theme.bg.tertiary,
@@ -282,16 +285,20 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
                     onDragStart={(e) => handleDragStart(e, img)}
                     style={{
                       position: 'relative',
-                      height: '80px',
+                      width: '100%',
+                      paddingBottom: '100%', // Ratio 1:1 carré
                       borderRadius: borderRadius.lg,
                       overflow: 'hidden',
                       cursor: 'grab',
                       border: `2px solid ${theme.border.light}`,
                     }}
                   >
-                    <img src={img.dataUrl} alt={img.filename} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={img.dataUrl} alt={img.filename} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button
-                      onClick={() => handleRemoveLibraryImage(img.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveLibraryImage(img.id);
+                      }}
                       style={{
                         position: 'absolute',
                         top: '4px',
@@ -303,6 +310,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
                         borderRadius: borderRadius.md,
                         cursor: 'pointer',
                         fontSize: '10px',
+                        zIndex: 1,
                       }}
                     >
                       ✕
@@ -408,43 +416,46 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
                 <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.medium, color: theme.text.secondary, marginBottom: '0.75rem' }}>
                   Projets ({projectCount})
                 </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
                   {Array.from({ length: projectCount }).map((_, i) => {
                     const zoneId = `project-${i}`;
                     return (
-                      <div key={i}>
-                        <div
-                          style={dropZoneStyle(zoneId)}
-                          onDragOver={handleDragOver}
-                          onDragEnter={() => setDragOverZone(zoneId)}
-                          onDragLeave={() => setDragOverZone(null)}
-                          onDrop={(e) => handleDrop(e, zoneId)}
-                        >
-                          {assignments[zoneId] ? (
-                            <>
-                              <img src={assignments[zoneId]} alt={`Project ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              <button
-                                onClick={() => handleRemoveAssignment(zoneId)}
-                                style={{
-                                  position: 'absolute',
-                                  top: '4px',
-                                  right: '4px',
-                                  padding: '4px 8px',
-                                  backgroundColor: theme.semantic.error,
-                                  color: '#FFFFFF',
-                                  border: 'none',
-                                  borderRadius: borderRadius.md,
-                                  cursor: 'pointer',
-                                  fontSize: '10px',
-                                }}
-                              >
-                                ✕
-                              </button>
-                            </>
-                          ) : (
-                            <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>Projet {i + 1}</span>
-                          )}
-                        </div>
+                      <div
+                        key={i}
+                        style={dropZoneStyle(zoneId)}
+                        onDragOver={handleDragOver}
+                        onDragEnter={() => setDragOverZone(zoneId)}
+                        onDragLeave={() => setDragOverZone(null)}
+                        onDrop={(e) => handleDrop(e, zoneId)}
+                      >
+                        {assignments[zoneId] ? (
+                          <>
+                            <img src={assignments[zoneId]} alt={`Project ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveAssignment(zoneId);
+                              }}
+                              style={{
+                                position: 'absolute',
+                                top: '4px',
+                                right: '4px',
+                                padding: '4px 8px',
+                                backgroundColor: theme.semantic.error,
+                                color: '#FFFFFF',
+                                border: 'none',
+                                borderRadius: borderRadius.md,
+                                cursor: 'pointer',
+                                fontSize: '10px',
+                                zIndex: 1,
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </>
+                        ) : (
+                          <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary, textAlign: 'center' }}>P{i + 1}</span>
+                        )}
                       </div>
                     );
                   })}
@@ -462,17 +473,26 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             </h3>
           </div>
 
-          <div style={{ flex: 1, overflow: 'auto' }}>
-            <iframe
-              ref={iframeRef}
-              srcDoc={initialHtml}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-              }}
-              title="Portfolio Preview"
-            />
+          <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', backgroundColor: theme.bg.tertiary }}>
+            <div style={{ 
+              width: '1200px', 
+              minHeight: '100%',
+              backgroundColor: '#FFFFFF',
+              boxShadow: '0 0 40px rgba(0,0,0,0.1)',
+            }}>
+              <iframe
+                ref={iframeRef}
+                srcDoc={initialHtml}
+                style={{
+                  width: '1200px',
+                  height: '100%',
+                  minHeight: '100vh',
+                  border: 'none',
+                  display: 'block',
+                }}
+                title="Portfolio Preview"
+              />
+            </div>
           </div>
         </div>
 
