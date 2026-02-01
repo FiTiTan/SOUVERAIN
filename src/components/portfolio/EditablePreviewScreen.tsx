@@ -206,7 +206,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   const mainStyle: React.CSSProperties = {
     flex: 1,
     display: 'grid',
-    gridTemplateColumns: '240px 280px 1fr',
+    gridTemplateColumns: '240px 320px 1fr',
     gap: 0,
     overflow: 'hidden',
   };
@@ -227,7 +227,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     const hasImage = !!assignments[zoneId];
     const isHovered = dragOverZone === zoneId;
     
-    const size = '100px';
+    const size = '140px';
 
     return {
       position: 'relative',
@@ -237,12 +237,13 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
       border: `2px dashed ${isHovered ? theme.accent.primary : hasImage ? theme.semantic.success : theme.border.default}`,
       backgroundColor: isHovered ? theme.accent.muted : theme.bg.tertiary,
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       cursor: 'pointer',
       transition: transitions.fast,
       overflow: 'hidden',
-      margin: zoneId === 'about' ? '0 auto' : 0,
+      gap: '0.25rem',
     };
   };
 
@@ -381,9 +382,6 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             
             {/* Hero */}
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.medium, color: theme.text.secondary, marginBottom: '0.5rem' }}>
-                Hero
-              </label>
               <div
                 style={dropZoneStyle('hero')}
                 onDragOver={(e) => handleDragOver(e, 'hero')}
@@ -392,7 +390,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
               >
                 {assignments.hero ? (
                   <>
-                    <img src={assignments.hero} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={assignments.hero} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
                     <button
                       onClick={() => handleRemoveAssignment('hero')}
                       style={{
@@ -406,22 +404,23 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
                         borderRadius: borderRadius.md,
                         cursor: 'pointer',
                         fontSize: '10px',
+                        zIndex: 1,
                       }}
                     >
                       ✕
                     </button>
                   </>
                 ) : (
-                  <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>Glissez ici</span>
+                  <>
+                    <span style={{ fontSize: typography.fontSize.xs, fontWeight: typography.fontWeight.semibold, color: theme.text.secondary }}>Hero</span>
+                    <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>Glissez ici</span>
+                  </>
                 )}
               </div>
             </div>
 
             {/* About */}
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.medium, color: theme.text.secondary, marginBottom: '0.5rem' }}>
-                À propos
-              </label>
               <div
                 style={dropZoneStyle('about')}
                 onDragOver={(e) => handleDragOver(e, 'about')}
@@ -430,7 +429,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
               >
                 {assignments.about ? (
                   <>
-                    <img src={assignments.about} alt="About" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={assignments.about} alt="About" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
                     <button
                       onClick={() => handleRemoveAssignment('about')}
                       style={{
@@ -444,13 +443,17 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
                         borderRadius: borderRadius.md,
                         cursor: 'pointer',
                         fontSize: '10px',
+                        zIndex: 1,
                       }}
                     >
                       ✕
                     </button>
                   </>
                 ) : (
-                  <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>Glissez ici</span>
+                  <>
+                    <span style={{ fontSize: typography.fontSize.xs, fontWeight: typography.fontWeight.semibold, color: theme.text.secondary }}>À propos</span>
+                    <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>Glissez ici</span>
+                  </>
                 )}
               </div>
             </div>
@@ -458,53 +461,54 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             {/* Projets */}
             {detectedProjectCount > 0 && (
               <div>
-                <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.medium, color: theme.text.secondary, marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.semibold, color: theme.text.primary, marginBottom: '0.75rem' }}>
                   Projets ({detectedProjectCount})
                 </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 140px)', gap: '0.75rem' }}>
                   {Array.from({ length: detectedProjectCount }).map((_, i) => {
                     const zoneId = `project-${i}`;
                     const projectTitle = portfolioData.projects?.[i]?.title || `Projet ${i + 1}`;
                     return (
-                      <div key={i}>
-                        <label style={{ display: 'block', fontSize: typography.fontSize.xs, color: theme.text.tertiary, marginBottom: '0.25rem' }}>
-                          {projectTitle}
-                        </label>
-                        <div
-                          style={dropZoneStyle(zoneId)}
-                          onDragOver={(e) => handleDragOver(e, zoneId)}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, zoneId)}
-                        >
-                          {assignments[zoneId] ? (
-                            <>
-                              <img src={assignments[zoneId]} alt={projectTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveAssignment(zoneId);
-                                }}
-                                style={{
-                                  position: 'absolute',
-                                  top: '4px',
-                                  right: '4px',
-                                  padding: '4px 8px',
-                                  backgroundColor: theme.semantic.error,
-                                  color: '#FFFFFF',
-                                  border: 'none',
-                                  borderRadius: borderRadius.md,
-                                  cursor: 'pointer',
-                                  fontSize: '10px',
-                                  zIndex: 1,
-                                }}
-                              >
-                                ✕
-                              </button>
-                            </>
-                          ) : (
-                            <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary, textAlign: 'center' }}>Glissez ici</span>
-                          )}
-                        </div>
+                      <div
+                        key={i}
+                        style={dropZoneStyle(zoneId)}
+                        onDragOver={(e) => handleDragOver(e, zoneId)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, zoneId)}
+                      >
+                        {assignments[zoneId] ? (
+                          <>
+                            <img src={assignments[zoneId]} alt={projectTitle} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveAssignment(zoneId);
+                              }}
+                              style={{
+                                position: 'absolute',
+                                top: '4px',
+                                right: '4px',
+                                padding: '4px 8px',
+                                backgroundColor: theme.semantic.error,
+                                color: '#FFFFFF',
+                                border: 'none',
+                                borderRadius: borderRadius.md,
+                                cursor: 'pointer',
+                                fontSize: '10px',
+                                zIndex: 1,
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: typography.fontSize.xs, fontWeight: typography.fontWeight.medium, color: theme.text.secondary, textAlign: 'center', padding: '0 0.5rem' }}>
+                              {projectTitle}
+                            </span>
+                            <span style={{ fontSize: '9px', color: theme.text.tertiary }}>Glissez ici</span>
+                          </>
+                        )}
                       </div>
                     );
                   })}
