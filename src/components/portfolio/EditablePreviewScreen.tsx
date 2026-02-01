@@ -36,25 +36,57 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   const [libraryImages, setLibraryImages] = useState<LibraryImage[]>([]);
   const [assignments, setAssignments] = useState<ImageAssignments>({});
   const [dragOverZone, setDragOverZone] = useState<string | null>(null);
+  const [detectedProjectCount, setDetectedProjectCount] = useState<number>(0);
 
-  // Nombre de projets
-  const projectCount = portfolioData.projects?.length || 0;
+  // ============================================================
+  // DETECT PROJECTS FROM HTML
+  // ============================================================
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const handleIframeLoad = () => {
+      const doc = iframe.contentDocument;
+      if (!doc) return;
+
+      // Détecter le nombre de projets dans le HTML
+      const projectZones = doc.querySelectorAll('[data-image-zone="project"]');
+      setDetectedProjectCount(projectZones.length);
+      
+      console.log('[EditablePreview] Detected projects:', projectZones.length);
+    };
+
+    iframe.addEventListener('load', handleIframeLoad);
+
+    return () => {
+      iframe.removeEventListener('load', handleIframeLoad);
+    };
+  }, []);
 
   // ============================================================
   // INJECT IMAGES INTO IFRAME
   // ============================================================
 
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe?.contentDocument) return;
+    // Petit délai pour s'assurer que l'iframe est complètement chargée
+    const timer = setTimeout(() => {
+      const iframe = iframeRef.current;
+      if (!iframe?.contentDocument) {
+        console.log('[EditablePreview] Iframe contentDocument not ready');
+        return;
+      }
 
-    const doc = iframe.contentDocument;
+      const doc = iframe.contentDocument;
 
     // Injecter hero
     if (assignments.hero) {
       const heroZone = doc.querySelector('[data-image-zone="hero"]');
       if (heroZone) {
         heroZone.innerHTML = `<img src="${assignments.hero}" alt="Hero" style="width: 100%; height: 100%; object-fit: cover;">`;
+        console.log('[EditablePreview] Injected hero image');
+      } else {
+        console.warn('[EditablePreview] Hero zone not found in HTML');
       }
     }
 
@@ -63,6 +95,9 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
       const aboutZone = doc.querySelector('[data-image-zone="about"]');
       if (aboutZone) {
         aboutZone.innerHTML = `<img src="${assignments.about}" alt="About" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+        console.log('[EditablePreview] Injected about image');
+      } else {
+        console.warn('[EditablePreview] About zone not found in HTML');
       }
     }
 
@@ -73,9 +108,15 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
         const projectZone = doc.querySelector(`[data-image-zone="project"][data-project-index="${projectIndex}"]`);
         if (projectZone) {
           projectZone.innerHTML = `<img src="${value}" alt="Project ${projectIndex}" style="width: 100%; height: 100%; object-fit: cover;">`;
+          console.log(`[EditablePreview] Injected project ${projectIndex} image`);
+        } else {
+          console.warn(`[EditablePreview] Project ${projectIndex} zone not found in HTML`);
         }
       }
     });
+    }, 300); // Attendre 300ms que l'iframe soit prête
+
+    return () => clearTimeout(timer);
   }, [assignments]);
 
   // ============================================================
@@ -411,13 +452,13 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             </div>
 
             {/* Projets */}
-            {projectCount > 0 && (
+            {detectedProjectCount > 0 && (
               <div>
                 <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.medium, color: theme.text.secondary, marginBottom: '0.75rem' }}>
-                  Projets ({projectCount})
+                  Projets ({detectedProjectCount})
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
-                  {Array.from({ length: projectCount }).map((_, i) => {
+                  {Array.from({ length: detectedProjectCount }).map((_, i) => {
                     const zoneId = `project-${i}`;
                     return (
                       <div
