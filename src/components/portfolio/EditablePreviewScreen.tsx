@@ -206,7 +206,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   const mainStyle: React.CSSProperties = {
     flex: 1,
     display: 'grid',
-    gridTemplateColumns: '240px 320px 1fr',
+    gridTemplateColumns: '240px 260px 1fr',
     gap: 0,
     overflow: 'hidden',
   };
@@ -227,7 +227,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     const hasImage = !!assignments[zoneId];
     const isHovered = dragOverZone === zoneId;
     
-    const size = '140px';
+    const size = '120px';
 
     return {
       position: 'relative',
@@ -378,7 +378,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             </h3>
           </div>
 
-          <div style={{ flex: 1, padding: '1.5rem', overflowY: 'auto' }}>
+          <div style={{ flex: 1, padding: '1rem', overflowY: 'auto' }}>
             
             {/* Hero */}
             <div style={{ marginBottom: '1.5rem' }}>
@@ -464,7 +464,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
                 <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.semibold, color: theme.text.primary, marginBottom: '0.75rem' }}>
                   Projets ({detectedProjectCount})
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 140px)', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {Array.from({ length: detectedProjectCount }).map((_, i) => {
                     const zoneId = `project-${i}`;
                     const projectTitle = portfolioData.projects?.[i]?.title || `Projet ${i + 1}`;
@@ -526,19 +526,26 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             </h3>
           </div>
 
-          <div style={{ flex: 1, overflow: 'auto', backgroundColor: '#FFFFFF' }}>
-            <iframe
-              ref={iframeRef}
-              srcDoc={initialHtml}
-              style={{
-                width: '100%',
-                height: '100%',
-                minHeight: '100vh',
-                border: 'none',
-                display: 'block',
-              }}
-              title="Portfolio Preview"
-            />
+          <div style={{ flex: 1, overflow: 'auto', backgroundColor: '#F5F5F5', display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+            <div style={{ 
+              width: '1200px',
+              minHeight: '100vh',
+              backgroundColor: '#FFFFFF',
+              boxShadow: '0 0 20px rgba(0,0,0,0.1)',
+            }}>
+              <iframe
+                ref={iframeRef}
+                srcDoc={initialHtml}
+                style={{
+                  width: '1200px',
+                  height: '100%',
+                  minHeight: '100vh',
+                  border: 'none',
+                  display: 'block',
+                }}
+                title="Portfolio Preview"
+              />
+            </div>
           </div>
         </div>
 
