@@ -6,8 +6,7 @@ import React from 'react';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius } from '../../design-system';
 import type { SocialPlatformStatus } from '../../types/reputation';
-import { GlobeIcon } from '../icons/FeatherIcons';
-import { BriefcaseIcon, GithubIcon, TwitterIcon, InstagramIcon, UsersIcon } from '../icons/MoreFeatherIcons';
+import { GlobeIcon, BriefcaseIcon, GithubIcon, TwitterIcon, InstagramIcon, UsersIcon } from '../icons/MoreFeatherIcons';
 
 interface SocialPlatformsProps {
   platforms: SocialPlatformStatus[];
