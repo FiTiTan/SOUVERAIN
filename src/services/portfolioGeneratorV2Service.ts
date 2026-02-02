@@ -14,11 +14,8 @@ import { getLabels } from '../config/portfolioLabels';
  */
 async function loadTemplateHTML(templateId: string): Promise<string> {
   try {
-    console.log('[GeneratorV2] 🔵 Loading template:', templateId);
     // @ts-ignore
     const result = await window.electron.templates.getHTML(templateId);
-    
-    console.log('[GeneratorV2] 🔍 Template result:', result?.success, 'HTML length:', result?.html?.length || 0);
     
     if (typeof result === 'object' && result !== null) {
       if (!result.success) {
@@ -37,7 +34,7 @@ async function loadTemplateHTML(templateId: string): Promise<string> {
     
     throw new Error('Invalid template result format');
   } catch (error) {
-    console.error(`[GeneratorV2] ❌ Error loading template:`, error);
+    console.error(`[GeneratorV2] Error loading template:`, error);
     throw new Error(`Impossible de charger le template: ${error.message}`);
   }
 }
@@ -131,8 +128,6 @@ export async function generatePortfolioFromWizardV2(
 ): Promise<{ success: boolean; html?: string; error?: string }> {
   try {
     console.log('[GeneratorV2] Starting generation...');
-    console.log('[GeneratorV2] 🔍 Template ID:', formData.templateId);
-    console.log('[GeneratorV2] 🔍 Form data keys:', Object.keys(formData));
     
     if (!formData.templateId) {
       throw new Error('Aucun template sélectionné');

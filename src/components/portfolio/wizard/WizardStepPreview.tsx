@@ -21,11 +21,6 @@ export const WizardStepPreview: React.FC<WizardStepProps> = ({
   // @ts-ignore - HTML généré temporairement stocké dans formData
   const generatedHTML = formData._generatedHTML as string | undefined;
 
-  console.log('[WizardStepPreview] 🔍 formData keys:', Object.keys(formData));
-  console.log('[WizardStepPreview] 🔍 generatedHTML exists:', !!generatedHTML);
-  console.log('[WizardStepPreview] 🔍 generatedHTML length:', generatedHTML?.length || 0);
-  console.log('[WizardStepPreview] 🔍 generatedHTML preview:', generatedHTML?.substring(0, 200));
-
   if (!generatedHTML) {
     // Pas de HTML généré, afficher message d'erreur
     return (

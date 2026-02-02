@@ -38,16 +38,12 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
         throw new Error(result.error || 'Échec de la génération');
       }
 
-      console.log('[WizardStepGeneration] 🔍 Result HTML length:', result.html?.length || 0);
-      console.log('[WizardStepGeneration] 🔍 Result HTML preview:', result.html?.substring(0, 200));
-
       // Stocker le HTML généré dans formData pour le Step 6
       onUpdate({ 
         // @ts-ignore - On ajoute temporairement le HTML généré
         _generatedHTML: result.html 
       });
 
-      console.log('[WizardStepGeneration] ✅ HTML stored in formData');
       setIsComplete(true);
     } catch (error: any) {
       console.error('[Generation] Error:', error);
