@@ -100,7 +100,7 @@ export const GenerationScreen: React.FC<GenerationScreenProps> = ({
 
   const [steps, setSteps] = useState<GenerationStep[]>([
     { id: 'anonymize', label: 'Anonymisation (🔒 Local)', status: 'pending', icon: Icons.Shield },
-    { id: 'generate', label: 'Génération contenu (☁️ Groq)', status: 'pending', icon: Icons.Brain },
+    { id: 'generate', label: 'Génération contenu (☁️ IA)', status: 'pending', icon: Icons.Brain },
     { id: 'deanonymize', label: 'Dé-anonymisation (🔒 Local)', status: 'pending', icon: Icons.Shield },
     { id: 'style', label: 'Application style (🔒 Local)', status: 'pending', icon: Icons.Palette },
     { id: 'render', label: 'Rendu HTML (🔒 Local)', status: 'pending', icon: Icons.Code },
@@ -132,9 +132,9 @@ export const GenerationScreen: React.FC<GenerationScreenProps> = ({
       updateStep('anonymize', 'done');
       await delay(300);
 
-      // 2. Génération contenu (Groq distant)
+      // 2. Génération contenu (IA cloud)
       updateStep('generate', 'processing');
-      setLog('☁️ Génération du contenu via Groq API...');
+      setLog('☁️ Génération du contenu via IA (DeepSeek/Groq)...');
 
       const content = await generatePortfolioContent({
         anonymizedText,
@@ -362,7 +362,7 @@ export const GenerationScreen: React.FC<GenerationScreenProps> = ({
             <Icons.Shield />
           </div>
           <p style={styles.privacyText}>
-            Vos données sont protégées : anonymisation locale avant envoi à Groq
+            Vos données sont protégées : anonymisation locale avant envoi au cloud
           </p>
         </div>
       </div>

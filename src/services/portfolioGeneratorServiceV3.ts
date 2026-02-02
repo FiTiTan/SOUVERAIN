@@ -3,7 +3,7 @@
 // Extraction → Anonymisation → Enrichissement GROQ → Désanonymisation → Injection Template
 
 import { aggregateAllData, type ExtractedData } from './extractionService';
-import { enrichPortfolioDataV3 } from './groqEnrichmentServiceV3';
+import { enrichPortfolioDataV3 } from './aiEnrichmentServiceV3';
 import { injectDataIntoTemplate, computeFlags } from './templateInjectorService';
 
 export interface GenerationInputV3 {
