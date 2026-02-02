@@ -80,14 +80,18 @@ async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: num
 async function enrichHeroAndAbout(data: RawPortfolioData): Promise<any> {
   const systemPrompt = `Expert copywriting. Génère hero section + about.
 Retourne JSON : {"heroTitle","heroSubtitle","heroEyebrow","heroCta","aboutText","valueProp"}
-heroTitle = COPIE EXACTE du nom fourni. Pas clichés. Concis.`;
+heroTitle = EXACTEMENT le nom fourni, SANS modification ni ajout. Copie-colle strict.
+heroSubtitle: reformuler la tagline de façon percutante (15-25 mots max).
+heroEyebrow: rôle/statut court (ex: "Freelance", "Studio", "Designer").
+heroCta: CTA action (ex: "Voir mes projets", "Me contacter").
+aboutText: paragraphe à propos (40-60 mots), personnel et authentique.`;
 
   const userPrompt = `Nom: ${data.name}
 Profil: ${data.profileType}
 Tagline: ${data.tagline}
 Value prop: ${data.valueProp || 'N/A'}
 
-Génère JSON hero+about. heroTitle="${data.name}" exact.`;
+IMPORTANT: heroTitle doit être EXACTEMENT "${data.name}", rien d'autre.`;
 
   console.log('[GroqSequenced] Step 1/3: Enriching hero & about...');
   return await callGroq(systemPrompt, userPrompt, 800);
@@ -125,20 +129,20 @@ async function enrichProjects(data: RawPortfolioData): Promise<any[]> {
     return [];
   }
 
-  const systemPrompt = `Expert copywriting. Enrichis projets.
+  const systemPrompt = `Expert copywriting. Enrichis projets de manière CONCISE.
 Retourne objet JSON: {"projects": [{"title","description","category"}]}
-description: 40-80 mots, contexte+résultats.`;
+description: MAX 50 mots. Pitch court et impactant. PAS de détails exhaustifs.`;
 
   const projectsSummary = data.projects.map(p => 
-    `${p.title} (${p.category || 'N/A'}): ${p.description || 'Sans desc'}`
+    `${p.title} (${p.category || 'N/A'}): ${(p.description || 'Sans desc').substring(0, 200)}`
   ).join(' | ');
 
   const userPrompt = `Projets: ${projectsSummary}
 
-Génère objet JSON avec clé "projects" contenant array enrichi.`;
+Génère objet JSON avec clé "projects" contenant array enrichi. Descriptions MAX 50 mots chacune.`;
 
   console.log('[GroqSequenced] Step 3/3: Enriching projects...');
-  const result = await callGroq(systemPrompt, userPrompt, 1500);
+  const result = await callGroq(systemPrompt, userPrompt, 1000);
   
   return result.projects || [];
 }
