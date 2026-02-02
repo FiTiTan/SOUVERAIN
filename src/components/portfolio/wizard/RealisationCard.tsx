@@ -7,6 +7,7 @@ import React from 'react';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { Realisation } from '../types';
+import { DocumentPreview } from './DocumentPreview';
 
 interface RealisationCardProps {
   realisation: Realisation;
@@ -146,15 +147,31 @@ export const RealisationCard: React.FC<RealisationCardProps> = ({
         />
       </div>
 
-      {/* Description */}
+      {/* Preview du contenu extrait OU Description éditable */}
       <div style={formGroupStyle}>
-        <label style={labelStyle}>Description :</label>
-        <textarea
-          value={realisation.description}
-          onChange={(e) => onUpdate({ description: e.target.value })}
-          placeholder="Décrivez cette réalisation..."
-          style={textareaStyle}
-        />
+        <label style={labelStyle}>
+          {realisation.extractedContent ? 'Contenu extrait :' : 'Description :'}
+        </label>
+        {realisation.extractedContent ? (
+          <DocumentPreview
+            content={realisation.extractedContent}
+            sourceType={realisation.source.type}
+            sourceName={realisation.source.path || realisation.source.url}
+            onContentEdit={(newContent) => {
+              onUpdate({ 
+                extractedContent: newContent,
+                description: newContent.substring(0, 200) + (newContent.length > 200 ? '...' : '')
+              });
+            }}
+          />
+        ) : (
+          <textarea
+            value={realisation.description}
+            onChange={(e) => onUpdate({ description: e.target.value })}
+            placeholder="Décrivez cette réalisation..."
+            style={textareaStyle}
+          />
+        )}
       </div>
 
       {/* Catégorie */}
