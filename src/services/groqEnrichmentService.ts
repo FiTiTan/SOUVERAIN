@@ -3,6 +3,7 @@
 // NE TOUCHE JAMAIS au HTML
 
 import { detectAndAnonymize, deanonymize } from './anonymizationService';
+import { enrichServicesWithIcons } from '../utils/fallbackIcons';
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -51,11 +52,27 @@ LONGUEURS RECOMMANDÉES :
 - valueProp : 20-40 mots
 
 ICÔNES SVG POUR LES SERVICES :
-- Génère une icône SVG minimaliste et abstraite pour chaque service
-- Format : viewBox='0 0 48 48', pas de couleur fill/stroke (utilise currentColor si nécessaire)
-- Style : géométrique, simple, clean (pas d'emojis, pas de détails complexes)
-- Formes abstraites : cercles, rectangles, lignes, paths simples
-- Exemples de concepts : écran/laptop pour dev web, palette pour design, mobile pour apps
+Tu DOIS générer une icône SVG unique et spécifique pour chaque service.
+
+RÈGLES STRICTES :
+- Format : <svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'>
+- Style : Géométrique, minimaliste, ligne stroke uniquement
+- ❌ PAS de cercle vide seul
+- ✅ Représentation abstraite du concept (laptop, palette, engrenage, etc.)
+
+EXEMPLES CONCRETS À SUIVRE :
+
+Développement web :
+<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><rect x='6' y='10' width='36' height='28' rx='2'/><line x1='6' y1='18' x2='42' y2='18'/><circle cx='12' cy='14' r='1.5'/><circle cx='17' cy='14' r='1.5'/><circle cx='22' cy='14' r='1.5'/></svg>
+
+Design graphique :
+<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 36l6-16 6 8 6-12 6 20'/><circle cx='12' cy='36' r='2' fill='currentColor'/><circle cx='36' cy='36' r='2' fill='currentColor'/></svg>
+
+Conseil/Stratégie :
+<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><circle cx='24' cy='24' r='10'/><path d='M24 14v20M34 24H14'/><circle cx='24' cy='14' r='2' fill='currentColor'/><circle cx='34' cy='24' r='2' fill='currentColor'/><circle cx='24' cy='34' r='2' fill='currentColor'/><circle cx='14' cy='24' r='2' fill='currentColor'/></svg>
+
+Marketing :
+<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><path d='M10 38L24 10l14 28z'/><circle cx='24' cy='20' r='3'/><path d='M18 28h12'/></svg>
 
 STYLE D'ÉCRITURE :
 - Évite les clichés ("passionné", "dynamique", "expert reconnu")
@@ -169,7 +186,7 @@ Génère un JSON avec les champs suivants.
     { 
       "title": "Titre service original ou légèrement amélioré", 
       "description": "Description enrichie (15-30 mots)",
-      "icon": "<svg viewBox='0 0 48 48' fill='none' xmlns='http://www.w3.org/2000/svg'><!-- icône SVG minimaliste et abstraite --></svg>"
+      "icon": "<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><rect x='6' y='10' width='36' height='28' rx='2'/><line x1='6' y1='18' x2='42' y2='18'/></svg>"
     }
   ],
   "projects": [
@@ -242,7 +259,10 @@ export async function enrichPortfolioData(
 
     const enriched = JSON.parse(content);
 
-    // 4. Fusionner avec les données originales (garder ce que Groq n'a pas enrichi)
+    // 4. Enrichir les services avec icônes fallback si nécessaire
+    enriched.services = enrichServicesWithIcons(enriched.services || []);
+
+    // 5. Fusionner avec les données originales (garder ce que Groq n'a pas enrichi)
     const merged: EnrichedPortfolioData = {
       ...enriched,
       // Données non modifiées par Groq
@@ -263,7 +283,7 @@ export async function enrichPortfolioData(
       testimonials: rawData.testimonials,
     };
 
-    // 5. Dé-anonymisation
+    // 6. Dé-anonymisation
     console.log('[GroqEnrichment] De-anonymizing data...');
     const finalDataString = JSON.stringify(merged);
     const deanonymizedString = deanonymize(finalDataString, anonymizedResult.mappings);

@@ -4,6 +4,7 @@
 
 import type { ExtractedData } from './extractionService';
 import { anonymizeObject, deanonymizeObject, type EntityMap } from './anonymizationServiceV3';
+import { enrichServicesWithIcons } from '../utils/fallbackIcons';
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -215,6 +216,11 @@ export async function enrichPortfolioDataV3(
     // 4. Désanonymiser le résultat
     console.log('[GroqEnrichmentV3] Deanonymizing...');
     const enrichedData = deanonymizeObject(enrichedAnonymized, entityMap);
+
+    // 4.5. Enrichir les services avec icônes fallback si nécessaire
+    if (enrichedData.services) {
+      enrichedData.services = enrichServicesWithIcons(enrichedData.services);
+    }
 
     // 5. Réinjecter les données non modifiées par Groq
     enrichedData.email = extractedData.formData.email;
