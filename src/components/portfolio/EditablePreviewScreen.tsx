@@ -1,12 +1,25 @@
 /**
- * SOUVERAIN - Editable Preview Screen V3
- * Layout 3 colonnes : Bibliothèque | Zones Drop | Preview
+ * SOUVERAIN - Editable Preview Screen V4
+ * Layout 2 colonnes : Bibliothèque | Preview avec drop direct dans iframe
  */
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../design-system';
 import type { LibraryImage, ImageAssignments, PortfolioPreviewData } from './types';
+
+// ============================================================
+// UTILS
+// ============================================================
+
+const fileToDataUrl = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 
 // ============================================================
 // TYPES
@@ -32,95 +45,217 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   const { theme } = useTheme();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragImageRef = useRef<string | null>(null);
   
   const [libraryImages, setLibraryImages] = useState<LibraryImage[]>([]);
   const [assignments, setAssignments] = useState<ImageAssignments>({});
-  const [dragOverZone, setDragOverZone] = useState<string | null>(null);
-  const [detectedProjectCount, setDetectedProjectCount] = useState<number>(0);
-
-  // ============================================================
-  // DETECT PROJECTS FROM HTML
-  // ============================================================
-
-  useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-
-    const handleIframeLoad = () => {
-      const doc = iframe.contentDocument;
-      if (!doc) return;
-
-      // Détecter le nombre de projets dans le HTML
-      const projectZones = doc.querySelectorAll('[data-image-zone="project"]');
-      setDetectedProjectCount(projectZones.length);
-      
-      console.log('[EditablePreview] Detected projects:', projectZones.length);
-    };
-
-    iframe.addEventListener('load', handleIframeLoad);
-
-    return () => {
-      iframe.removeEventListener('load', handleIframeLoad);
-    };
-  }, []);
+  const [isDragging, setIsDragging] = useState(false);
+  const [hoveredZone, setHoveredZone] = useState<string | null>(null);
 
   // ============================================================
   // INJECT IMAGES INTO IFRAME
   // ============================================================
 
   useEffect(() => {
-    // Petit délai pour s'assurer que l'iframe est complètement chargée
     const timer = setTimeout(() => {
       const iframe = iframeRef.current;
-      if (!iframe?.contentDocument) {
-        console.log('[EditablePreview] Iframe contentDocument not ready');
-        return;
-      }
+      if (!iframe?.contentDocument) return;
 
       const doc = iframe.contentDocument;
 
-    // Injecter hero
-    if (assignments.hero) {
-      const heroZone = doc.querySelector('[data-image-zone="hero"]');
-      if (heroZone) {
-        heroZone.innerHTML = `<img src="${assignments.hero}" alt="Hero" style="width: 100%; height: 100%; object-fit: cover;">`;
-        console.log('[EditablePreview] Injected hero image');
-      } else {
-        console.warn('[EditablePreview] Hero zone not found in HTML');
-      }
-    }
+      // Injecter les CSS pour les zones droppables
+      injectDropZonesCSS(doc);
 
-    // Injecter about
-    if (assignments.about) {
-      const aboutZone = doc.querySelector('[data-image-zone="about"]');
-      if (aboutZone) {
-        aboutZone.innerHTML = `<img src="${assignments.about}" alt="About" style="width: 100%; height: 100%; object-fit: cover;">`;
-        console.log('[EditablePreview] Injected about image');
-      } else {
-        console.warn('[EditablePreview] About zone not found in HTML');
-      }
-    }
-
-    // Injecter projets
-    Object.entries(assignments).forEach(([key, value]) => {
-      if (key.startsWith('project-') && value) {
-        const projectIndex = key.split('-')[1];
-        const projectZone = doc.querySelector(`[data-image-zone="project"][data-project-index="${projectIndex}"]`);
-        if (projectZone) {
-          projectZone.innerHTML = `<img src="${value}" alt="Project ${projectIndex}" style="width: 100%; height: 100%; object-fit: cover;">`;
-          console.log(`[EditablePreview] Injected project ${projectIndex} image`);
-        } else {
-          console.warn(`[EditablePreview] Project ${projectIndex} zone not found in HTML`);
+      // Injecter les images assignées
+      Object.entries(assignments).forEach(([zoneId, dataUrl]) => {
+        const zone = findZoneByIdInIframe(doc, zoneId);
+        if (zone) {
+          zone.innerHTML = `<img src="${dataUrl}" alt="${zoneId}" style="width: 100%; height: 100%; object-fit: cover;">`;
         }
-      }
-    });
-    }, 300); // Attendre 300ms que l'iframe soit prête
+      });
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [assignments]);
 
   // ============================================================
-  // HANDLERS
+  // INJECT CSS FOR DROP ZONES
+  // ============================================================
+
+  const injectDropZonesCSS = (doc: Document) => {
+    let style = doc.getElementById('drop-zones-style');
+    if (!style) {
+      style = doc.createElement('style');
+      style.id = 'drop-zones-style';
+      doc.head.appendChild(style);
+    }
+
+    style.textContent = `
+      [data-image-zone] {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      [data-image-zone]:not(:has(img))::after {
+        content: '📷 Drop image here';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: rgba(156, 163, 175, 0.6);
+        font-size: 0.875rem;
+        font-weight: 500;
+        pointer-events: none;
+        z-index: 1;
+      }
+      
+      [data-image-zone].drag-hover {
+        outline: 3px dashed #3A3A3A;
+        outline-offset: -3px;
+        background-color: rgba(58, 58, 58, 0.1);
+      }
+      
+      [data-image-zone]:hover {
+        outline: 2px solid rgba(58, 58, 58, 0.3);
+        outline-offset: -2px;
+      }
+    `;
+  };
+
+  // ============================================================
+  // FIND ZONE HELPER
+  // ============================================================
+
+  const findZoneByIdInIframe = (doc: Document, zoneId: string): HTMLElement | null => {
+    if (zoneId === 'hero') {
+      return doc.querySelector('[data-image-zone="hero"]');
+    } else if (zoneId === 'about') {
+      return doc.querySelector('[data-image-zone="about"]');
+    } else if (zoneId.startsWith('project-')) {
+      const projectIndex = zoneId.split('-')[1];
+      return doc.querySelector(`[data-image-zone="project"][data-project-index="${projectIndex}"]`);
+    }
+    return null;
+  };
+
+  // ============================================================
+  // DRAG & DROP HANDLERS (sur la bibliothèque)
+  // ============================================================
+
+  const handleDragStart = useCallback((e: React.DragEvent, image: LibraryImage) => {
+    dragImageRef.current = image.dataUrl;
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'copy';
+    
+    // Image fantôme pendant le drag
+    const dragImage = new Image();
+    dragImage.src = image.dataUrl;
+    dragImage.style.width = '100px';
+    dragImage.style.height = '100px';
+    dragImage.style.objectFit = 'cover';
+    e.dataTransfer.setDragImage(dragImage, 50, 50);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+    dragImageRef.current = null;
+    setHoveredZone(null);
+    
+    // Retirer tous les hover states de l'iframe
+    const doc = iframeRef.current?.contentDocument;
+    if (doc) {
+      doc.querySelectorAll('[data-image-zone].drag-hover').forEach(el => {
+        el.classList.remove('drag-hover');
+      });
+    }
+  }, []);
+
+  // ============================================================
+  // TRACK MOUSE OVER IFRAME DURING DRAG
+  // ============================================================
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const doc = iframe.contentDocument;
+      if (!doc) return;
+
+      // Convertir coordonnées parent vers iframe
+      const iframeRect = iframe.getBoundingClientRect();
+      const x = e.clientX - iframeRect.left;
+      const y = e.clientY - iframeRect.top + (doc.documentElement.scrollTop || doc.body.scrollTop);
+
+      // Trouver l'élément sous le curseur dans l'iframe
+      const elementInIframe = doc.elementFromPoint(e.clientX - iframeRect.left, e.clientY - iframeRect.top);
+      
+      // Remonter pour trouver la zone droppable
+      let zone = elementInIframe;
+      while (zone && !zone.hasAttribute('data-image-zone')) {
+        zone = zone.parentElement;
+      }
+
+      // Mettre à jour les hover states
+      doc.querySelectorAll('[data-image-zone]').forEach(el => {
+        if (el === zone) {
+          el.classList.add('drag-hover');
+        } else {
+          el.classList.remove('drag-hover');
+        }
+      });
+
+      if (zone) {
+        const zoneType = zone.getAttribute('data-image-zone');
+        const projectIndex = zone.getAttribute('data-project-index');
+        const zoneId = zoneType === 'project' ? `project-${projectIndex}` : zoneType || '';
+        setHoveredZone(zoneId);
+      } else {
+        setHoveredZone(null);
+      }
+    };
+
+    // Écouter les mouvements de souris sur le document parent
+    document.addEventListener('dragover', handleMouseMove);
+
+    return () => {
+      document.removeEventListener('dragover', handleMouseMove);
+    };
+  }, [isDragging]);
+
+  // ============================================================
+  // DROP HANDLER ON IFRAME
+  // ============================================================
+
+  const handleIframeDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    
+    if (!dragImageRef.current || !hoveredZone) {
+      setIsDragging(false);
+      return;
+    }
+
+    // Assigner l'image à la zone
+    setAssignments(prev => ({
+      ...prev,
+      [hoveredZone]: dragImageRef.current!
+    }));
+
+    setIsDragging(false);
+    dragImageRef.current = null;
+    setHoveredZone(null);
+  }, [hoveredZone]);
+
+  const handleIframeDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  }, []);
+
+  // ============================================================
+  // LIBRARY HANDLERS
   // ============================================================
 
   const handleAddImages = useCallback(async (files: FileList) => {
@@ -131,45 +266,11 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
         dataUrl: await fileToDataUrl(file),
       }))
     );
-    setLibraryImages((prev) => [...prev, ...newImages]);
+    setLibraryImages(prev => [...prev, ...newImages]);
   }, []);
 
   const handleRemoveLibraryImage = useCallback((id: string) => {
-    setLibraryImages((prev) => prev.filter((img) => img.id !== id));
-  }, []);
-
-  const handleDragStart = useCallback((e: React.DragEvent, image: LibraryImage) => {
-    e.dataTransfer.setData('imageDataUrl', image.dataUrl);
-    e.dataTransfer.effectAllowed = 'copy';
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent, zoneId: string) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-    setDragOverZone(zoneId);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOverZone(null);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent, zoneId: string) => {
-    e.preventDefault();
-    setDragOverZone(null);
-
-    const dataUrl = e.dataTransfer.getData('imageDataUrl');
-    if (dataUrl) {
-      setAssignments((prev) => ({ ...prev, [zoneId]: dataUrl }));
-    }
-  }, []);
-
-  const handleRemoveAssignment = useCallback((zoneId: string) => {
-    setAssignments((prev) => {
-      const updated = { ...prev };
-      delete updated[zoneId];
-      return updated;
-    });
+    setLibraryImages(prev => prev.filter(img => img.id !== id));
   }, []);
 
   const handleExport = useCallback(() => {
@@ -203,61 +304,124 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     alignItems: 'center',
   };
 
+  const titleStyle: React.CSSProperties = {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: theme.text.primary,
+  };
+
   const mainStyle: React.CSSProperties = {
-    flex: 1,
     display: 'grid',
-    gridTemplateColumns: '240px 160px 1fr',
+    gridTemplateColumns: '280px 1fr',
     gap: 0,
+    flex: 1,
     overflow: 'hidden',
   };
 
-  const columnStyle: React.CSSProperties = {
+  const sidebarStyle: React.CSSProperties = {
+    padding: '1.5rem',
+    backgroundColor: theme.bg.secondary,
+    borderRight: `1px solid ${theme.border.light}`,
+    overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
+    gap: '1rem',
+  };
+
+  const sidebarTitleStyle: React.CSSProperties = {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: theme.text.primary,
+    marginBottom: '0.5rem',
+  };
+
+  const addButtonStyle: React.CSSProperties = {
+    padding: '0.75rem',
+    backgroundColor: '#3A3A3A',
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: borderRadius.md,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    cursor: 'pointer',
+    transition: transitions.fast,
+  };
+
+  const imageGridStyle: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '0.75rem',
+  };
+
+  const imageItemStyle: React.CSSProperties = {
+    position: 'relative',
+    aspectRatio: '1',
+    borderRadius: borderRadius.md,
+    overflow: 'hidden',
+    cursor: 'grab',
+    border: `2px solid ${theme.border.default}`,
+    transition: transitions.fast,
+  };
+
+  const removeImageButtonStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '0.25rem',
+    right: '0.25rem',
+    width: '24px',
+    height: '24px',
+    backgroundColor: theme.semantic.error,
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: '50%',
+    fontSize: '12px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: 0,
+    transition: transitions.fast,
+  };
+
+  const previewContainerStyle: React.CSSProperties = {
+    position: 'relative',
+    backgroundColor: theme.bg.tertiary,
     overflow: 'hidden',
   };
 
-  const columnHeaderStyle: React.CSSProperties = {
-    padding: '1rem 1.5rem',
-    borderBottom: `1px solid ${theme.border.light}`,
-    backgroundColor: theme.bg.secondary,
+  const iframeStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    border: 'none',
+    backgroundColor: '#FFFFFF',
   };
 
-  const dropZoneStyle = (zoneId: string): React.CSSProperties => {
-    const hasImage = !!assignments[zoneId];
-    const isHovered = dragOverZone === zoneId;
-    
-    const size = '120px';
-
-    return {
-      position: 'relative',
-      height: size,
-      width: size,
-      borderRadius: borderRadius.lg,
-      border: `2px dashed ${isHovered ? theme.accent.primary : hasImage ? theme.semantic.success : theme.border.default}`,
-      backgroundColor: isHovered ? theme.accent.muted : theme.bg.tertiary,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      transition: transitions.fast,
-      overflow: 'hidden',
-      gap: '0.25rem',
-    };
+  const buttonStyle = (variant: 'primary' | 'secondary'): React.CSSProperties => {
+    if (variant === 'primary') {
+      return {
+        padding: '0.75rem 1.5rem',
+        fontSize: typography.fontSize.sm,
+        fontWeight: typography.fontWeight.medium,
+        backgroundColor: '#3A3A3A',
+        color: '#FFFFFF',
+        border: 'none',
+        borderRadius: borderRadius.lg,
+        cursor: 'pointer',
+        transition: transitions.fast,
+      };
+    } else {
+      return {
+        padding: '0.75rem 1.5rem',
+        fontSize: typography.fontSize.sm,
+        fontWeight: typography.fontWeight.medium,
+        backgroundColor: 'transparent',
+        color: theme.text.secondary,
+        border: `1px solid ${theme.border.default}`,
+        borderRadius: borderRadius.lg,
+        cursor: 'pointer',
+        transition: transitions.fast,
+      };
+    }
   };
-
-  const buttonStyle = (variant: 'primary' | 'secondary'): React.CSSProperties => ({
-    padding: '0.75rem 1.5rem',
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    backgroundColor: variant === 'primary' ? theme.accent.primary : 'transparent',
-    color: variant === 'primary' ? '#FFFFFF' : theme.text.secondary,
-    border: variant === 'primary' ? 'none' : `1px solid ${theme.border.default}`,
-    borderRadius: borderRadius.lg,
-    cursor: 'pointer',
-    transition: transitions.fast,
-  });
 
   // ============================================================
   // RENDER
@@ -267,295 +431,104 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     <div style={containerStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <div>
-          <h2 style={{ fontSize: typography.fontSize.xl, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-            Personnalisation des images
-          </h2>
-          <p style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary, marginTop: '0.25rem' }}>
-            Glissez vos images depuis la bibliothèque vers les zones
-          </p>
-        </div>
+        <h1 style={titleStyle}>ÉTAPE 6 : PERSONNALISEZ</h1>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <button onClick={onBack} style={buttonStyle('secondary')}>← Retour</button>
-          <button onClick={handleExport} style={buttonStyle('primary')}>Exporter →</button>
+          <button onClick={onBack} style={buttonStyle('secondary')}>
+            ← Retour
+          </button>
+          <button onClick={handleExport} style={buttonStyle('primary')}>
+            Exporter →
+          </button>
         </div>
       </div>
 
-      {/* Main 3 colonnes */}
+      {/* Main content */}
       <div style={mainStyle}>
-        
-        {/* COLONNE 1 : BIBLIOTHÈQUE */}
-        <div style={{ ...columnStyle, borderRight: `1px solid ${theme.border.light}`, backgroundColor: theme.bg.secondary }}>
-          <div style={columnHeaderStyle}>
-            <h3 style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-              Bibliothèque ({libraryImages.length})
-            </h3>
-          </div>
-
-          <div style={{ flex: 1, padding: '1rem', overflowY: 'auto' }}>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                marginBottom: '1rem',
-                backgroundColor: theme.accent.primary,
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: borderRadius.lg,
-                cursor: 'pointer',
-                fontSize: typography.fontSize.sm,
-                fontWeight: typography.fontWeight.medium,
-              }}
-            >
-              + Importer des images
-            </button>
-
+        {/* Bibliothèque d'images */}
+        <div style={sidebarStyle}>
+          <div>
+            <h2 style={sidebarTitleStyle}>Bibliothèque d'images</h2>
             <input
               ref={fileInputRef}
               type="file"
-              multiple
               accept="image/*"
+              multiple
               style={{ display: 'none' }}
-              onChange={(e) => e.target.files && handleAddImages(e.target.files)}
+              onChange={e => e.target.files && handleAddImages(e.target.files)}
             />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              style={addButtonStyle}
+            >
+              + Importer
+            </button>
+          </div>
 
-            {libraryImages.length === 0 ? (
-              <p style={{ textAlign: 'center', color: theme.text.tertiary, fontSize: typography.fontSize.sm, padding: '2rem 0' }}>
-                Aucune image<br/>Importez-en pour commencer
-              </p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {libraryImages.map((img) => (
-                  <div
-                    key={img.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, img)}
+          <div>
+            <p style={{
+              fontSize: typography.fontSize.xs,
+              color: theme.text.tertiary,
+              marginBottom: '0.75rem',
+            }}>
+              Glissez les images vers le preview →
+            </p>
+            <div style={imageGridStyle}>
+              {libraryImages.map(image => (
+                <div
+                  key={image.id}
+                  draggable
+                  onDragStart={e => handleDragStart(e, image)}
+                  onDragEnd={handleDragEnd}
+                  style={imageItemStyle}
+                  onMouseEnter={(e) => {
+                    const btn = e.currentTarget.querySelector('.remove-btn') as HTMLElement;
+                    if (btn) btn.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    const btn = e.currentTarget.querySelector('.remove-btn') as HTMLElement;
+                    if (btn) btn.style.opacity = '0';
+                  }}
+                >
+                  <img
+                    src={image.dataUrl}
+                    alt={image.filename}
                     style={{
-                      position: 'relative',
                       width: '100%',
-                      paddingBottom: '100%', // Ratio 1:1 carré
-                      borderRadius: borderRadius.lg,
-                      overflow: 'hidden',
-                      cursor: 'grab',
-                      border: `2px solid ${theme.border.light}`,
+                      height: '100%',
+                      objectFit: 'cover',
+                      pointerEvents: 'none',
                     }}
+                  />
+                  <button
+                    className="remove-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveLibraryImage(image.id);
+                    }}
+                    style={removeImageButtonStyle}
                   >
-                    <img src={img.dataUrl} alt={img.filename} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveLibraryImage(img.id);
-                      }}
-                      style={{
-                        position: 'absolute',
-                        top: '4px',
-                        right: '4px',
-                        padding: '4px 8px',
-                        backgroundColor: theme.semantic.error,
-                        color: '#FFFFFF',
-                        border: 'none',
-                        borderRadius: borderRadius.md,
-                        cursor: 'pointer',
-                        fontSize: '10px',
-                        zIndex: 1,
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* COLONNE 2 : ZONES DE DROP */}
-        <div style={{ ...columnStyle, borderRight: `1px solid ${theme.border.light}`, backgroundColor: theme.bg.primary }}>
-          <div style={columnHeaderStyle}>
-            <h3 style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-              Zones
-            </h3>
-          </div>
-
-          <div style={{ flex: 1, padding: '1rem 0.5rem', overflowY: 'auto' }}>
-            
-            {/* Hero */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div
-                style={dropZoneStyle('hero')}
-                onDragOver={(e) => handleDragOver(e, 'hero')}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, 'hero')}
-              >
-                {assignments.hero ? (
-                  <>
-                    <img src={assignments.hero} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
-                    <button
-                      onClick={() => handleRemoveAssignment('hero')}
-                      style={{
-                        position: 'absolute',
-                        top: '4px',
-                        right: '4px',
-                        padding: '4px 8px',
-                        backgroundColor: theme.semantic.error,
-                        color: '#FFFFFF',
-                        border: 'none',
-                        borderRadius: borderRadius.md,
-                        cursor: 'pointer',
-                        fontSize: '10px',
-                        zIndex: 1,
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <span style={{ fontSize: typography.fontSize.xs, fontWeight: typography.fontWeight.semibold, color: theme.text.secondary }}>Hero</span>
-                    <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>Glissez ici</span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* About */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div
-                style={dropZoneStyle('about')}
-                onDragOver={(e) => handleDragOver(e, 'about')}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, 'about')}
-              >
-                {assignments.about ? (
-                  <>
-                    <img src={assignments.about} alt="About" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
-                    <button
-                      onClick={() => handleRemoveAssignment('about')}
-                      style={{
-                        position: 'absolute',
-                        top: '4px',
-                        right: '4px',
-                        padding: '4px 8px',
-                        backgroundColor: theme.semantic.error,
-                        color: '#FFFFFF',
-                        border: 'none',
-                        borderRadius: borderRadius.md,
-                        cursor: 'pointer',
-                        fontSize: '10px',
-                        zIndex: 1,
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <span style={{ fontSize: typography.fontSize.xs, fontWeight: typography.fontWeight.semibold, color: theme.text.secondary }}>À propos</span>
-                    <span style={{ fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>Glissez ici</span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Projets */}
-            {detectedProjectCount > 0 && (
-              <div>
-                <label style={{ display: 'block', fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.semibold, color: theme.text.primary, marginBottom: '0.75rem' }}>
-                  Projets ({detectedProjectCount})
-                </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {Array.from({ length: detectedProjectCount }).map((_, i) => {
-                    const zoneId = `project-${i}`;
-                    const projectTitle = portfolioData.projects?.[i]?.title || `Projet ${i + 1}`;
-                    return (
-                      <div
-                        key={i}
-                        style={dropZoneStyle(zoneId)}
-                        onDragOver={(e) => handleDragOver(e, zoneId)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, zoneId)}
-                      >
-                        {assignments[zoneId] ? (
-                          <>
-                            <img src={assignments[zoneId]} alt={projectTitle} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveAssignment(zoneId);
-                              }}
-                              style={{
-                                position: 'absolute',
-                                top: '4px',
-                                right: '4px',
-                                padding: '4px 8px',
-                                backgroundColor: theme.semantic.error,
-                                color: '#FFFFFF',
-                                border: 'none',
-                                borderRadius: borderRadius.md,
-                                cursor: 'pointer',
-                                fontSize: '10px',
-                                zIndex: 1,
-                              }}
-                            >
-                              ✕
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <span style={{ fontSize: typography.fontSize.xs, fontWeight: typography.fontWeight.medium, color: theme.text.secondary, textAlign: 'center', padding: '0 0.5rem' }}>
-                              {projectTitle}
-                            </span>
-                            <span style={{ fontSize: '9px', color: theme.text.tertiary }}>Glissez ici</span>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
+                    ×
+                  </button>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* COLONNE 3 : PREVIEW */}
-        <div style={{ ...columnStyle, backgroundColor: theme.bg.tertiary }}>
-          <div style={columnHeaderStyle}>
-            <h3 style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-              Aperçu final
-            </h3>
-          </div>
-
-          <div style={{ flex: 1, overflow: 'auto', backgroundColor: '#FFFFFF' }}>
-            <iframe
-              ref={iframeRef}
-              srcDoc={initialHtml}
-              style={{
-                width: '100%',
-                height: '100%',
-                minHeight: '100vh',
-                border: 'none',
-                display: 'block',
-              }}
-              title="Portfolio Preview"
-            />
-          </div>
+        {/* Preview */}
+        <div
+          style={previewContainerStyle}
+          onDrop={handleIframeDrop}
+          onDragOver={handleIframeDragOver}
+        >
+          <iframe
+            ref={iframeRef}
+            srcDoc={initialHtml}
+            style={iframeStyle}
+            title="Portfolio Preview"
+          />
         </div>
-
       </div>
     </div>
   );
-};
-
-// ============================================================
-// UTILITAIRES
-// ============================================================
-
-const fileToDataUrl = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 };
