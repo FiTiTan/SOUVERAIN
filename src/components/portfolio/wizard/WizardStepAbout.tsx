@@ -9,6 +9,7 @@ import { typography, borderRadius, transitions } from '../../../design-system';
 import type { WizardStepProps, ProfileType, ImportSource } from '../types';
 import { SourceImporter } from './SourceImporter';
 import { SocialLinksGrid } from './SocialLinksGrid';
+import { AIEnhanceButton } from './AIEnhanceButton';
 
 export const WizardStepAbout: React.FC<WizardStepProps> = ({
   formData,
@@ -19,6 +20,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
   const { theme } = useTheme();
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [isEnhancingTagline, setIsEnhancingTagline] = useState(false);
 
   const handleProfileTypeChange = (type: ProfileType) => {
     onUpdate({ profileType: type });
@@ -52,6 +54,20 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
       setImportError(error.message);
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  const handleEnhanceTagline = async () => {
+    setIsEnhancingTagline(true);
+    try {
+      // TODO: Appeler l'API GROQ pour améliorer le tagline
+      // Pour l'instant, on simule
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Amélioration IA du tagline');
+    } catch (error) {
+      console.error('Erreur amélioration IA:', error);
+    } finally {
+      setIsEnhancingTagline(false);
     }
   };
 
@@ -376,27 +392,33 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         </div>
 
         <div style={formGroupStyle}>
-          <label style={labelStyle}>
-            Tagline *
-            <span
-              title="Une phrase courte et percutante qui résume votre identité ou votre proposition de valeur (ex: 'Créateur d'expériences digitales mémorables')"
-              style={{
-                marginLeft: '0.5rem',
-                cursor: 'help',
-                color: theme.text.tertiary,
-                fontSize: typography.fontSize.xs,
-                border: `1px solid ${theme.border.default}`,
-                borderRadius: '50%',
-                width: '16px',
-                height: '16px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              ?
-            </span>
-          </label>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>
+              Tagline *
+              <span
+                title="Une phrase courte et percutante qui résume votre identité ou votre proposition de valeur (ex: 'Créateur d'expériences digitales mémorables')"
+                style={{
+                  marginLeft: '0.5rem',
+                  cursor: 'help',
+                  color: theme.text.tertiary,
+                  fontSize: typography.fontSize.xs,
+                  border: `1px solid ${theme.border.default}`,
+                  borderRadius: '50%',
+                  width: '16px',
+                  height: '16px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ?
+              </span>
+            </label>
+            <AIEnhanceButton
+              onEnhance={handleEnhanceTagline}
+              isLoading={isEnhancingTagline}
+            />
+          </div>
           <input
             type="text"
             value={formData.tagline}

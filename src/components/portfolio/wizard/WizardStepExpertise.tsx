@@ -1,13 +1,13 @@
 /**
  * SOUVERAIN - Wizard Step 2: Expertise
- * Services + proposition de valeur avec suggestions IA
+ * Services + proposition de valeur avec IA
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { WizardStepProps, Service } from '../types';
-import { detectContext } from '../../../config/portfolioLabels';
+import { AIEnhanceButton } from './AIEnhanceButton';
 
 export const WizardStepExpertise: React.FC<WizardStepProps> = ({
   formData,
@@ -16,94 +16,7 @@ export const WizardStepExpertise: React.FC<WizardStepProps> = ({
   onBack,
 }) => {
   const { theme } = useTheme();
-  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
-  const [suggestedServices, setSuggestedServices] = useState<Service[]>([]);
-
-  // Générer des suggestions basées sur le contexte détecté
-  useEffect(() => {
-    generateSuggestions();
-  }, [formData.profileContext]);
-
-  const generateSuggestions = () => {
-    // Suggestions basiques selon le contexte
-    // TODO: Améliorer avec IA pour suggestions plus contextuelles
-    const context = formData.profileContext || detectContext(
-      formData.profileType,
-      formData.services.map(s => s.title)
-    );
-
-    let suggestions: Service[] = [];
-
-    switch (context) {
-      case 'tech':
-        suggestions = [
-          { title: 'Développement web', description: 'Création d\'applications web modernes et performantes', suggested: true },
-          { title: 'Conseil technique', description: 'Accompagnement sur vos choix d\'architecture et de technologie', suggested: true },
-          { title: 'Formation', description: 'Transmission de compétences techniques à vos équipes', suggested: true },
-        ];
-        break;
-      case 'service':
-        suggestions = [
-          { title: 'Conseil personnalisé', description: 'Accompagnement sur-mesure adapté à vos besoins', suggested: true },
-          { title: 'Expertise juridique', description: 'Analyse et conseil en droit des affaires', suggested: true },
-          { title: 'Gestion de projet', description: 'Pilotage et coordination de vos projets', suggested: true },
-        ];
-        break;
-      case 'food':
-        suggestions = [
-          { title: 'Cuisine traditionnelle', description: 'Plats authentiques préparés avec des produits frais', suggested: true },
-          { title: 'Service traiteur', description: 'Prestations pour vos événements professionnels et privés', suggested: true },
-          { title: 'Livraison à domicile', description: 'Recevez nos plats chez vous', suggested: true },
-        ];
-        break;
-      case 'artisan':
-        suggestions = [
-          { title: 'Intervention rapide', description: 'Dépannage et réparation dans les meilleurs délais', suggested: true },
-          { title: 'Installation complète', description: 'Pose et mise en service de vos équipements', suggested: true },
-          { title: 'Entretien régulier', description: 'Maintenance préventive pour garantir la durabilité', suggested: true },
-        ];
-        break;
-      case 'retail':
-        suggestions = [
-          { title: 'Vente en boutique', description: 'Large sélection de produits de qualité', suggested: true },
-          { title: 'Conseil personnalisé', description: 'Expertise pour vous guider dans vos choix', suggested: true },
-          { title: 'Commande en ligne', description: 'Service de click & collect disponible', suggested: true },
-        ];
-        break;
-      case 'junior':
-        suggestions = [
-          { title: 'Stage / Alternance', description: 'Disponible pour une mission en entreprise', suggested: true },
-          { title: 'Projets personnels', description: 'Réalisations académiques et side-projects', suggested: true },
-          { title: 'Apprentissage continu', description: 'Formation permanente aux nouvelles technologies', suggested: true },
-        ];
-        break;
-      default:
-        suggestions = [
-          { title: 'Service 1', description: 'Décrivez votre premier service', suggested: true },
-          { title: 'Service 2', description: 'Décrivez votre deuxième service', suggested: true },
-          { title: 'Service 3', description: 'Décrivez votre troisième service', suggested: true },
-        ];
-    }
-
-    setSuggestedServices(suggestions);
-  };
-
-  const handleToggleService = (index: number) => {
-    const service = suggestedServices[index];
-    const exists = formData.services.find(s => s.title === service.title);
-
-    if (exists) {
-      // Retirer
-      onUpdate({
-        services: formData.services.filter(s => s.title !== service.title),
-      });
-    } else {
-      // Ajouter
-      onUpdate({
-        services: [...formData.services, service],
-      });
-    }
-  };
+  const [isEnhancingValueProp, setIsEnhancingValueProp] = useState(false);
 
   const handleServiceChange = (index: number, field: 'title' | 'description', value: string) => {
     const updated = [...formData.services];
@@ -122,11 +35,30 @@ export const WizardStepExpertise: React.FC<WizardStepProps> = ({
     onUpdate({ services: updated });
   };
 
-  const isServiceSelected = (title: string) => {
-    return formData.services.some(s => s.title === title);
+  const handleEnhanceValueProp = async () => {
+    setIsEnhancingValueProp(true);
+    try {
+      // TODO: Appeler l'API GROQ pour améliorer la proposition de valeur
+      // Pour l'instant, on simule
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Placeholder pour le moment
+      console.log('Amélioration IA de la proposition de valeur');
+    } catch (error) {
+      console.error('Erreur amélioration IA:', error);
+    } finally {
+      setIsEnhancingValueProp(false);
+    }
   };
 
-  const canProceed = formData.services.length >= 1 && formData.valueProp.trim().length > 0;
+  // Initialiser avec au moins 1 service vide
+  if (formData.services.length === 0) {
+    onUpdate({
+      services: [{ title: '', description: '', suggested: false }],
+    });
+  }
+
+  const canProceed = formData.services.some(s => s.title.trim().length > 0) && 
+                     formData.valueProp.trim().length > 0;
 
   // Styles
   const containerStyle: React.CSSProperties = {
@@ -162,16 +94,6 @@ export const WizardStepExpertise: React.FC<WizardStepProps> = ({
     marginBottom: '1rem',
   };
 
-  const suggestionCardStyle = (selected: boolean): React.CSSProperties => ({
-    padding: '1.5rem',
-    border: `2px solid ${selected ? theme.accent.primary : theme.border.default}`,
-    borderRadius: borderRadius.lg,
-    backgroundColor: selected ? theme.accent.muted : theme.bg.secondary,
-    cursor: 'pointer',
-    transition: transitions.fast,
-    marginBottom: '1rem',
-  });
-
   const serviceCardStyle: React.CSSProperties = {
     padding: '1.5rem',
     border: `1px solid ${theme.border.default}`,
@@ -196,6 +118,14 @@ export const WizardStepExpertise: React.FC<WizardStepProps> = ({
     minHeight: '80px',
     resize: 'vertical' as const,
     fontFamily: 'inherit',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: theme.text.secondary,
+    marginBottom: '0.5rem',
   };
 
   const buttonStyle = (variant: 'primary' | 'secondary' | 'danger'): React.CSSProperties => {
@@ -244,85 +174,89 @@ export const WizardStepExpertise: React.FC<WizardStepProps> = ({
     <div style={containerStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={titleStyle}>STEP 2 : EXPERTISE</h1>
+        <h1 style={titleStyle}>ÉTAPE 2 : EXPERTISE</h1>
         <p style={subtitleStyle}>Que faites-vous ? Quels services proposez-vous ?</p>
       </div>
 
-      {/* Suggestions */}
+      {/* Services */}
       <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>💡 Suggestions basées sur votre profil :</h2>
-        {suggestedServices.map((service, index) => {
-          const selected = isServiceSelected(service.title);
-          return (
-            <div
-              key={index}
-              style={suggestionCardStyle(selected)}
-              onClick={() => handleToggleService(index)}
-            >
-              <div style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
-                <div style={{ fontSize: '1.5rem' }}>
-                  {selected ? '☑️' : '☐'}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: typography.fontWeight.semibold, marginBottom: '0.5rem' }}>
-                    {service.title}
-                  </div>
-                  <div style={{ fontSize: typography.fontSize.sm, color: theme.text.secondary }}>
-                    {service.description}
-                  </div>
-                </div>
-              </div>
+        <h2 style={sectionTitleStyle}>Vos services :</h2>
+        {formData.services.map((service, index) => (
+          <div key={index} style={serviceCardStyle}>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={labelStyle}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }}>
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="9" y1="9" x2="15" y2="9"/>
+                  <line x1="9" y1="15" x2="15" y2="15"/>
+                </svg>
+                Titre du service
+              </label>
+              <input
+                type="text"
+                value={service.title}
+                onChange={(e) => handleServiceChange(index, 'title', e.target.value)}
+                placeholder="Ex: Développement web"
+                style={inputStyle}
+              />
             </div>
-          );
-        })}
-      </div>
-
-      {/* Services sélectionnés / édition */}
-      {formData.services.length > 0 && (
-        <div style={sectionStyle}>
-          <h2 style={sectionTitleStyle}>Vos services ({formData.services.length}) :</h2>
-          {formData.services.map((service, index) => (
-            <div key={index} style={serviceCardStyle}>
-              <div style={{ marginBottom: '0.75rem' }}>
-                <input
-                  type="text"
-                  value={service.title}
-                  onChange={(e) => handleServiceChange(index, 'title', e.target.value)}
-                  placeholder="Titre du service"
-                  style={inputStyle}
-                />
-              </div>
-              <div style={{ marginBottom: '0.75rem' }}>
-                <textarea
-                  value={service.description}
-                  onChange={(e) => handleServiceChange(index, 'description', e.target.value)}
-                  placeholder="Description du service (15-30 mots)"
-                  style={textareaStyle}
-                />
-              </div>
+            <div style={{ marginBottom: formData.services.length > 1 ? '1rem' : 0 }}>
+              <label style={labelStyle}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }}>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                Description
+              </label>
+              <textarea
+                value={service.description}
+                onChange={(e) => handleServiceChange(index, 'description', e.target.value)}
+                placeholder="Ex: Création d'applications web modernes et performantes"
+                style={textareaStyle}
+              />
+            </div>
+            {formData.services.length > 1 && (
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button
                   onClick={() => handleRemoveService(index)}
-                  style={buttonStyle('danger')}
+                  style={{
+                    ...buttonStyle('secondary'),
+                    color: theme.semantic.error,
+                    borderColor: theme.semantic.error,
+                    padding: '0.5rem 1rem',
+                  }}
                 >
-                  🗑️ Retirer
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }}>
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                  Retirer
                 </button>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Ajouter un service */}
-      <div style={{ marginBottom: '2rem' }}>
+            )}
+          </div>
+        ))}
         <button onClick={handleAddService} style={buttonStyle('secondary')}>
-          + Ajouter un service personnalisé
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }}>
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Ajouter un service
         </button>
       </div>
 
       {/* Proposition de valeur */}
       <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Proposition de valeur :</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <h2 style={sectionTitleStyle}>Proposition de valeur :</h2>
+          <AIEnhanceButton
+            onEnhance={handleEnhanceValueProp}
+            isLoading={isEnhancingValueProp}
+          />
+        </div>
         <p style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary, marginBottom: '1rem' }}>
           En une phrase, qu'est-ce qui vous différencie ?
         </p>

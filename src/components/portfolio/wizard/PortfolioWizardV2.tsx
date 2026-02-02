@@ -22,13 +22,23 @@ const TOTAL_STEPS = 7;
 
 const INITIAL_FORM_DATA: PortfolioFormDataV2 = {
   profileType: 'person',
-  profileContext: 'default',
-  name: '',
-  tagline: '',
+  profileContext: 'tech',
+  name: 'Jean Dupont',
+  title: 'Développeur Full-Stack',
+  tagline: 'Passionné par la création d\'expériences web modernes et performantes',
   importSources: [],
-  socialLinks: [],
-  services: [],
-  valueProp: '',
+  socialLinks: [
+    { platform: 'LinkedIn', url: 'https://linkedin.com/in/jean-dupont' },
+    { platform: 'GitHub', url: 'https://github.com/jeandupont' },
+  ],
+  services: [
+    {
+      title: 'Développement web',
+      description: 'Création d\'applications web modernes avec React, TypeScript et Node.js',
+      suggested: false,
+    },
+  ],
+  valueProp: 'Je transforme vos idées en applications web performantes et élégantes',
   realisations: [],
   templateId: '',
   imageAssignments: {},
