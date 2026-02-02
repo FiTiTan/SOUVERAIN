@@ -1,5 +1,9 @@
 /**
- * SOUVERAIN - GROQ Enrichment Service (Sequenced) - V4 FINAL
+ * SOUVERAIN - AI Enrichment Service (Multi-provider) - V4 FINAL
+ * 
+ * Providers supportés :
+ * - DeepSeek V3 (défaut) : Meilleure qualité, moins cher
+ * - Groq Llama 3.3 (fallback) : Rapide, gratuit
  * 
  * Structure validée :
  * - heroSubtitle : 15-30 mots
@@ -14,8 +18,6 @@
 import { detectAndAnonymize, deanonymize } from './anonymizationService';
 import { enrichServicesWithIcons } from '../utils/fallbackIcons';
 import type { RawPortfolioData, EnrichedPortfolioData } from './groqEnrichmentService';
-
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // ============================================================
 // GUIDELINES GLOBALES
@@ -42,34 +44,75 @@ PLACEHOLDERS - RÈGLES CRITIQUES :
 `;
 
 // ============================================================
-// API
+// AI PROVIDERS CONFIGURATION
 // ============================================================
 
-async function getGroqApiKey(): Promise<string> {
-  try {
-    // @ts-ignore
-    const result = await window.electron.groq.getApiKey();
-    if (!result.success || !result.key) {
-      throw new Error('API key not available');
-    }
-    return result.key;
-  } catch (error) {
-    console.error('[GROQ] Failed to get API key:', error);
-    throw new Error('GROQ API key not configured');
+const PROVIDERS = {
+  deepseek: {
+    name: 'DeepSeek V3',
+    url: 'https://api.deepseek.com/v1/chat/completions',
+    model: 'deepseek-chat',
+    getKey: async () => {
+      try {
+        // @ts-ignore
+        const result = await window.electron.deepseek.getApiKey();
+        return result.success ? result.key : null;
+      } catch {
+        return null;
+      }
+    },
+  },
+  groq: {
+    name: 'Groq Llama 3.3',
+    url: 'https://api.groq.com/openai/v1/chat/completions',
+    model: 'llama-3.3-70b-versatile',
+    getKey: async () => {
+      try {
+        // @ts-ignore
+        const result = await window.electron.groq.getApiKey();
+        return result.success ? result.key : null;
+      } catch {
+        return null;
+      }
+    },
+  },
+};
+
+/**
+ * Récupère le provider actif (DeepSeek prioritaire, fallback Groq)
+ */
+async function getActiveProvider(): Promise<{ name: string; url: string; model: string; key: string }> {
+  // Essayer DeepSeek d'abord
+  const deepseekKey = await PROVIDERS.deepseek.getKey();
+  if (deepseekKey) {
+    console.log('[AI] Using DeepSeek V3 (primary provider)');
+    return { ...PROVIDERS.deepseek, key: deepseekKey };
   }
+  
+  // Fallback Groq
+  const groqKey = await PROVIDERS.groq.getKey();
+  if (groqKey) {
+    console.log('[AI] Using Groq Llama 3.3 (fallback provider)');
+    return { ...PROVIDERS.groq, key: groqKey };
+  }
+  
+  throw new Error('No AI provider configured. Please add DeepSeek or Groq API key in settings.');
 }
 
-async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: number = 1500): Promise<any> {
-  const apiKey = await getGroqApiKey();
+/**
+ * Appel générique au provider actif
+ */
+async function callAI(systemPrompt: string, userPrompt: string, maxTokens: number = 1500): Promise<any> {
+  const provider = await getActiveProvider();
   
-  const response = await fetch(GROQ_API_URL, {
+  const response = await fetch(provider.url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      'Authorization': `Bearer ${provider.key}`,
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: provider.model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -82,8 +125,8 @@ async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: num
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('[GroqSequenced] API error:', errorText);
-    throw new Error(`GROQ API error: ${response.status}`);
+    console.error(`[AI] ${provider.name} API error:`, errorText);
+    throw new Error(`AI API error (${provider.name}): ${response.status}`);
   }
 
   const result = await response.json();
@@ -99,7 +142,7 @@ async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: num
   try {
     return JSON.parse(content);
   } catch (parseError) {
-    console.error('[GroqSequenced] Failed to parse JSON:', content.substring(0, 200));
+    console.error('[AI] Failed to parse JSON:', content.substring(0, 200));
     throw new Error(`Invalid JSON response: ${parseError.message}`);
   }
 }
@@ -177,8 +220,8 @@ RAPPEL LONGUEURS :
 - aboutText : 80-120 mots (5 phrases)
 - valueProp : 20-30 mots`;
 
-  console.log('[GroqSequenced] Step 1/3: Enriching hero & about...');
-  return await callGroq(systemPrompt, userPrompt, 1200);
+  console.log('[AI] Step 1/3: Enriching hero & about...');
+  return await callAI(systemPrompt, userPrompt, 1200);
 }
 
 // ============================================================
@@ -231,8 +274,8 @@ TYPE DE PROFIL : ${data.profileType}
 
 RAPPEL : 30-50 mots par description, ton impersonnel, aucun placeholder`;
 
-  console.log('[GroqSequenced] Step 2/3: Enriching services...');
-  const result = await callGroq(systemPrompt, userPrompt, 1500);
+  console.log('[AI] Step 2/3: Enriching services...');
+  const result = await callAI(systemPrompt, userPrompt, 1500);
   
   if (result.services) {
     result.services = result.services.map((service: any) => ({
@@ -254,9 +297,9 @@ async function enrichProjects(data: RawPortfolioData): Promise<any[]> {
     return [];
   }
 
-  console.log('[GroqSequenced] Step 3/3: Enriching projects...');
+  console.log('[AI] Step 3/3: Enriching projects...');
   
-  console.log('[GroqSequenced] enrichProjects - input:', data.projects.map(p => ({
+  console.log('[AI] enrichProjects - input:', data.projects.map(p => ({
     title: p.title,
     descLength: p.description?.length || 0,
   })));
@@ -329,7 +372,7 @@ RAPPELS :
 - Catégorie : Application Mobile, Site Web, Branding, Business Plan, etc.`;
 
     try {
-      const result = await callGroq(systemPrompt, userPrompt, 1500);
+      const result = await callAI(systemPrompt, userPrompt, 1500);
       
       if (result.projects && Array.isArray(result.projects)) {
         const projectsWithDefaults = result.projects.map((p: any, idx: number) => ({
@@ -345,7 +388,7 @@ RAPPELS :
         })));
       }
     } catch (error) {
-      console.warn(`[GroqSequenced] Batch ${Math.floor(i / batchSize) + 1} failed:`, error);
+      console.warn(`[AI] Batch ${Math.floor(i / batchSize) + 1} failed:`, error);
       enrichedProjects.push(...batch.map(p => ({
         title: p.title,
         description: p.description?.substring(0, 300) || '',
@@ -367,7 +410,7 @@ export async function enrichPortfolioDataSequenced(
 ): Promise<{ success: boolean; data?: EnrichedPortfolioData; error?: string }> {
   
   try {
-    console.log('[GroqSequenced] Starting sequenced enrichment V4...');
+    console.log('[AI] Starting sequenced enrichment V4...');
 
     // Anonymisation
     const dataString = JSON.stringify(rawData);
@@ -380,11 +423,11 @@ export async function enrichPortfolioDataSequenced(
     // Étape 2 & 3 : Services + Projects (parallèle)
     const [enrichedServices, enrichedProjects] = await Promise.all([
       enrichServices(anonymizedData).catch(err => {
-        console.warn('[GroqSequenced] Services failed:', err);
+        console.warn('[AI] Services failed:', err);
         return anonymizedData.services?.map(s => ({ title: s, description: '', icon: '' })) || [];
       }),
       enrichProjects(anonymizedData).catch(err => {
-        console.warn('[GroqSequenced] Projects failed:', err);
+        console.warn('[AI] Projects failed:', err);
         return anonymizedData.projects || [];
       }),
     ]);
@@ -414,7 +457,7 @@ export async function enrichPortfolioDataSequenced(
     };
 
     // Dé-anonymisation
-    console.log('[GroqSequenced] De-anonymizing...');
+    console.log('[AI] De-anonymizing...');
     const finalDataString = JSON.stringify(merged);
     const deanonymizedString = deanonymize(finalDataString, anonymizedResult.mappings);
     const finalData: EnrichedPortfolioData = JSON.parse(deanonymizedString);
@@ -430,26 +473,26 @@ export async function enrichPortfolioDataSequenced(
       avgProjectWords: Math.round((finalData.projects?.reduce((acc, p) => acc + countWords(p.description), 0) || 0) / (finalData.projects?.length || 1)),
     };
     
-    console.log('[GroqSequenced] ✓ Complete. Stats:', stats);
+    console.log('[AI] ✓ Complete. Stats:', stats);
     
     // Warnings si hors limites
     if (stats.heroSubtitleWords < 15 || stats.heroSubtitleWords > 30) {
-      console.warn(`[GroqSequenced] ⚠️ heroSubtitle: ${stats.heroSubtitleWords} mots (attendu: 15-30)`);
+      console.warn(`[AI] ⚠️ heroSubtitle: ${stats.heroSubtitleWords} mots (attendu: 15-30)`);
     }
     if (stats.aboutTextWords < 80 || stats.aboutTextWords > 120) {
-      console.warn(`[GroqSequenced] ⚠️ aboutText: ${stats.aboutTextWords} mots (attendu: 80-120)`);
+      console.warn(`[AI] ⚠️ aboutText: ${stats.aboutTextWords} mots (attendu: 80-120)`);
     }
     if (stats.avgServiceWords < 30 || stats.avgServiceWords > 50) {
-      console.warn(`[GroqSequenced] ⚠️ services avg: ${stats.avgServiceWords} mots (attendu: 30-50)`);
+      console.warn(`[AI] ⚠️ services avg: ${stats.avgServiceWords} mots (attendu: 30-50)`);
     }
     if (stats.avgProjectWords < 60 || stats.avgProjectWords > 80) {
-      console.warn(`[GroqSequenced] ⚠️ projects avg: ${stats.avgProjectWords} mots (attendu: 60-80)`);
+      console.warn(`[AI] ⚠️ projects avg: ${stats.avgProjectWords} mots (attendu: 60-80)`);
     }
     
     return { success: true, data: finalData };
 
   } catch (error: any) {
-    console.error('[GroqSequenced] Error:', error);
+    console.error('[AI] Error:', error);
     
     // Fallback
     const fallbackData: EnrichedPortfolioData = {

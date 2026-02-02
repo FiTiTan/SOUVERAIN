@@ -226,6 +226,10 @@ contextBridge.exposeInMainWorld('electron', {
     getApiKey: () => ipcRenderer.invoke('get-groq-api-key'),
   },
 
+  deepseek: {
+    getApiKey: () => ipcRenderer.invoke('get-deepseek-api-key'),
+  },
+
   // ============================================================
   // MEDIATHEQUE (Legacy/Hybrid)
   // ============================================================

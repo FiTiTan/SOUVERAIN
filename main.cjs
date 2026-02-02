@@ -31,12 +31,23 @@ let linkedInScraper = null;
 // ============================================================
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 
-// Validation de la clé API
-if (!GROQ_API_KEY) {
-  console.error('[SOUVERAIN] ERREUR CRITIQUE: GROQ_API_KEY non trouvée dans le fichier .env');
-  console.error('[SOUVERAIN] Veuillez créer un fichier .env avec : GROQ_API_KEY=votre_clé');
+// Validation des clés API (au moins une doit être présente)
+if (!GROQ_API_KEY && !DEEPSEEK_API_KEY) {
+  console.error('[SOUVERAIN] ERREUR CRITIQUE: Aucune clé API trouvée dans .env');
+  console.error('[SOUVERAIN] Veuillez configurer au moins une clé :');
+  console.error('  - DEEPSEEK_API_KEY=votre_clé (recommandé, meilleure qualité)');
+  console.error('  - GROQ_API_KEY=votre_clé (fallback)');
   process.exit(1);
+}
+
+// Log du provider configuré
+if (DEEPSEEK_API_KEY) {
+  console.log('[SOUVERAIN] ✓ DeepSeek API key configured (primary)');
+}
+if (GROQ_API_KEY) {
+  console.log('[SOUVERAIN] ✓ Groq API key configured' + (DEEPSEEK_API_KEY ? ' (fallback)' : ' (primary)'));
 }
 
 // ============================================================
@@ -2939,6 +2950,20 @@ ipcMain.handle('get-groq-api-key', async () => {
     return { success: true, key: GROQ_API_KEY };
   } catch (error) {
     console.error('[IPC] get-groq-api-key error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// ==================== DEEPSEEK API HANDLERS ====================
+
+ipcMain.handle('get-deepseek-api-key', async () => {
+  try {
+    if (!DEEPSEEK_API_KEY) {
+      return { success: false, error: 'DeepSeek API key not configured' };
+    }
+    return { success: true, key: DEEPSEEK_API_KEY };
+  } catch (error) {
+    console.error('[IPC] get-deepseek-api-key error:', error);
     return { success: false, error: error.message };
   }
 });
