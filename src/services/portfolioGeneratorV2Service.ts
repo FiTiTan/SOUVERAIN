@@ -156,13 +156,6 @@ export async function generatePortfolioFromWizardV2(
       }
       enrichedData = result.data;
       console.log('[GeneratorV2] ✅ GROQ enrichment successful');
-      console.log('[GeneratorV2] 🔍 Enriched data sample:', {
-        heroTitle: enrichedData.heroTitle,
-        heroSubtitle: enrichedData.heroSubtitle,
-        aboutText: enrichedData.aboutText?.substring(0, 100),
-        servicesCount: enrichedData.services?.length || 0,
-        projectsCount: enrichedData.projects?.length || 0,
-      });
     } catch (groqError) {
       console.warn('[GeneratorV2] ⚠️ GROQ enrichment failed, fallback to basic data:', groqError);
       // Fallback: utiliser conversion basique sans IA
