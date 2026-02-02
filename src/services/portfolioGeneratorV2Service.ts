@@ -150,7 +150,11 @@ export async function generatePortfolioFromWizardV2(
     let enrichedData: EnrichedPortfolioData;
     
     try {
-      enrichedData = await enrichPortfolioData(rawData);
+      const result = await enrichPortfolioData(rawData);
+      if (!result.success || !result.data) {
+        throw new Error('GROQ enrichment returned no data');
+      }
+      enrichedData = result.data;
       console.log('[GeneratorV2] ✅ GROQ enrichment successful');
       console.log('[GeneratorV2] 🔍 Enriched data sample:', {
         heroTitle: enrichedData.heroTitle,
