@@ -85,28 +85,8 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
 
     try {
       if (file.type === 'application/pdf') {
-        // Import PDF
-        // @ts-ignore
-        const result = await window.electron.portfolio.extractFromPDF({ filePath: file.path });
-        
-        if (!result.success) {
-          throw new Error(result.error || 'Échec de l\'extraction PDF');
-        }
-
-        // Créer une réalisation depuis les données extraites
-        const realisation: Realisation = {
-          id: `real-${Date.now()}`,
-          title: file.name.replace('.pdf', ''),
-          description: result.data.text ? result.data.text.substring(0, 200) + '...' : '',
-          source: {
-            type: 'pdf',
-            path: file.path,
-          },
-        };
-
-        onUpdate({
-          realisations: [...formData.realisations, realisation],
-        });
+        // Import PDF - TODO: Implémenter handler IPC
+        throw new Error('L\'import PDF n\'est pas encore disponible. Utilisez l\'ajout manuel ou importez depuis une URL.');
       } else {
         throw new Error('Format de fichier non supporté. Utilisez PDF.');
       }
@@ -255,8 +235,8 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
     <div style={containerStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={titleStyle}>STEP 3 : RÉALISATIONS</h1>
-        <p style={subtitleStyle}>Qu'avez-vous accompli ? (optionnel)</p>
+        <h1 style={titleStyle}>ÉTAPE 3 : RÉALISATIONS</h1>
+        <p style={subtitleStyle}>Mettez en avant un à trois projet(s) ou réalisation(s) sur votre portfolio</p>
       </div>
 
       {/* Zone d'import */}

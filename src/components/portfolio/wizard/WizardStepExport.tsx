@@ -124,7 +124,7 @@ export const WizardStepExport: React.FC<WizardStepProps> = ({
   return (
     <div style={containerStyle}>
       {/* Header */}
-      <h1 style={titleStyle}>STEP 7 : EXPORT</h1>
+      <h1 style={titleStyle}>ÉTAPE 7 : EXPORT</h1>
 
       {/* Icon */}
       <div style={iconStyle}>

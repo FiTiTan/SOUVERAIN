@@ -9,7 +9,7 @@ import { typography, borderRadius, transitions } from '../../../design-system';
 import type { WizardStepProps, ProfileType, ImportSource } from '../types';
 import { SourceImporter } from './SourceImporter';
 import { SocialLinksGrid } from './SocialLinksGrid';
-import { AIEnhanceButton } from './AIEnhanceButton';
+import { AIEnhanceButtonInline } from './AIEnhanceButtonInline';
 
 export const WizardStepAbout: React.FC<WizardStepProps> = ({
   formData,
@@ -314,20 +314,25 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
                     transform: 'translateX(-50%)',
                     marginTop: '0.5rem',
                     padding: '0.75rem 1rem',
-                    backgroundColor: 'rgba(34, 197, 94, 0.95)',
-                    color: '#FFFFFF',
+                    backgroundColor: 'rgba(187, 247, 208, 0.95)',
+                    color: '#065F46',
                     fontSize: typography.fontSize.sm,
                     borderRadius: borderRadius.lg,
-                    border: '2px dashed rgba(255, 255, 255, 0.5)',
+                    border: '2px dashed rgba(6, 95, 70, 0.3)',
                     minWidth: '250px',
                     maxWidth: '300px',
                     zIndex: 1000,
-                    boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+                    boxShadow: '0 4px 12px rgba(134, 239, 172, 0.4)',
                     animation: 'bounce 0.3s ease-out',
                   }}
                 >
-                  <div style={{ fontWeight: typography.fontWeight.semibold, marginBottom: '0.25rem' }}>
-                    💡 Sources recommandées
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: typography.fontWeight.semibold, marginBottom: '0.25rem' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6"/>
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M12 2.83V6M12 18v3.17M3.17 12H6M18 12h3.17M5.64 5.64l2.83 2.83M15.54 15.54l2.83 2.83M5.64 18.36l2.83-2.83M15.54 8.46l2.83-2.83"/>
+                    </svg>
+                    Sources recommandées
                   </div>
                   <div style={{ fontSize: typography.fontSize.xs, lineHeight: '1.4' }}>
                     Google Business • TripAdvisor • LinkedIn • Site web personnel
@@ -480,40 +485,40 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         </div>
 
         <div style={formGroupStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <label style={{ ...labelStyle, marginBottom: 0 }}>
-              Tagline *
-              <span
-                title="Une phrase courte et percutante qui résume votre identité ou votre proposition de valeur (ex: 'Créateur d'expériences digitales mémorables')"
-                style={{
-                  marginLeft: '0.5rem',
-                  cursor: 'help',
-                  color: theme.text.tertiary,
-                  fontSize: typography.fontSize.xs,
-                  border: `1px solid ${theme.border.default}`,
-                  borderRadius: '50%',
-                  width: '16px',
-                  height: '16px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                ?
-              </span>
-            </label>
-            <AIEnhanceButton
+          <label style={labelStyle}>
+            Tagline *
+            <span
+              title="Une phrase courte et percutante qui résume votre identité ou votre proposition de valeur (ex: 'Créateur d'expériences digitales mémorables')"
+              style={{
+                marginLeft: '0.5rem',
+                cursor: 'help',
+                color: theme.text.tertiary,
+                fontSize: typography.fontSize.xs,
+                border: `1px solid ${theme.border.default}`,
+                borderRadius: '50%',
+                width: '16px',
+                height: '16px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              ?
+            </span>
+          </label>
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              value={formData.tagline}
+              onChange={(e) => onUpdate({ tagline: e.target.value })}
+              placeholder="Passionné par les solutions innovantes"
+              style={{ ...inputStyle, paddingRight: '45px' }}
+            />
+            <AIEnhanceButtonInline
               onEnhance={handleEnhanceTagline}
               isLoading={isEnhancingTagline}
             />
           </div>
-          <input
-            type="text"
-            value={formData.tagline}
-            onChange={(e) => onUpdate({ tagline: e.target.value })}
-            placeholder="Passionné par les solutions innovantes"
-            style={inputStyle}
-          />
         </div>
 
         {/* Champs spécifiques aux lieux */}

@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { WizardStepProps, Service } from '../types';
-import { AIEnhanceButton } from './AIEnhanceButton';
+import { AIEnhanceButtonInline } from './AIEnhanceButtonInline';
 
 export const WizardStepExpertise: React.FC<WizardStepProps> = ({
   formData,
@@ -260,22 +260,22 @@ export const WizardStepExpertise: React.FC<WizardStepProps> = ({
 
       {/* Proposition de valeur */}
       <div style={sectionStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <h2 style={sectionTitleStyle}>Proposition de valeur :</h2>
-          <AIEnhanceButton
+        <h2 style={sectionTitleStyle}>Proposition de valeur :</h2>
+        <p style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary, marginBottom: '1rem' }}>
+          En une phrase, qu'est-ce qui vous différencie ?
+        </p>
+        <div style={{ position: 'relative' }}>
+          <textarea
+            value={formData.valueProp}
+            onChange={(e) => onUpdate({ valueProp: e.target.value })}
+            placeholder="Ex: Je transforme vos idées en applications web performantes et élégantes"
+            style={{ ...textareaStyle, paddingRight: '45px' }}
+          />
+          <AIEnhanceButtonInline
             onEnhance={handleEnhanceValueProp}
             isLoading={isEnhancingValueProp}
           />
         </div>
-        <p style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary, marginBottom: '1rem' }}>
-          En une phrase, qu'est-ce qui vous différencie ?
-        </p>
-        <textarea
-          value={formData.valueProp}
-          onChange={(e) => onUpdate({ valueProp: e.target.value })}
-          placeholder="Ex: Je transforme vos idées en applications web performantes et élégantes"
-          style={textareaStyle}
-        />
       </div>
 
       {/* Footer avec navigation */}

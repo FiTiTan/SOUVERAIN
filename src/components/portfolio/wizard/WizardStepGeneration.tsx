@@ -142,7 +142,7 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
     <div style={containerStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={titleStyle}>STEP 5 : GÉNÉRATION</h1>
+        <h1 style={titleStyle}>ÉTAPE 5 : GÉNÉRATION</h1>
       </div>
 
       {/* Spinner */}

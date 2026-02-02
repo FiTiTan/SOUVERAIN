@@ -98,7 +98,7 @@ export const WizardStepPreview: React.FC<WizardStepProps> = ({
     <div style={containerStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={titleStyle}>STEP 6 : PERSONNALISEZ</h1>
+        <h1 style={titleStyle}>ÉTAPE 6 : PERSONNALISEZ</h1>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button onClick={onBack} style={buttonStyle('secondary')}>
             ← Retour
