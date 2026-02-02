@@ -14,16 +14,31 @@ import { getLabels } from '../config/portfolioLabels';
  */
 async function loadTemplateHTML(templateId: string): Promise<string> {
   try {
+    console.log('[GeneratorV2] 🔵 Loading template:', templateId);
     // @ts-ignore
     const result = await window.electron.templates.getHTML(templateId);
     
-    if (typeof result === 'object' && result !== null && 'html' in result) {
-      return result.html || '';
+    console.log('[GeneratorV2] 🔍 Template result:', result?.success, 'HTML length:', result?.html?.length || 0);
+    
+    if (typeof result === 'object' && result !== null) {
+      if (!result.success) {
+        throw new Error(result.error || 'Template loading failed');
+      }
+      if (!result.html) {
+        throw new Error('Template HTML is empty');
+      }
+      return result.html;
     }
-    return typeof result === 'string' ? result : '';
+    
+    // Fallback pour legacy
+    if (typeof result === 'string' && result.length > 0) {
+      return result;
+    }
+    
+    throw new Error('Invalid template result format');
   } catch (error) {
-    console.error(`[GeneratorV2] Error loading template:`, error);
-    throw new Error(`Impossible de charger le template`);
+    console.error(`[GeneratorV2] ❌ Error loading template:`, error);
+    throw new Error(`Impossible de charger le template: ${error.message}`);
   }
 }
 
@@ -116,6 +131,12 @@ export async function generatePortfolioFromWizardV2(
 ): Promise<{ success: boolean; html?: string; error?: string }> {
   try {
     console.log('[GeneratorV2] Starting generation...');
+    console.log('[GeneratorV2] 🔍 Template ID:', formData.templateId);
+    console.log('[GeneratorV2] 🔍 Form data keys:', Object.keys(formData));
+    
+    if (!formData.templateId) {
+      throw new Error('Aucun template sélectionné');
+    }
     
     // Étape 1 : Chargement du template
     onProgress?.('Chargement du template...', 20);
