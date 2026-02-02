@@ -420,6 +420,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     height: '100%',
     border: 'none',
     backgroundColor: '#FFFFFF',
+    pointerEvents: isDragging ? 'none' : 'auto', // ✅ Désactiver pendant le drag pour que les événements passent
   };
 
   const buttonStyle = (variant: 'primary' | 'secondary'): React.CSSProperties => {
