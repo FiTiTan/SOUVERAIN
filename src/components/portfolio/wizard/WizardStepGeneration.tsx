@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../../../ThemeContext';
-import { typography, borderRadius } from '../../../design-system';
+import { typography, borderRadius, transitions } from '../../../design-system';
 import type { WizardStepProps } from '../types';
 
 export const WizardStepGeneration: React.FC<WizardStepProps> = ({
