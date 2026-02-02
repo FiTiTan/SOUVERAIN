@@ -105,7 +105,7 @@ contextBridge.exposeInMainWorld('electron', {
     regenerateSection: (projectId, section) => ipcRenderer.invoke('portfolio-regenerate-section', { projectId, section }),
 
     // PDF Extraction
-    extractFromPDF: (filePath) => ipcRenderer.invoke('portfolio-extract-from-pdf', { filePath }),
+    extractFromPDF: (buffer, filename) => ipcRenderer.invoke('portfolio-extract-from-pdf', { buffer, filename }),
 
     // Ghost Mode
     detectSensitiveEntities: (projectId) => ipcRenderer.invoke('portfolio-detect-sensitive-entities', { projectId }),

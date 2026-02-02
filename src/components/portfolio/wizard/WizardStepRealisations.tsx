@@ -85,9 +85,12 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
 
     try {
       if (file.type === 'application/pdf') {
-        // Import PDF
+        // Lire le fichier comme ArrayBuffer
+        const arrayBuffer = await file.arrayBuffer();
+        
+        // Import PDF via IPC
         // @ts-ignore
-        const result = await window.electron.portfolio.extractFromPDF(file.path);
+        const result = await window.electron.portfolio.extractFromPDF(arrayBuffer, file.name);
         
         if (!result.success) {
           throw new Error(result.error || 'Échec de l\'extraction PDF');
@@ -100,7 +103,7 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
           description: result.data.text ? result.data.text.substring(0, 200) + '...' : '',
           source: {
             type: 'pdf',
-            path: file.path,
+            path: file.name, // Juste le nom, pas de path accessible
           },
         };
 

@@ -617,18 +617,22 @@ ipcMain.handle('portfolio-analyze-project', async (event, { sourceData, sourceTy
 // PDF EXTRACTION HANDLER
 // ============================================================
 
-ipcMain.handle('portfolio-extract-from-pdf', async (event, { filePath }) => {
+ipcMain.handle('portfolio-extract-from-pdf', async (event, { buffer, filename }) => {
   try {
-    const fs = require('fs');
     const pdfParse = require('pdf-parse');
     
-    // Vérifier que le fichier existe
-    if (!fs.existsSync(filePath)) {
-      return { success: false, error: 'Fichier introuvable' };
+    // Buffer peut être soit un ArrayBuffer soit un Buffer Node
+    let dataBuffer;
+    if (buffer instanceof ArrayBuffer) {
+      dataBuffer = Buffer.from(buffer);
+    } else if (Buffer.isBuffer(buffer)) {
+      dataBuffer = buffer;
+    } else {
+      // Si c'est un array-like, le convertir
+      dataBuffer = Buffer.from(buffer);
     }
     
-    // Lire le fichier PDF
-    const dataBuffer = fs.readFileSync(filePath);
+    console.log(`[PDF] Parsing ${filename}, buffer size: ${dataBuffer.length} bytes`);
     
     // Parser le PDF
     const pdfData = await pdfParse(dataBuffer);
@@ -637,14 +641,14 @@ ipcMain.handle('portfolio-extract-from-pdf', async (event, { filePath }) => {
     const text = pdfData.text || '';
     const numPages = pdfData.numpages || 0;
     
-    console.log(`[PDF] Extracted ${text.length} chars from ${numPages} pages`);
+    console.log(`[PDF] ✅ Extracted ${text.length} chars from ${numPages} pages`);
     
     return {
       success: true,
       data: {
         text: text,
         numPages: numPages,
-        filename: require('path').basename(filePath),
+        filename: filename,
       }
     };
   } catch (err) {
