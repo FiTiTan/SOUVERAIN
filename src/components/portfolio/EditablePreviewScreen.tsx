@@ -145,6 +145,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   // ============================================================
 
   const handleDragStart = useCallback((e: React.DragEvent, image: LibraryImage) => {
+    console.log('[EditablePreview] 🎯 Drag started:', image.filename);
     dragImageRef.current = image.dataUrl;
     setIsDragging(true);
     e.dataTransfer.effectAllowed = 'copy';
@@ -159,6 +160,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   }, []);
 
   const handleDragEnd = useCallback(() => {
+    console.log('[EditablePreview] 🏁 Drag ended');
     setIsDragging(false);
     dragImageRef.current = null;
     setHoveredZone(null);
@@ -222,8 +224,14 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
         const zoneType = zone.getAttribute('data-image-zone');
         const projectIndex = zone.getAttribute('data-project-index');
         const zoneId = zoneType === 'project' ? `project-${projectIndex}` : zoneType || '';
+        if (zoneId !== hoveredZone) {
+          console.log('[EditablePreview] 🎯 Hovering zone:', zoneId);
+        }
         setHoveredZone(zoneId);
       } else {
+        if (hoveredZone) {
+          console.log('[EditablePreview] ❌ Left zone');
+        }
         setHoveredZone(null);
       }
     };
@@ -250,8 +258,10 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
 
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();
+      console.log('[EditablePreview] 📦 Drop event! Zone:', hoveredZone, 'Has image:', !!dragImageRef.current);
       
       if (!dragImageRef.current || !hoveredZone) {
+        console.warn('[EditablePreview] ⚠️ Drop ignored - missing data or zone');
         return;
       }
 
@@ -261,7 +271,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
         [hoveredZone]: dragImageRef.current!
       }));
 
-      console.log(`[EditablePreview] Dropped image on zone: ${hoveredZone}`);
+      console.log(`[EditablePreview] ✅ Dropped image on zone: ${hoveredZone}`);
     };
 
     document.addEventListener('drop', handleDrop);
