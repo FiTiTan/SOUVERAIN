@@ -85,8 +85,28 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
 
     try {
       if (file.type === 'application/pdf') {
-        // Import PDF - TODO: Implémenter handler IPC
-        throw new Error('L\'import PDF n\'est pas encore disponible. Utilisez l\'ajout manuel ou importez depuis une URL.');
+        // Import PDF
+        // @ts-ignore
+        const result = await window.electron.portfolio.extractFromPDF(file.path);
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Échec de l\'extraction PDF');
+        }
+
+        // Créer une réalisation depuis les données extraites
+        const realisation: Realisation = {
+          id: `real-${Date.now()}`,
+          title: result.data.filename.replace('.pdf', ''),
+          description: result.data.text ? result.data.text.substring(0, 200) + '...' : '',
+          source: {
+            type: 'pdf',
+            path: file.path,
+          },
+        };
+
+        onUpdate({
+          realisations: [...formData.realisations, realisation],
+        });
       } else {
         throw new Error('Format de fichier non supporté. Utilisez PDF.');
       }

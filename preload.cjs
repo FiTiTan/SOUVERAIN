@@ -104,6 +104,9 @@ contextBridge.exposeInMainWorld('electron', {
     analyzeProject: (sourceData, sourceType) => ipcRenderer.invoke('portfolio-analyze-project', { sourceData, sourceType }),
     regenerateSection: (projectId, section) => ipcRenderer.invoke('portfolio-regenerate-section', { projectId, section }),
 
+    // PDF Extraction
+    extractFromPDF: (filePath) => ipcRenderer.invoke('portfolio-extract-from-pdf', { filePath }),
+
     // Ghost Mode
     detectSensitiveEntities: (projectId) => ipcRenderer.invoke('portfolio-detect-sensitive-entities', { projectId }),
     applyGhostMode: (projectId, mappings, enabled) => ipcRenderer.invoke('portfolio-apply-ghost-mode', { projectId, mappings, enabled }),

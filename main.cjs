@@ -612,6 +612,46 @@ ipcMain.handle('portfolio-analyze-project', async (event, { sourceData, sourceTy
 // PORTFOLIO GHOST MODE
 // ============================================================
 // IPC HANDLERS - PORTFOLIO IDENTITY & SOCIALS (Sprint)
+
+// ============================================================
+// PDF EXTRACTION HANDLER
+// ============================================================
+
+ipcMain.handle('portfolio-extract-from-pdf', async (event, { filePath }) => {
+  try {
+    const fs = require('fs');
+    const pdfParse = require('pdf-parse');
+    
+    // Vérifier que le fichier existe
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Fichier introuvable' };
+    }
+    
+    // Lire le fichier PDF
+    const dataBuffer = fs.readFileSync(filePath);
+    
+    // Parser le PDF
+    const pdfData = await pdfParse(dataBuffer);
+    
+    // Extraire le texte
+    const text = pdfData.text || '';
+    const numPages = pdfData.numpages || 0;
+    
+    console.log(`[PDF] Extracted ${text.length} chars from ${numPages} pages`);
+    
+    return {
+      success: true,
+      data: {
+        text: text,
+        numPages: numPages,
+        filename: require('path').basename(filePath),
+      }
+    };
+  } catch (err) {
+    console.error('[IPC] portfolio-extract-from-pdf error:', err.message);
+    return { success: false, error: err.message || 'Erreur lors de l\'extraction PDF' };
+  }
+});
 // ============================================================
 
 // Update Identity (Bio, Name, Tagline)
