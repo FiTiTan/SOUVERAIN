@@ -114,7 +114,7 @@ export async function extractAllDocuments(
 }
 
 /**
- * Agrège toutes les données pour Groq
+ * Agrège toutes les données pour l'IA
  */
 export async function aggregateAllData(
   formData: any,

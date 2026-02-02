@@ -94,7 +94,7 @@ export interface PortfolioFormData {
   testimonials: Testimonial[];
 }
 
-export interface GroqFlags {
+export interface AIFlags {
   showPracticalInfo: boolean;
   showSocialShowcase: boolean;
   showProjects: boolean;
@@ -103,6 +103,9 @@ export interface GroqFlags {
   hasLinkedIn: boolean;
   hasNotion: boolean;
 }
+
+// Legacy alias for backward compatibility
+export type GroqFlags = AIFlags;
 
 export interface ProfileTypeOption {
   id: ProfileType;
@@ -267,8 +270,8 @@ export const initialFormData: PortfolioFormData = DEV_MODE ? devFormData : {
   testimonials: [],
 };
 
-// Calculate Groq flags based on form data
-export const calculateGroqFlags = (data: PortfolioFormData): GroqFlags => {
+// Calculate AI flags based on form data
+export const calculateAIFlags = (data: PortfolioFormData): AIFlags => {
   return {
     showPracticalInfo: !!(data.address || data.openingHours),
     showSocialShowcase: data.socialIsMain,
@@ -279,3 +282,6 @@ export const calculateGroqFlags = (data: PortfolioFormData): GroqFlags => {
     hasNotion: !!data.notionData,
   };
 };
+
+// Legacy alias for backward compatibility
+export const calculateGroqFlags = calculateAIFlags;

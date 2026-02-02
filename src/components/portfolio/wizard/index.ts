@@ -9,7 +9,8 @@ export type {
   Project,
   Testimonial,
   Media,
-  GroqFlags,
+  AIFlags,
+  GroqFlags, // Legacy alias for AIFlags
 } from './types';
 
 export {
@@ -20,5 +21,6 @@ export {
   validateStep2,
   validateStep3,
   validateStep4,
-  calculateGroqFlags,
+  calculateAIFlags,
+  calculateGroqFlags, // Legacy alias for calculateAIFlags
 } from './types';

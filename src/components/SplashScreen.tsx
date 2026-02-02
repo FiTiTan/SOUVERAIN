@@ -28,7 +28,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
             // Simulation des étapes de chargement
             if (newProgress < 20) setLoadingText('Chargement des modules principaux...');
             else if (newProgress < 40) setLoadingText('Connexion à la base de données locale sécurisée...');
-            else if (newProgress < 60) setLoadingText('Initialisation du moteur IA (Groq Cloud)...');
+            else if (newProgress < 60) setLoadingText('Initialisation du moteur IA (DeepSeek/Groq)...');
             else if (newProgress < 80) setLoadingText('Optimisation des rendus graphiques...');
             else if (newProgress < 95) setLoadingText('Finalisation du démarrage...');
             else setLoadingText('Prêt.');

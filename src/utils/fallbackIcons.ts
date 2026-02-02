@@ -1,6 +1,6 @@
 /**
  * Générateur d'icônes SVG fallback
- * Utilisé si Groq échoue à générer une icône pour un service
+ * Utilisé si l'IA échoue à générer une icône pour un service
  */
 
 const ICON_TEMPLATES: Record<string, string> = {
