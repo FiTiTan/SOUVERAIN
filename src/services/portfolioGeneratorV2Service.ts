@@ -4,7 +4,7 @@
  */
 
 import type { PortfolioFormDataV2 } from '../components/portfolio/types';
-import type { EnrichedPortfolioData, RawPortfolioData } from './groqEnrichmentService';
+import type { EnrichedPortfolioData, RawPortfolioData } from './aiEnrichmentTypes';
 import { enrichPortfolioDataSequenced } from './aiEnrichmentService';
 import { injectDataIntoTemplate, computeFlags } from './templateInjectorService';
 import { getLabels } from '../config/portfolioLabels';

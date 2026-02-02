@@ -2,7 +2,7 @@
 // Injecte les données enrichies dans le template HTML
 // 100% déterministe, PAS d'IA
 
-import type { EnrichedPortfolioData } from './groqEnrichmentService';
+import type { EnrichedPortfolioData } from './aiEnrichmentTypes';
 import { getSocialIcon } from '../utils/socialIcons';
 
 export interface PortfolioFlags {

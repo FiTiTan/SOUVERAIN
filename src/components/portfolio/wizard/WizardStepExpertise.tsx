@@ -42,7 +42,7 @@ export const WizardStepExpertise: React.FC<WizardStepProps> = ({
 
     setIsEnhancingValueProp(true);
     try {
-      const { enhanceText } = await import('../../../services/groqTextEnhancer');
+      const { enhanceText } = await import('../../../services/aiTextEnhancer');
       const enhanced = await enhanceText(formData.valueProp, {
         type: 'valueProp',
         context: {

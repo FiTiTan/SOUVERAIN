@@ -17,7 +17,7 @@
 
 import { detectAndAnonymize, deanonymize } from './anonymizationService';
 import { enrichServicesWithIcons } from '../utils/fallbackIcons';
-import type { RawPortfolioData, EnrichedPortfolioData } from './groqEnrichmentService';
+import type { RawPortfolioData, EnrichedPortfolioData } from './aiEnrichmentTypes';
 
 // ============================================================
 // GUIDELINES GLOBALES

@@ -64,7 +64,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
     setIsEnhancingTagline(true);
     try {
-      const { enhanceText } = await import('../../../services/groqTextEnhancer');
+      const { enhanceText } = await import('../../../services/aiTextEnhancer');
       const enhanced = await enhanceText(formData.tagline, {
         type: 'tagline',
         context: {
