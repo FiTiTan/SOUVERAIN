@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { useTheme } from '../../../ThemeContext';
-import { typography, borderRadius } from '../../../design-system';
+import { typography, borderRadius, transitions } from '../../../design-system';
 import type { PortfolioFormDataV2, WizardState } from '../types';
 import { detectContext } from '../../../config/portfolioLabels';
 
