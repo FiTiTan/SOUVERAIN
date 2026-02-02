@@ -23,6 +23,37 @@ interface StepInfo {
   description: string;
 }
 
+// Phrases aléatoires pour storytelling dynamique
+const ANONYMIZATION_PHRASES = [
+  "Vos données passent en mode masqué",
+  "Protection de votre vie privée en cours",
+  "Anonymisation de vos informations sensibles",
+  "Vos données deviennent invisibles",
+  "Mode confidentialité activé",
+  "Sécurisation de votre identité",
+  "Masquage des données personnelles",
+  "Chiffrement de vos informations",
+  "Activation du bouclier de confidentialité",
+  "Vos données sont protégées localement",
+];
+
+const AI_BOOST_PHRASES = [
+  "Votre portfolio est boosté par l'IA",
+  "L'IA transforme votre contenu",
+  "Génération de contenu professionnel en cours",
+  "L'intelligence artificielle optimise votre portfolio",
+  "Enrichissement par IA nouvelle génération",
+  "L'IA crée votre storytelling unique",
+  "Boost IA : transformation en cours",
+  "Génération intelligente de contenu",
+  "L'IA affine votre message professionnel",
+  "Création de contenu percutant par IA",
+];
+
+// Sélection aléatoire au montage du composant
+const getRandomPhrase = (phrases: string[]) => 
+  phrases[Math.floor(Math.random() * phrases.length)];
+
 // Icônes SVG animées
 const MaskIcon = () => (
   <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -131,16 +162,17 @@ const SparklingAIIcon = () => (
   </svg>
 );
 
-const GENERATION_STEPS: StepInfo[] = [
+// Fonction pour créer les étapes avec phrases aléatoires
+const createGenerationSteps = (): StepInfo[] => [
   {
     id: 'anonymize',
-    label: 'Vos données passent en mode masqué',
+    label: getRandomPhrase(ANONYMIZATION_PHRASES),
     icon: MaskIcon as any,
     description: 'Protection de votre identité avant traitement IA',
   },
   {
     id: 'enrich',
-    label: 'Votre portfolio est boosté par l\'IA',
+    label: getRandomPhrase(AI_BOOST_PHRASES),
     icon: SparklingAIIcon as any,
     description: 'Génération de contenu professionnel et percutant',
   },
@@ -169,6 +201,9 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
   const [currentStep, setCurrentStep] = useState('Initialisation...');
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  
+  // Générer les étapes avec phrases aléatoires (une seule fois)
+  const generationSteps = React.useMemo(() => createGenerationSteps(), []);
 
   useEffect(() => {
     generatePortfolio();
@@ -419,7 +454,7 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
 
       {/* Steps checklist */}
       <div style={stepsListStyle}>
-        {GENERATION_STEPS.map((step, index) => {
+        {generationSteps.map((step, index) => {
           const status = getStepStatus(index);
           const StepIcon = step.icon;
           
