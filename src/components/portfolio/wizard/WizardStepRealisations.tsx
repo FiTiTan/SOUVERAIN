@@ -105,6 +105,7 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
             type: 'pdf',
             path: file.name, // Juste le nom, pas de path accessible
           },
+          extractedContent: result.data.text, // ✅ Stocker le texte complet pour GROQ
         };
 
         onUpdate({

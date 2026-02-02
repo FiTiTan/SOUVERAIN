@@ -72,6 +72,7 @@ export interface Realisation {
     url?: string;
   };
   image?: string;  // Ajouté au Step 6
+  extractedContent?: string;  // Contenu complet extrait (PDF, Notion, etc.) pour GROQ
 }
 
 /**

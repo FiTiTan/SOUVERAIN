@@ -62,7 +62,7 @@ function convertToRawData(formData: PortfolioFormDataV2): RawPortfolioData {
     socialIsMain: false,
     projects: formData.realisations.map(r => ({
       title: r.title,
-      description: r.description,
+      description: r.extractedContent || r.description, // ✅ Envoyer le contenu complet à GROQ
       category: r.category,
     })),
   };
