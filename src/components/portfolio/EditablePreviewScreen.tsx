@@ -181,20 +181,29 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e: DragEvent) => {
       const doc = iframe.contentDocument;
       if (!doc) return;
 
       // Convertir coordonnées parent vers iframe
       const iframeRect = iframe.getBoundingClientRect();
-      const x = e.clientX - iframeRect.left;
-      const y = e.clientY - iframeRect.top + (doc.documentElement.scrollTop || doc.body.scrollTop);
+      const relativeX = e.clientX - iframeRect.left;
+      const relativeY = e.clientY - iframeRect.top;
 
-      // Trouver l'élément sous le curseur dans l'iframe
-      const elementInIframe = doc.elementFromPoint(e.clientX - iframeRect.left, e.clientY - iframeRect.top);
+      // Vérifier si on est au-dessus de l'iframe
+      if (relativeX < 0 || relativeY < 0 || relativeX > iframeRect.width || relativeY > iframeRect.height) {
+        setHoveredZone(null);
+        doc.querySelectorAll('[data-image-zone].drag-hover').forEach(el => {
+          el.classList.remove('drag-hover');
+        });
+        return;
+      }
+
+      // Trouver l'élément sous le curseur dans l'iframe (sans tenir compte du scroll pour elementFromPoint)
+      const elementInIframe = doc.elementFromPoint(relativeX, relativeY);
       
       // Remonter pour trouver la zone droppable
-      let zone = elementInIframe;
+      let zone: Element | null = elementInIframe;
       while (zone && !zone.hasAttribute('data-image-zone')) {
         zone = zone.parentElement;
       }
@@ -219,40 +228,47 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     };
 
     // Écouter les mouvements de souris sur le document parent
-    document.addEventListener('dragover', handleMouseMove);
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault(); // Important pour permettre le drop
+      handleMouseMove(e);
+    };
+
+    document.addEventListener('dragover', handleDragOver);
 
     return () => {
-      document.removeEventListener('dragover', handleMouseMove);
+      document.removeEventListener('dragover', handleDragOver);
     };
   }, [isDragging]);
 
   // ============================================================
-  // DROP HANDLER ON IFRAME
+  // DROP HANDLER
   // ============================================================
 
-  const handleIframeDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    
-    if (!dragImageRef.current || !hoveredZone) {
-      setIsDragging(false);
-      return;
-    }
+  useEffect(() => {
+    if (!isDragging) return;
 
-    // Assigner l'image à la zone
-    setAssignments(prev => ({
-      ...prev,
-      [hoveredZone]: dragImageRef.current!
-    }));
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      
+      if (!dragImageRef.current || !hoveredZone) {
+        return;
+      }
 
-    setIsDragging(false);
-    dragImageRef.current = null;
-    setHoveredZone(null);
-  }, [hoveredZone]);
+      // Assigner l'image à la zone
+      setAssignments(prev => ({
+        ...prev,
+        [hoveredZone]: dragImageRef.current!
+      }));
 
-  const handleIframeDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-  }, []);
+      console.log(`[EditablePreview] Dropped image on zone: ${hoveredZone}`);
+    };
+
+    document.addEventListener('drop', handleDrop);
+
+    return () => {
+      document.removeEventListener('drop', handleDrop);
+    };
+  }, [isDragging, hoveredZone]);
 
   // ============================================================
   // LIBRARY HANDLERS
@@ -516,11 +532,7 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
         </div>
 
         {/* Preview */}
-        <div
-          style={previewContainerStyle}
-          onDrop={handleIframeDrop}
-          onDragOver={handleIframeDragOver}
-        >
+        <div style={previewContainerStyle}>
           <iframe
             ref={iframeRef}
             srcDoc={initialHtml}

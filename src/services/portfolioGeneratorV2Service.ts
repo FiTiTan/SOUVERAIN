@@ -4,7 +4,8 @@
  */
 
 import type { PortfolioFormDataV2 } from '../components/portfolio/types';
-import type { EnrichedPortfolioData } from './groqEnrichmentService';
+import type { EnrichedPortfolioData, RawPortfolioData } from './groqEnrichmentService';
+import { enrichPortfolioWithGroq } from './groqEnrichmentService';
 import { injectDataIntoTemplate, computeFlags } from './templateInjectorService';
 import { getLabels } from '../config/portfolioLabels';
 
@@ -27,7 +28,36 @@ async function loadTemplateHTML(templateId: string): Promise<string> {
 }
 
 /**
- * Convertit les données du wizard V2 vers le format EnrichedPortfolioData
+ * Convertit les données du wizard V2 vers le format RawPortfolioData pour GROQ
+ */
+function convertToRawData(formData: PortfolioFormDataV2): RawPortfolioData {
+  return {
+    name: formData.name,
+    profileType: formData.profileContext === 'junior' ? 'student' : 
+                 formData.profileContext === 'food' ? 'commerce' :
+                 formData.profileContext === 'retail' ? 'commerce' :
+                 formData.profileContext === 'artisan' ? 'service' :
+                 formData.profileContext === 'service' ? 'service' :
+                 formData.profileContext === 'tech' ? 'freelance' : 'freelance',
+    tagline: formData.tagline,
+    services: formData.services.map(s => s.title),
+    valueProp: formData.valueProp,
+    email: formData.email || '',
+    phone: formData.phone,
+    address: formData.address,
+    openingHours: formData.openingHours,
+    socialLinks: formData.socialLinks,
+    socialIsMain: false,
+    projects: formData.realisations.map(r => ({
+      title: r.title,
+      description: r.description,
+      category: r.category,
+    })),
+  };
+}
+
+/**
+ * Convertit les données du wizard V2 vers le format EnrichedPortfolioData (sans GROQ)
  */
 function convertToEnrichedData(formData: PortfolioFormDataV2): EnrichedPortfolioData {
   const labels = getLabels(formData.profileContext);
@@ -88,22 +118,35 @@ export async function generatePortfolioFromWizardV2(
     console.log('[GeneratorV2] Starting generation...');
     
     // Étape 1 : Chargement du template
-    onProgress?.('Chargement du template...', 25);
+    onProgress?.('Chargement du template...', 20);
     const templateHTML = await loadTemplateHTML(formData.templateId);
     
     if (!templateHTML) {
       throw new Error('Template HTML vide');
     }
     
-    // Étape 2 : Conversion des données
-    onProgress?.('Préparation des données...', 50);
-    const enrichedData = convertToEnrichedData(formData);
+    // Étape 2 : Conversion vers RawData
+    onProgress?.('Préparation des données...', 40);
+    const rawData = convertToRawData(formData);
     
-    // Étape 3 : Calcul des flags
+    // Étape 3 : Enrichissement par GROQ (IA)
+    onProgress?.('Enrichissement du contenu par IA...', 60);
+    let enrichedData: EnrichedPortfolioData;
+    
+    try {
+      enrichedData = await enrichPortfolioWithGroq(rawData);
+      console.log('[GeneratorV2] ✅ GROQ enrichment successful');
+    } catch (groqError) {
+      console.warn('[GeneratorV2] ⚠️ GROQ enrichment failed, fallback to basic data:', groqError);
+      // Fallback: utiliser conversion basique sans IA
+      enrichedData = convertToEnrichedData(formData);
+    }
+    
+    // Étape 4 : Calcul des flags
     onProgress?.('Configuration...', 75);
     const flags = computeFlags(enrichedData);
     
-    // Étape 4 : Injection dans le template
+    // Étape 5 : Injection dans le template
     onProgress?.('Génération du HTML...', 90);
     const labels = getLabels(formData.profileContext);
     

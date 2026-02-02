@@ -45,11 +45,6 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
       });
 
       setIsComplete(true);
-
-      // Auto-avancer après 1s
-      setTimeout(() => {
-        onNext();
-      }, 1000);
     } catch (error: any) {
       console.error('[Generation] Error:', error);
       setCurrentStep(`Erreur: ${error.message}`);
@@ -192,6 +187,28 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
           <span>Finalisation</span>
         </div>
       </div>
+
+      {/* Bouton Continuer */}
+      {isComplete && (
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <button
+            onClick={onNext}
+            style={{
+              padding: '0.75rem 2rem',
+              fontSize: typography.fontSize.base,
+              fontWeight: typography.fontWeight.semibold,
+              backgroundColor: '#3A3A3A',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: borderRadius.lg,
+              cursor: 'pointer',
+              transition: transitions.fast,
+            }}
+          >
+            Continuer vers la personnalisation →
+          </button>
+        </div>
+      )}
 
       {/* CSS Animation */}
       <style>{`
