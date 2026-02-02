@@ -122,29 +122,42 @@ Génère objet JSON avec clé "services" contenant array enrichi.`;
 }
 
 /**
- * ÉTAPE 3 : Enrichir Projects
+ * ÉTAPE 3 : Enrichir Projects (par batch pour éviter 413)
  */
 async function enrichProjects(data: RawPortfolioData): Promise<any[]> {
   if (!data.projects || data.projects.length === 0) {
     return [];
   }
 
+  console.log('[GroqSequenced] Step 3/3: Enriching projects...');
+  
   const systemPrompt = `Expert copywriting. Enrichis projets de manière CONCISE.
 Retourne objet JSON: {"projects": [{"title","description","category"}]}
-description: MAX 50 mots. Pitch court et impactant. PAS de détails exhaustifs.`;
+description: MAX 40 mots. Pitch court et impactant. PAS de détails exhaustifs.`;
 
-  const projectsSummary = data.projects.map(p => 
-    `${p.title} (${p.category || 'N/A'}): ${(p.description || 'Sans desc').substring(0, 200)}`
-  ).join(' | ');
+  const batchSize = 2; // Traiter 2 projets à la fois max
+  const enrichedProjects: any[] = [];
 
-  const userPrompt = `Projets: ${projectsSummary}
+  for (let i = 0; i < data.projects.length; i += batchSize) {
+    const batch = data.projects.slice(i, i + batchSize);
+    const projectsSummary = batch.map(p => 
+      `${p.title} (${p.category || 'N/A'}): ${(p.description || '').substring(0, 150)}`
+    ).join(' | ');
 
-Génère objet JSON avec clé "projects" contenant array enrichi. Descriptions MAX 50 mots chacune.`;
+    const userPrompt = `Projets: ${projectsSummary}
 
-  console.log('[GroqSequenced] Step 3/3: Enriching projects...');
-  const result = await callGroq(systemPrompt, userPrompt, 1000);
+Génère objet JSON avec clé "projects" contenant array enrichi. Descriptions MAX 40 mots chacune.`;
+
+    try {
+      const result = await callGroq(systemPrompt, userPrompt, 600);
+      enrichedProjects.push(...(result.projects || []));
+    } catch (error) {
+      console.warn(`[GroqSequenced] Batch ${i / batchSize + 1} failed, using raw data:`, error);
+      enrichedProjects.push(...batch);
+    }
+  }
   
-  return result.projects || [];
+  return enrichedProjects;
 }
 
 /**
