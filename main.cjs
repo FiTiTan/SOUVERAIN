@@ -466,18 +466,30 @@ ipcMain.handle('init-groq-client', async (event, apiKey) => {
 
 // Compilation Vision (MPF-4)
 ipcMain.handle('groq-compile-vision', async (event, { analysisData, portfolioId }) => {
-  if (!groqClient) {
-    // Tentative de récupération depuis ENV si non init manuellement
-    if (process.env.GROQ_API_KEY) {
-      groqClient = new GroqClient(process.env.GROQ_API_KEY);
-    } else {
-      return { success: false, error: 'Groq client non initialisé. Configurez votre clé API.' };
+  try {
+    console.log('[GROQ] 🔵 START Compiling Portfolio Vision...', { portfolioId });
+    
+    if (!groqClient) {
+      // Tentative de récupération depuis ENV si non init manuellement
+      if (process.env.GROQ_API_KEY) {
+        groqClient = new GroqClient(process.env.GROQ_API_KEY);
+      } else {
+        return { success: false, error: 'Groq client non initialisé. Configurez votre clé API.' };
+      }
     }
-  }
 
-  console.log('[GROQ] Compiling Portfolio Vision...');
-  // Utilise analyzePortfolioStyle qui correspond à la logique "Vision" (Style + Sector + Analysis)
-  return groqClient.analyzePortfolioStyle(analysisData);
+    // Utilise analyzePortfolioStyle qui correspond à la logique "Vision" (Style + Sector + Analysis)
+    const result = await groqClient.analyzePortfolioStyle(analysisData);
+    
+    console.log('[GROQ] ✅ DONE Compiling Portfolio Vision', { success: result.success });
+    return result;
+  } catch (error) {
+    console.error('[GROQ] ❌ ERROR Compiling Portfolio Vision:', error);
+    return { 
+      success: false, 
+      error: error.message || 'Erreur lors de la compilation Vision' 
+    };
+  }
 });
 
 // Génération Contenu (MPF-5)
