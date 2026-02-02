@@ -619,7 +619,7 @@ ipcMain.handle('portfolio-analyze-project', async (event, { sourceData, sourceTy
 
 ipcMain.handle('portfolio-extract-from-pdf', async (event, { buffer, filename }) => {
   try {
-    const pdfParse = require('pdf-parse');
+    const { PDFParse } = require('pdf-parse');
     
     // Buffer peut être soit un ArrayBuffer soit un Buffer Node
     let dataBuffer;
@@ -634,12 +634,13 @@ ipcMain.handle('portfolio-extract-from-pdf', async (event, { buffer, filename })
     
     console.log(`[PDF] Parsing ${filename}, buffer size: ${dataBuffer.length} bytes`);
     
-    // Parser le PDF
-    const pdfData = await pdfParse(dataBuffer);
+    // Parser le PDF avec l'API v2
+    const parser = new PDFParse({ data: dataBuffer });
+    const result = await parser.getText();
     
     // Extraire le texte
-    const text = pdfData.text || '';
-    const numPages = pdfData.numpages || 0;
+    const text = result.text || '';
+    const numPages = result.numPages || 0;
     
     console.log(`[PDF] ✅ Extracted ${text.length} chars from ${numPages} pages`);
     
@@ -2920,7 +2921,7 @@ ipcMain.handle('get-groq-api-key', async () => {
 
 // ==================== EXTRACTION HANDLERS (V3) ====================
 
-// Extract PDF text
+// Extract PDF text  
 ipcMain.handle('extract-pdf-text', async (event, filePath) => {
   try {
     const { PDFParse } = require('pdf-parse');
