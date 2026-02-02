@@ -598,6 +598,26 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         .social-links {
             display: flex;
             gap: 3rem;
+        }
+
+        /* Si un seul témoignage : centrer */
+        .testimonial-card:first-child:last-child {
+            grid-column: 2 / 3;
+        }
+        }
+
+        /* Si un seul projet : centrer */
+        .project-card:first-child:last-child {
+            grid-column: 1 / 3;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        }
+
+        /* Si un seul service : centrer */
+        .service-card:first-child:last-child {
+            grid-column: 2 / 3;
+        }
             margin-top: var(--spacing-md);
         }
 

@@ -410,6 +410,12 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 3rem;
+        }
+
+        /* Si un seul service : centrer */
+        .service-card:first-child:last-child {
+            grid-column: 2 / 3;
+        }
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
@@ -631,6 +637,12 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 4rem;
+        }
+
+        /* Si un seul témoignage : centrer */
+        .testimonial-card:first-child:last-child {
+            grid-column: 2 / 3;
+        }
             max-width: 1200px;
             margin: 0 auto;
         }
@@ -884,6 +896,12 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             .services-grid {
                 grid-template-columns: 1fr;
                 gap: 2rem;
+        }
+
+        /* Si un seul service : centrer */
+        .service-card:first-child:last-child {
+            grid-column: 2 / 3;
+        }
             }
             
             .project-item {
@@ -902,6 +920,12 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             .testimonials-grid {
                 grid-template-columns: 1fr;
                 gap: 3rem;
+        }
+
+        /* Si un seul témoignage : centrer */
+        .testimonial-card:first-child:last-child {
+            grid-column: 2 / 3;
+        }
             }
         }
 
