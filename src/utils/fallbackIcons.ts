@@ -5,31 +5,31 @@
 
 const ICON_TEMPLATES: Record<string, string> = {
   // Développement / Web
-  'dev': `<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><rect x='6' y='10' width='36' height='28' rx='2'/><line x1='6' y1='18' x2='42' y2='18'/><circle cx='12' cy='14' r='1.5'/><circle cx='17' cy='14' r='1.5'/><circle cx='22' cy='14' r='1.5'/></svg>`,
+  'dev': `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="10" width="36" height="28" rx="2"/><line x1="6" y1="18" x2="42" y2="18"/><circle cx="12" cy="14" r="1.5"/><circle cx="17" cy="14" r="1.5"/><circle cx="22" cy="14" r="1.5"/></svg>`,
   
   // Design / Créatif
-  'design': `<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 36l6-16 6 8 6-12 6 20'/><circle cx='12' cy='36' r='2' fill='currentColor'/><circle cx='36' cy='36' r='2' fill='currentColor'/></svg>`,
+  'design': `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 36l6-16 6 8 6-12 6 20"/><circle cx="12" cy="36" r="2" fill="currentColor"/><circle cx="36" cy="36" r="2" fill="currentColor"/></svg>`,
   
   // Conseil / Stratégie
-  'conseil': `<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><circle cx='24' cy='24' r='10'/><path d='M24 14v20M34 24H14'/><circle cx='24' cy='14' r='2' fill='currentColor'/><circle cx='34' cy='24' r='2' fill='currentColor'/></svg>`,
+  'conseil': `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="10"/><path d="M24 14v20M34 24H14"/><circle cx="24" cy="14" r="2" fill="currentColor"/><circle cx="34" cy="24" r="2" fill="currentColor"/></svg>`,
   
   // Marketing / Communication
-  'marketing': `<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><path d='M10 38L24 10l14 28z'/><circle cx='24' cy='20' r='3'/><path d='M18 28h12'/></svg>`,
+  'marketing': `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 38L24 10l14 28z"/><circle cx="24" cy="20" r="3"/><path d="M18 28h12"/></svg>`,
   
   // Formation / Éducation
-  'formation': `<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><path d='M24 8l-16 8v12c0 8 16 12 16 12s16-4 16-12V16z'/><polyline points='20,24 22,26 28,20'/></svg>`,
+  'formation': `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M24 8l-16 8v12c0 8 16 12 16 12s16-4 16-12V16z"/><polyline points="20,24 22,26 28,20"/></svg>`,
   
   // Maintenance / Support
-  'maintenance': `<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><circle cx='24' cy='24' r='3'/><path d='M24 8v3M24 37v3M8 24h3M37 24h3M14 14l2 2M32 32l2 2M32 14l-2 2M14 32l-2 2'/></svg>`,
+  'maintenance': `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="3"/><path d="M24 8v3M24 37v3M8 24h3M37 24h3M14 14l2 2M32 32l2 2M32 14l-2 2M14 32l-2 2"/></svg>`,
   
   // SEO / Référencement
-  'seo': `<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><circle cx='20' cy='20' r='8'/><line x1='26' y1='26' x2='38' y2='38'/><polyline points='16,20 18,22 24,16'/></svg>`,
+  'seo': `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="20" cy="20" r="8"/><line x1="26" y1="26" x2="38" y2="38"/><polyline points="16,20 18,22 24,16"/></svg>`,
   
   // Mobile / Application
-  'mobile': `<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><rect x='14' y='6' width='20' height='36' rx='3'/><line x1='14' y1='34' x2='34' y2='34'/><circle cx='24' cy='38' r='1.5' fill='currentColor'/></svg>`,
+  'mobile': `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="14" y="6" width="20" height="36" rx="3"/><line x1="14" y1="34" x2="34" y2="34"/><circle cx="24" cy="38" r="1.5" fill="currentColor"/></svg>`,
   
   // Fallback générique
-  'default': `<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><rect x='10' y='10' width='28' height='28' rx='4'/><line x1='16' y1='20' x2='32' y2='20'/><line x1='16' y1='24' x2='32' y2='24'/><line x1='16' y1='28' x2='24' y2='28'/></svg>`,
+  'default': `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="10" y="10" width="28" height="28" rx="4"/><line x1="16" y1="20" x2="32" y2="20"/><line x1="16" y1="24" x2="32" y2="24"/><line x1="16" y1="28" x2="24" y2="28"/></svg>`,
 };
 
 const KEYWORDS_MAP: Record<string, string> = {

@@ -108,17 +108,34 @@ async function enrichServices(data: RawPortfolioData): Promise<any[]> {
   const systemPrompt = `Expert copywriting. Enrichis services.
 Retourne objet JSON: {"services": [{"title","description","icon"}]}
 description: 20-35 mots spécifiques.
-icon: SVG <svg viewBox='0 0 48 48' stroke='currentColor'...> minimaliste.`;
+icon: SVG <svg viewBox="0 0 48 48" stroke="currentColor"...> minimaliste (GUILLEMETS DOUBLES obligatoires).`;
 
   const userPrompt = `Services: ${data.services.join(', ')}
 Profil: ${data.profileType}
 
-Génère objet JSON avec clé "services" contenant array enrichi.`;
+Génère objet JSON avec clé "services" contenant array enrichi. SVG avec guillemets doubles UNIQUEMENT.`;
 
   console.log('[GroqSequenced] Step 2/3: Enriching services...');
   const result = await callGroq(systemPrompt, userPrompt, 1200);
   
+  // Nettoyer les SVG : forcer guillemets doubles
+  if (result.services) {
+    result.services = result.services.map((service: any) => ({
+      ...service,
+      icon: service.icon ? cleanSvgQuotes(service.icon) : service.icon,
+    }));
+  }
+  
   return result.services || [];
+}
+
+/**
+ * Nettoie un SVG en forçant les guillemets doubles
+ */
+function cleanSvgQuotes(svg: string): string {
+  if (!svg) return svg;
+  // Remplacer les guillemets simples par des doubles dans les attributs SVG
+  return svg.replace(/(\w+)='([^']*)'/g, '$1="$2"');
 }
 
 /**

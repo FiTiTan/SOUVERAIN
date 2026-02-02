@@ -189,6 +189,13 @@ function processRepeat<T>(
         const varRegex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
         // SERVICE_ICON contient du SVG, ne pas échapper
         const finalValue = key === 'SERVICE_ICON' ? value : escapeHtml(value);
+        
+        // Debug: Log SVG icons
+        if (key === 'SERVICE_ICON' && value) {
+          console.log('[SVG Debug] Icon value:', value.substring(0, 100));
+          console.log('[SVG Debug] Starts with <svg:', value.trim().startsWith('<svg'));
+        }
+        
         block = block.replace(varRegex, finalValue);
       }
       
