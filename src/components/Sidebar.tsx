@@ -16,7 +16,7 @@ import { PrivacyBadge, PrivacyModal } from './PrivacyBadge';
 // DATA
 // ============================================================
 
-export type ModuleId = 'cv' | 'portfolio' | 'jobs' | 'linkedin' | 'vault' | 'shop' | 'settings';
+export type ModuleId = 'cv' | 'reputation' | 'portfolio' | 'jobs' | 'linkedin' | 'vault' | 'shop' | 'settings';
 
 interface Module {
   id: ModuleId;
@@ -27,6 +27,7 @@ interface Module {
 
 const moduleColors = {
   cv: { bg: '#F3E8FF', color: '#9333EA', darkBg: '#3B0764', darkColor: '#C084FC' },
+  reputation: { bg: '#FEF3C7', color: '#F59E0B', darkBg: '#451A03', darkColor: '#FCD34D' },
   portfolio: { bg: '#DBEAFE', color: '#2563EB', darkBg: '#1E3A5F', darkColor: '#60A5FA' },
   jobs: { bg: '#FFEDD5', color: '#EA580C', darkBg: '#431407', darkColor: '#FB923C' },
   linkedin: { bg: '#DBEAFE', color: '#0077B5', darkBg: '#1E3A5F', darkColor: '#38BDF8' },
@@ -36,6 +37,7 @@ const moduleColors = {
 
 const Icons = {
   FileText: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>,
+  TrendingUp: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>,
   Briefcase: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>,
   Target: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>,
   Linkedin: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>,
@@ -48,6 +50,7 @@ const Icons = {
 
 const MODULES: Module[] = [
   { id: 'cv', label: 'CV Coach', icon: Icons.FileText, colorKey: 'cv' },
+  { id: 'reputation', label: 'E-Réputation', icon: Icons.TrendingUp, colorKey: 'reputation' },
   { id: 'portfolio', label: 'Portfolio', icon: Icons.Briefcase, colorKey: 'portfolio' },
   { id: 'jobs', label: 'Job Match', icon: Icons.Target, colorKey: 'jobs' },
   { id: 'linkedin', label: 'LinkedIn', icon: Icons.Linkedin, colorKey: 'linkedin' },

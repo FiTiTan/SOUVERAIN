@@ -19,6 +19,7 @@ const VaultModule = lazy(() => import('./VaultModule').then(m => ({ default: m.V
 const PortfolioHub = lazy(() => import('./portfolio/PortfolioHub').then(m => ({ default: m.PortfolioHub })));
 const JobMatchingModule = lazy(() => import('./job-matching/JobMatchingModule').then(m => ({ default: m.JobMatchingModule })));
 const LinkedInCoachModule = lazy(() => import('./linkedin-coach/LinkedInCoachModule').then(m => ({ default: m.LinkedInCoachModule })));
+const ReputationDashboard = lazy(() => import('./reputation/ReputationDashboard').then(m => ({ default: m.ReputationDashboard })));
 
 // ============================================================
 // TYPES
@@ -100,13 +101,14 @@ export const Shell: React.FC<ShellProps> = ({ children, onShowTutorial, pageTitl
   // Ctrl+K / Cmd+K pour ouvrir la command palette
   useCtrlKey('k', () => setShowCommandPalette(true));
 
-  // Raccourcis de navigation (⌘+1 à ⌘+6)
+  // Raccourcis de navigation (⌘+1 à ⌘+7)
   useCtrlKey('1', () => setActiveModule('cv'));
-  useCtrlKey('2', () => setActiveModule('portfolio'));
-  useCtrlKey('3', () => setActiveModule('jobs'));
-  useCtrlKey('4', () => setActiveModule('linkedin'));
-  useCtrlKey('5', () => setActiveModule('vault'));
-  useCtrlKey('6', () => setActiveModule('shop'));
+  useCtrlKey('2', () => setActiveModule('reputation'));
+  useCtrlKey('3', () => setActiveModule('portfolio'));
+  useCtrlKey('4', () => setActiveModule('jobs'));
+  useCtrlKey('5', () => setActiveModule('linkedin'));
+  useCtrlKey('6', () => setActiveModule('vault'));
+  useCtrlKey('7', () => setActiveModule('shop'));
 
   // Autres raccourcis
   useCtrlKey('d', toggleTheme);
@@ -244,6 +246,13 @@ export const Shell: React.FC<ShellProps> = ({ children, onShowTutorial, pageTitl
         return (
           <Suspense fallback={LoadingFallback}>
             <VaultModule />
+          </Suspense>
+        );
+
+      case 'reputation':
+        return (
+          <Suspense fallback={LoadingFallback}>
+            <ReputationDashboard />
           </Suspense>
         );
 
