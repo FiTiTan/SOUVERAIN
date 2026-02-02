@@ -51,42 +51,33 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
   const [assignments, setAssignments] = useState<ImageAssignments>({});
   const [isDragging, setIsDragging] = useState(false);
   const [hoveredZone, setHoveredZone] = useState<string | null>(null);
-  const [isIframeLoaded, setIsIframeLoaded] = useState(false);
-
-  console.log('[EditablePreviewScreen] 🔍 initialHtml length:', initialHtml?.length || 0);
-  console.log('[EditablePreviewScreen] 🔍 initialHtml preview:', initialHtml?.substring(0, 200));
 
   // ============================================================
   // INJECT IMAGES INTO IFRAME
   // ============================================================
 
   useEffect(() => {
-    if (!isIframeLoaded) {
-      console.log('[EditablePreviewScreen] ⏳ Waiting for iframe to load...');
-      return;
-    }
+    // Délai simple pour s'assurer que l'iframe est chargée (mécanique V3)
+    const timer = setTimeout(() => {
+      const iframe = iframeRef.current;
+      if (!iframe?.contentDocument) return;
 
-    console.log('[EditablePreviewScreen] 🔧 Injecting drop zones CSS and images...');
-    
-    const iframe = iframeRef.current;
-    if (!iframe?.contentDocument) {
-      console.error('[EditablePreviewScreen] ❌ No contentDocument');
-      return;
-    }
+      const doc = iframe.contentDocument;
 
-    const doc = iframe.contentDocument;
+      // Injecter les CSS pour les zones droppables
+      injectDropZonesCSS(doc);
 
-    // Injecter les CSS pour les zones droppables
-    injectDropZonesCSS(doc);
+      // Injecter les images assignées
+      Object.entries(assignments).forEach(([zoneId, dataUrl]) => {
+        const zone = findZoneByIdInIframe(doc, zoneId);
+        if (zone) {
+          zone.innerHTML = `<img src="${dataUrl}" alt="${zoneId}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        }
+      });
+    }, 300);
 
-    // Injecter les images assignées
-    Object.entries(assignments).forEach(([zoneId, dataUrl]) => {
-      const zone = findZoneByIdInIframe(doc, zoneId);
-      if (zone) {
-        zone.innerHTML = `<img src="${dataUrl}" alt="${zoneId}" style="width: 100%; height: 100%; object-fit: cover;">`;
-      }
-    });
-  }, [assignments, isIframeLoaded]);
+    return () => clearTimeout(timer);
+  }, [assignments]);
 
   // ============================================================
   // INJECT CSS FOR DROP ZONES
@@ -548,19 +539,6 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
             srcDoc={initialHtml}
             style={iframeStyle}
             title="Portfolio Preview"
-            onLoad={() => {
-              console.log('[EditablePreviewScreen] 📄 Iframe loaded');
-              const doc = iframeRef.current?.contentDocument;
-              if (doc) {
-                console.log('[EditablePreviewScreen] 🔍 Iframe document exists');
-                console.log('[EditablePreviewScreen] 🔍 Iframe body HTML length:', doc.body?.innerHTML?.length || 0);
-                const zones = doc.querySelectorAll('[data-image-zone]');
-                console.log('[EditablePreviewScreen] 🔍 Found', zones.length, 'image zones');
-                setIsIframeLoaded(true);
-              } else {
-                console.error('[EditablePreviewScreen] ❌ Iframe document not accessible');
-              }
-            }}
           />
         </div>
       </div>
