@@ -108,6 +108,47 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                         }}>
                             Agent de Carrière Autonome
                         </p>
+                        
+                        {/* Marketing Tagline */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5, duration: 0.8 }}
+                            style={{
+                                marginTop: '24px',
+                                padding: '12px 20px',
+                                backgroundColor: mode === 'dark' 
+                                    ? 'rgba(99, 102, 241, 0.15)' 
+                                    : 'rgba(99, 102, 241, 0.08)',
+                                borderRadius: borderRadius.lg,
+                                border: `1px solid ${theme.accent.primary}40`,
+                                display: 'inline-block',
+                            }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {/* Icône IA */}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                                    <circle cx="12" cy="12" r="3" fill={theme.accent.primary} opacity="0.6">
+                                        <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" />
+                                    </circle>
+                                    <path d="M8 8L10 10M16 8L14 10M8 16L10 14M16 16L14 14" 
+                                          stroke={theme.accent.primary} 
+                                          strokeWidth="1.5" 
+                                          strokeLinecap="round" 
+                                          opacity="0.4" />
+                                </svg>
+                                
+                                <p style={{
+                                    fontSize: typography.fontSize.sm,
+                                    fontWeight: typography.fontWeight.medium,
+                                    color: theme.accent.primary,
+                                    margin: 0,
+                                    letterSpacing: '0.3px'
+                                }}>
+                                    La puissance de l'IA, la sécurité des données en plus
+                                </p>
+                            </div>
+                        </motion.div>
                     </div>
 
                     {/* Version & Names */}
