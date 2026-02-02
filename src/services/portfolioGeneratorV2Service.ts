@@ -145,6 +145,15 @@ export async function generatePortfolioFromWizardV2(
     onProgress?.('Préparation des données...', 40);
     const rawData = convertToRawData(formData);
     
+    // DEBUG LOG - À SUPPRIMER APRÈS FIX
+    console.log('[GeneratorV2] convertToRawData - projects:', rawData.projects.map(p => ({
+      title: p.title,
+      descriptionLength: p.description?.length || 0,
+      descriptionPreview: p.description?.substring(0, 200),
+      descriptionSource: p.description === '' ? 'EMPTY' : 
+                         p.description?.length > 100 ? 'EXTRACTED_CONTENT' : 'FALLBACK_DESC'
+    })));
+    
     // Étape 3 : Enrichissement par GROQ (IA séquencé)
     onProgress?.('Enrichissement du contenu par IA (1/3: Hero)...', 50);
     let enrichedData: EnrichedPortfolioData;

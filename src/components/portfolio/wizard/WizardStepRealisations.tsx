@@ -92,6 +92,16 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
         // @ts-ignore
         const result = await window.electron.portfolio.extractFromPDF(arrayBuffer, file.name);
         
+        // DEBUG LOG - À SUPPRIMER APRÈS FIX
+        console.log('[Step3] PDF extraction result:', {
+          success: result.success,
+          error: result.error,
+          hasData: !!result.data,
+          hasText: !!result.data?.text,
+          textLength: result.data?.text?.length || 0,
+          textPreview: result.data?.text?.substring(0, 300)
+        });
+        
         if (!result.success) {
           throw new Error(result.error || 'Échec de l\'extraction PDF');
         }
@@ -107,6 +117,15 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
           },
           extractedContent: result.data.text, // ✅ Stocker le texte complet pour GROQ
         };
+        
+        // DEBUG LOG - À SUPPRIMER APRÈS FIX
+        console.log('[Step3] ✅ Realisation created:', {
+          id: realisation.id,
+          title: realisation.title,
+          hasExtractedContent: !!realisation.extractedContent,
+          extractedContentLength: realisation.extractedContent?.length || 0,
+          extractedContentPreview: realisation.extractedContent?.substring(0, 300)
+        });
 
         onUpdate({
           realisations: [...formData.realisations, realisation],

@@ -71,6 +71,15 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
       // Import dynamique du service
       const { generatePortfolioFromWizardV2 } = await import('../../../services/portfolioGeneratorV2Service');
       
+      // DEBUG LOG - À SUPPRIMER APRÈS FIX
+      console.log('[Generation] formData.realisations:', formData.realisations.map(r => ({
+        id: r.id,
+        title: r.title,
+        hasExtractedContent: !!r.extractedContent,
+        extractedContentLength: r.extractedContent?.length || 0,
+        extractedContentPreview: r.extractedContent?.substring(0, 200)
+      })));
+      
       // Appel du service de génération avec callback de progression
       const result = await generatePortfolioFromWizardV2(formData, (step, progressValue) => {
         setCurrentStep(step);

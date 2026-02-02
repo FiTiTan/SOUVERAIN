@@ -631,7 +631,11 @@ ipcMain.handle('portfolio-analyze-project', async (event, { sourceData, sourceTy
 
 ipcMain.handle('portfolio-extract-from-pdf', async (event, { buffer, filename }) => {
   try {
-    const { PDFParse } = require('pdf-parse');
+    // DEBUG LOG - À SUPPRIMER APRÈS FIX
+    console.log('[Main] extractFromPDF called with filename:', filename);
+    console.log('[Main] ArrayBuffer size:', buffer?.byteLength || buffer?.length || 0);
+    
+    const pdfParse = require('pdf-parse');
     
     // Buffer peut être soit un ArrayBuffer soit un Buffer Node
     let dataBuffer;
@@ -646,13 +650,20 @@ ipcMain.handle('portfolio-extract-from-pdf', async (event, { buffer, filename })
     
     console.log(`[PDF] Parsing ${filename}, buffer size: ${dataBuffer.length} bytes`);
     
-    // Parser le PDF avec l'API v2
-    const parser = new PDFParse({ data: dataBuffer });
-    const result = await parser.getText();
+    // Parser le PDF (pdf-parse renvoie une promesse avec { text, numpages, ... })
+    const pdfData = await pdfParse(dataBuffer);
     
     // Extraire le texte
-    const text = result.text || '';
-    const numPages = result.numPages || 0;
+    const text = pdfData.text || '';
+    const numPages = pdfData.numpages || 0;
+    
+    // DEBUG LOG - À SUPPRIMER APRÈS FIX
+    console.log('[Main] PDF parsed:', {
+      success: true,
+      textLength: text?.length || 0,
+      textPreview: text?.substring(0, 300),
+      numPages: numPages
+    });
     
     console.log(`[PDF] ✅ Extracted ${text.length} chars from ${numPages} pages`);
     

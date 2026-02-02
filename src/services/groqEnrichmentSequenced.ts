@@ -148,6 +148,13 @@ async function enrichProjects(data: RawPortfolioData): Promise<any[]> {
 
   console.log('[GroqSequenced] Step 3/3: Enriching projects...');
   
+  // DEBUG LOG - À SUPPRIMER APRÈS FIX
+  console.log('[GroqSequenced] enrichProjects - input projects:', data.projects.map(p => ({
+    title: p.title,
+    descLength: p.description?.length || 0,
+    descPreview: p.description?.substring(0, 200)
+  })));
+  
   const systemPrompt = `Expert copywriting. Enrichis projets de manière CONCISE.
 Retourne objet JSON: {"projects": [{"title","description","category"}]}
 description: MAX 40 mots. Pitch court et impactant. PAS de détails exhaustifs.`;
