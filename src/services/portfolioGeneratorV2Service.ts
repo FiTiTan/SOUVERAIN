@@ -5,7 +5,7 @@
 
 import type { PortfolioFormDataV2 } from '../components/portfolio/types';
 import type { EnrichedPortfolioData, RawPortfolioData } from './groqEnrichmentService';
-import { enrichPortfolioData } from './groqEnrichmentService';
+import { enrichPortfolioDataSequenced } from './groqEnrichmentSequenced';
 import { injectDataIntoTemplate, computeFlags } from './templateInjectorService';
 import { getLabels } from '../config/portfolioLabels';
 
@@ -145,17 +145,22 @@ export async function generatePortfolioFromWizardV2(
     onProgress?.('Préparation des données...', 40);
     const rawData = convertToRawData(formData);
     
-    // Étape 3 : Enrichissement par GROQ (IA)
-    onProgress?.('Enrichissement du contenu par IA...', 60);
+    // Étape 3 : Enrichissement par GROQ (IA séquencé)
+    onProgress?.('Enrichissement du contenu par IA (1/3: Hero)...', 50);
     let enrichedData: EnrichedPortfolioData;
     
     try {
-      const result = await enrichPortfolioData(rawData);
+      // Utilise la version séquencée pour éviter dépassement tokens
+      const result = await enrichPortfolioDataSequenced(rawData, formData.portfolioId);
+      onProgress?.('Enrichissement du contenu par IA (2/3: Services)...', 65);
+      
       if (!result.success || !result.data) {
         throw new Error('GROQ enrichment returned no data');
       }
+      
+      onProgress?.('Enrichissement du contenu par IA (3/3: Projects)...', 75);
       enrichedData = result.data;
-      console.log('[GeneratorV2] ✅ GROQ enrichment successful');
+      console.log('[GeneratorV2] ✅ GROQ enrichment successful (sequenced)');
     } catch (groqError) {
       console.warn('[GeneratorV2] ⚠️ GROQ enrichment failed, fallback to basic data:', groqError);
       // Fallback: utiliser conversion basique sans IA
