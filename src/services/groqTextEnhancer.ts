@@ -39,41 +39,77 @@ export async function enhanceText(text: string, options: EnhanceOptions): Promis
   let userPrompt = '';
 
   if (options.type === 'tagline') {
-    systemPrompt = `Tu es un expert en personal branding. Tu améliores les taglines pour les rendre plus percutantes et mémorables.
+    systemPrompt = `Tu es un expert en personal branding et copywriting. Tu transformes les taglines génériques en accroches percutantes et mémorables.
+
+INTERDICTIONS ABSOLUES:
+❌ "Passionné par", "Spécialisé dans", "Expert en"
+❌ "Dynamique", "Motivé", "Créatif"
+❌ "Solutions innovantes", "Expériences uniques"
+❌ Jargon vague ("moderne", "performant", "de qualité")
 
 RÈGLES:
-- Retourne UNIQUEMENT le tagline amélioré, rien d'autre
-- Maximum 15-20 mots
-- Évite les clichés ("passionné", "dynamique")
-- Sois spécifique et concret
-- Ton professionnel mais authentique
-- Privilégie les verbes d'action`;
+✅ Commence par un VERBE D'ACTION fort (je conçois, je développe, je transforme, je crée)
+✅ Sois ULTRA-SPÉCIFIQUE (technologies, secteurs, méthodes)
+✅ Montre le RÉSULTAT concret, pas le processus
+✅ Maximum 15-20 mots
+✅ Ton professionnel mais direct
 
-    userPrompt = `Améliore ce tagline pour qu'il soit plus impactant:
+EXEMPLES DE TRANSFORMATION:
+
+❌ "Passionné par le développement web moderne et performant"
+✅ "Je développe des applications React qui servent 100k+ utilisateurs/jour"
+
+❌ "Designer créatif spécialisé en UX/UI"
+✅ "Je conçois des interfaces SaaS B2B qui augmentent la rétention de 40%"
+
+❌ "Consultant en stratégie digitale innovante"
+✅ "J'aide les PME industrielles à générer des leads qualifiés via LinkedIn"`;
+
+    userPrompt = `Transforme ce tagline générique en accroche PERCUTANTE et CONCRÈTE:
 
 "${text}"
 
 ${options.context ? `Contexte: ${options.context.name || ''} - ${options.context.activity || ''} (${options.context.profileType || ''})` : ''}
 
-Retourne UNIQUEMENT le tagline amélioré.`;
+Applique les règles. Retourne UNIQUEMENT le tagline amélioré (pas d'explication).`;
   } else {
-    systemPrompt = `Tu es un expert en copywriting et propositions de valeur. Tu améliores les value propositions pour les rendre plus convaincantes.
+    systemPrompt = `Tu es un expert en copywriting B2B/B2C. Tu transformes les value propositions génériques en messages qui CONVERTISSENT.
+
+INTERDICTIONS ABSOLUES:
+❌ "Je transforme vos idées en applications web"
+❌ "Solutions personnalisées et sur-mesure"
+❌ "Accompagnement de A à Z"
+❌ "Écoute de vos besoins"
+❌ Promesses vagues sans preuve
 
 RÈGLES:
-- Retourne UNIQUEMENT la proposition de valeur améliorée, rien d'autre
-- Maximum 25-40 mots
-- Focus sur le bénéfice client/utilisateur
-- Évite le jargon et les clichés
-- Sois concret et différenciant
-- Ton professionnel`;
+✅ Commence par le PROBLÈME du client (frustration, manque, coût)
+✅ Enchaîne sur la SOLUTION concrète (méthode, outil, résultat)
+✅ Quantifie quand possible (délais, économies, gains)
+✅ Maximum 30-40 mots
+✅ Ton direct, pas commercial
 
-    userPrompt = `Améliore cette proposition de valeur pour qu'elle soit plus convaincante:
+STRUCTURE RECOMMANDÉE:
+[Problème client] → [Solution] → [Résultat mesurable]
+
+EXEMPLES DE TRANSFORMATION:
+
+❌ "Je crée des sites web modernes et performants adaptés à vos besoins"
+✅ "Votre site WordPress rame et perd des clients ? Je le migre vers Webflow en 2 semaines, -70% de temps de chargement garanti"
+
+❌ "Accompagnement personnalisé pour développer votre stratégie digitale"
+✅ "Vos posts LinkedIn ont 0 engagement ? Je vous forme à créer du contenu viral en 30 jours (méthode testée sur 50+ profils)"
+
+❌ "Designer UX/UI pour des expériences utilisateur exceptionnelles"
+✅ "Vos utilisateurs abandonnent au checkout ? J'optimise votre tunnel pour +25% de conversion en 3 sprints"`;
+
+    userPrompt = `Transforme cette value proposition générique en message qui CONVERTIT:
 
 "${text}"
 
 ${options.context ? `Contexte: ${options.context.name || ''} - ${options.context.activity || ''} (${options.context.profileType || ''})` : ''}
 
-Retourne UNIQUEMENT la proposition de valeur améliorée.`;
+Applique la structure [Problème] → [Solution] → [Résultat]. Retourne UNIQUEMENT la value prop améliorée (pas d'explication).`;
   }
 
   try {
@@ -89,8 +125,8 @@ Retourne UNIQUEMENT la proposition de valeur améliorée.`;
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        temperature: 0.7,
-        max_tokens: 150,
+        temperature: 0.5, // Réduit pour plus de contrôle sur les clichés
+        max_tokens: 200, // Augmenté pour value props plus longues
       }),
     });
 
