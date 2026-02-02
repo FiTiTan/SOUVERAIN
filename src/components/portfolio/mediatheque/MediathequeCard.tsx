@@ -2,6 +2,7 @@ import React from 'react';
 import type { MediathequeItem } from '../../../hooks/useMediatheque';
 import { useTheme } from '../../../ThemeContext';
 import { FileIcon, VideoIcon, FolderIcon, XIcon } from '../../icons';
+import { TrashIcon } from '../../icons/FeatherIcons';
 
 interface MediathequeCardProps {
     item: MediathequeItem;
@@ -130,11 +131,14 @@ export const MediathequeCard: React.FC<MediathequeCardProps> = ({
                                 color: '#ef4444',
                                 cursor: 'pointer',
                                 padding: '4px',
-                                borderRadius: '4px'
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                             }}
                             title="Supprimer"
                         >
-                            🗑️
+                            <TrashIcon size={18} color="#ef4444" />
                         </button>
                     </div>
                 )}

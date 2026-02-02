@@ -8,6 +8,7 @@ import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { Realisation } from '../types';
 import { DocumentPreview } from './DocumentPreview';
+import { TrashIcon } from '../../icons/FeatherIcons';
 
 interface RealisationCardProps {
   realisation: Realisation;
@@ -116,6 +117,10 @@ export const RealisationCard: React.FC<RealisationCardProps> = ({
     borderRadius: borderRadius.md,
     cursor: 'pointer',
     transition: transitions.fast,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
   };
 
   const selectStyle: React.CSSProperties = {
@@ -131,7 +136,7 @@ export const RealisationCard: React.FC<RealisationCardProps> = ({
           <span>{getSourceLabel(realisation.source.type, realisation.source.path, realisation.source.url)}</span>
         </div>
         <button onClick={onDelete} style={buttonStyle}>
-          🗑️
+          <TrashIcon size={16} color="#FFFFFF" />
         </button>
       </div>
 

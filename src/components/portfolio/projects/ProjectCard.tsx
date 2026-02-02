@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '../../../ThemeContext';
 import type { Project } from '../../../hooks/useProjects';
+import { TrashIcon } from '../../icons/FeatherIcons';
 
 interface ProjectCardProps {
     project: Project;
@@ -157,15 +158,18 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onEdit, onDel
                             onClick={() => onDelete(project.id)}
                             style={{
                                 background: 'transparent',
-                                border: 'none', // Cleaner look
+                                border: 'none',
                                 color: theme.semantic.error,
                                 padding: '6px',
                                 borderRadius: '6px',
                                 cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}
                             title="Supprimer"
                         >
-                            🗑️
+                            <TrashIcon size={18} color={theme.semantic.error} />
                         </button>
                     </div>
                 </div>
