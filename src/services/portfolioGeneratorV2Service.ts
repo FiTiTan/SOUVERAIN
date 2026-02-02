@@ -14,7 +14,7 @@ import { getLabels } from '../config/portfolioLabels';
 async function loadTemplateHTML(templateId: string): Promise<string> {
   try {
     // @ts-ignore
-    const result = await window.electron.invoke('template-get-html', templateId);
+    const result = await window.electron.templates.getHTML(templateId);
     
     if (typeof result === 'object' && result !== null && 'html' in result) {
       return result.html || '';

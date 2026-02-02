@@ -7,8 +7,8 @@ import React from 'react';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { WizardStepProps } from '../types';
-// Import du composant EditablePreviewScreen existant
-// import { EditablePreviewScreen } from '../EditablePreviewScreen';
+import { EditablePreviewScreen } from '../EditablePreviewScreen';
+import type { PortfolioPreviewData } from '../types';
 
 export const WizardStepPreview: React.FC<WizardStepProps> = ({
   formData,
@@ -18,129 +18,87 @@ export const WizardStepPreview: React.FC<WizardStepProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  // TODO: Intégrer EditablePreviewScreen ici
-  // Pour l'instant, version simplifiée
+  // @ts-ignore - HTML généré temporairement stocké dans formData
+  const generatedHTML = formData._generatedHTML as string | undefined;
 
-  // Styles
-  const containerStyle: React.CSSProperties = {
-    padding: '2rem',
-    maxWidth: '1400px',
-    margin: '0 auto',
+  if (!generatedHTML) {
+    // Pas de HTML généré, afficher message d'erreur
+    return (
+      <div style={{
+        padding: '2rem',
+        maxWidth: '600px',
+        margin: '0 auto',
+        textAlign: 'center',
+      }}>
+        <div style={{
+          padding: '3rem',
+          backgroundColor: theme.semantic.error + '20',
+          borderRadius: borderRadius.lg,
+          marginBottom: '2rem',
+        }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
+          <h2 style={{
+            fontSize: typography.fontSize.xl,
+            fontWeight: typography.fontWeight.semibold,
+            color: theme.text.primary,
+            marginBottom: '1rem',
+          }}>
+            Aucun portfolio généré
+          </h2>
+          <p style={{
+            fontSize: typography.fontSize.base,
+            color: theme.text.secondary,
+            marginBottom: '2rem',
+          }}>
+            L'étape de génération a échoué ou a été sautée. Veuillez retourner à l'étape précédente et réessayer.
+          </p>
+          <button
+            onClick={onBack}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: typography.fontSize.sm,
+              fontWeight: typography.fontWeight.medium,
+              backgroundColor: theme.accent.primary,
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: borderRadius.lg,
+              cursor: 'pointer',
+            }}
+          >
+            ← Retour à la génération
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Construire portfolioData depuis formData
+  const portfolioData: PortfolioPreviewData = {
+    portfolioId: 'wizard-' + Date.now(),
+    authorName: formData.name,
+    authorTitle: formData.title || '',
+    intentions: [],
+    style: formData.templateId || 'bento-grid',
+    projects: formData.realisations.map((r, i) => ({
+      title: r.title,
+      description: r.description || '',
+      category: r.category || '',
+    })),
   };
 
-  const headerStyle: React.CSSProperties = {
-    marginBottom: '2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  };
-
-  const titleStyle: React.CSSProperties = {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: theme.text.primary,
-  };
-
-  const mainStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: '240px 1fr',
-    gap: '2rem',
-    minHeight: '600px',
-  };
-
-  const sidebarStyle: React.CSSProperties = {
-    padding: '1.5rem',
-    backgroundColor: theme.bg.secondary,
-    borderRadius: borderRadius.lg,
-    border: `1px solid ${theme.border.default}`,
-  };
-
-  const previewStyle: React.CSSProperties = {
-    padding: '2rem',
-    backgroundColor: theme.bg.secondary,
-    borderRadius: borderRadius.lg,
-    border: `1px solid ${theme.border.default}`,
-    minHeight: '600px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: theme.text.tertiary,
-  };
-
-  const buttonStyle = (variant: 'primary' | 'secondary'): React.CSSProperties => {
-    const baseStyle: React.CSSProperties = {
-      padding: '0.75rem 1.5rem',
-      fontSize: typography.fontSize.sm,
-      fontWeight: typography.fontWeight.medium,
-      border: 'none',
-      borderRadius: borderRadius.lg,
-      cursor: 'pointer',
-      transition: transitions.fast,
-    };
-
-    if (variant === 'primary') {
-      return {
-        ...baseStyle,
-        backgroundColor: theme.accent.primary,
-        color: '#FFFFFF',
-      };
-    } else {
-      return {
-        ...baseStyle,
-        backgroundColor: 'transparent',
-        color: theme.text.secondary,
-        border: `1px solid ${theme.border.default}`,
-      };
-    }
+  const handleExportClick = (html: string) => {
+    // Stocker le HTML final dans formData avant de passer à l'étape suivante
+    // @ts-ignore
+    onUpdate({ _finalHTML: html });
+    onNext();
   };
 
   return (
-    <div style={containerStyle}>
-      {/* Header */}
-      <div style={headerStyle}>
-        <h1 style={titleStyle}>ÉTAPE 6 : PERSONNALISEZ</h1>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button onClick={onBack} style={buttonStyle('secondary')}>
-            ← Retour
-          </button>
-          <button onClick={onNext} style={buttonStyle('primary')}>
-            Exporter →
-          </button>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div style={mainStyle}>
-        {/* Sidebar - Bibliothèque d'images */}
-        <div style={sidebarStyle}>
-          <h3 style={{ 
-            fontSize: typography.fontSize.base, 
-            fontWeight: typography.fontWeight.semibold, 
-            marginBottom: '1rem' 
-          }}>
-            Bibliothèque d'images
-          </h3>
-          <button style={{ ...buttonStyle('secondary'), width: '100%', marginBottom: '1rem' }}>
-            + Importer
-          </button>
-          <p style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary }}>
-            Glissez vos images vers le preview →
-          </p>
-        </div>
-
-        {/* Preview */}
-        <div style={previewStyle}>
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ marginBottom: '1rem' }}>Preview du portfolio généré</p>
-            <p style={{ fontSize: typography.fontSize.sm }}>
-              TODO: Intégrer EditablePreviewScreen
-            </p>
-            <p style={{ fontSize: typography.fontSize.sm, marginTop: '0.5rem' }}>
-              (Drag & drop d'images sur les zones)
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <EditablePreviewScreen
+      portfolioData={portfolioData}
+      initialHtml={generatedHTML}
+      onBack={onBack}
+      onExport={handleExportClick}
+    />
   );
 };
