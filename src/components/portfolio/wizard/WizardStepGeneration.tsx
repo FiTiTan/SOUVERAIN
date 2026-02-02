@@ -23,17 +23,125 @@ interface StepInfo {
   description: string;
 }
 
+// Icônes SVG animées
+const MaskIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+    <g className="mask-anim">
+      <path
+        d="M24 8C16 8 10 14 10 22V32C10 36 13 40 17 40H31C35 40 38 36 38 32V22C38 14 32 8 24 8Z"
+        fill="currentColor"
+        opacity="0.2"
+      />
+      <circle cx="18" cy="22" r="3" fill="currentColor">
+        <animate
+          attributeName="opacity"
+          values="0.3;1;0.3"
+          dur="2s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      <circle cx="30" cy="22" r="3" fill="currentColor">
+        <animate
+          attributeName="opacity"
+          values="0.3;1;0.3"
+          dur="2s"
+          begin="0.5s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      <path
+        d="M16 30C16 30 20 34 24 34C28 34 32 30 32 30"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
+    </g>
+  </svg>
+);
+
+const SparklingAIIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+    <g className="sparkle-anim">
+      {/* Centre (cerveau stylisé) */}
+      <circle cx="24" cy="24" r="8" fill="currentColor" opacity="0.3">
+        <animate
+          attributeName="r"
+          values="8;9;8"
+          dur="2s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      
+      {/* Sparkles qui apparaissent */}
+      <g>
+        <path d="M12 12L14 14L12 16L10 14Z" fill="currentColor">
+          <animate
+            attributeName="opacity"
+            values="0;1;0"
+            dur="1.5s"
+            repeatCount="indefinite"
+          />
+        </path>
+        <path d="M36 10L38 12L36 14L34 12Z" fill="currentColor">
+          <animate
+            attributeName="opacity"
+            values="0;1;0"
+            dur="1.5s"
+            begin="0.3s"
+            repeatCount="indefinite"
+          />
+        </path>
+        <path d="M38 34L40 36L38 38L36 36Z" fill="currentColor">
+          <animate
+            attributeName="opacity"
+            values="0;1;0"
+            dur="1.5s"
+            begin="0.6s"
+            repeatCount="indefinite"
+          />
+        </path>
+        <path d="M10 36L12 38L10 40L8 38Z" fill="currentColor">
+          <animate
+            attributeName="opacity"
+            values="0;1;0"
+            dur="1.5s"
+            begin="0.9s"
+            repeatCount="indefinite"
+          />
+        </path>
+      </g>
+      
+      {/* Ondes qui se propagent */}
+      <circle cx="24" cy="24" r="12" stroke="currentColor" strokeWidth="1" fill="none" opacity="0">
+        <animate
+          attributeName="r"
+          values="12;16;20"
+          dur="2s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          values="0.6;0.3;0"
+          dur="2s"
+          repeatCount="indefinite"
+        />
+      </circle>
+    </g>
+  </svg>
+);
+
 const GENERATION_STEPS: StepInfo[] = [
   {
     id: 'anonymize',
-    label: 'Anonymisation des données',
-    icon: ShieldIcon,
-    description: '🔒 Vos données sensibles sont protégées avant envoi à l\'IA',
+    label: 'Vos données passent en mode masqué',
+    icon: MaskIcon as any,
+    description: 'Protection de votre identité avant traitement IA',
   },
   {
     id: 'enrich',
-    label: 'Enrichissement par IA',
-    icon: SparklesIcon,
+    label: 'Votre portfolio est boosté par l\'IA',
+    icon: SparklingAIIcon as any,
     description: 'Génération de contenu professionnel et percutant',
   },
   {
@@ -86,14 +194,21 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
         setProgress(progressValue);
         
         // Déterminer l'étape actuelle selon la progression
-        if (progressValue < 25) {
-          setCurrentStepIndex(0); // Anonymisation
-        } else if (progressValue < 75) {
-          setCurrentStepIndex(1); // Enrichissement IA
-        } else if (progressValue < 95) {
-          setCurrentStepIndex(2); // Mise en page
-        } else {
-          setCurrentStepIndex(3); // Finalisation
+        // Phase 1 : Anonymisation (0-40%) - Plus visible
+        if (progressValue < 40) {
+          setCurrentStepIndex(0); // 🎭 Mode masqué
+        } 
+        // Phase 2 : IA Boost (40-80%) - Phase principale
+        else if (progressValue < 80) {
+          setCurrentStepIndex(1); // ✨ Boost IA
+        } 
+        // Phase 3 : Mise en page (80-95%)
+        else if (progressValue < 95) {
+          setCurrentStepIndex(2); // Layout
+        } 
+        // Phase 4 : Finalisation (95-100%)
+        else {
+          setCurrentStepIndex(3); // Finalization
         }
       });
 
@@ -256,9 +371,14 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
     <div style={containerStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={titleStyle}>ÉTAPE 5 : GÉNÉRATION</h1>
+        <h1 style={titleStyle}>
+          {!isComplete ? 'Génération en cours...' : '✨ Portfolio généré !'}
+        </h1>
         <p style={subtitleStyle}>
-          Création de votre portfolio avec anonymisation des données sensibles
+          {!isComplete 
+            ? 'La puissance de l\'IA, la sécurité des données en plus'
+            : 'Votre portfolio professionnel est prêt à être personnalisé'
+          }
         </p>
       </div>
 
