@@ -635,7 +635,7 @@ ipcMain.handle('portfolio-extract-from-pdf', async (event, { buffer, filename })
     console.log('[Main] extractFromPDF called with filename:', filename);
     console.log('[Main] ArrayBuffer size:', buffer?.byteLength || buffer?.length || 0);
     
-    const pdfParse = require('pdf-parse');
+    const pdf = require('pdf-parse');
     
     // Buffer peut être soit un ArrayBuffer soit un Buffer Node
     let dataBuffer;
@@ -651,7 +651,7 @@ ipcMain.handle('portfolio-extract-from-pdf', async (event, { buffer, filename })
     console.log(`[PDF] Parsing ${filename}, buffer size: ${dataBuffer.length} bytes`);
     
     // Parser le PDF (pdf-parse renvoie une promesse avec { text, numpages, ... })
-    const pdfData = await pdfParse(dataBuffer);
+    const pdfData = await pdf(dataBuffer);
     
     // Extraire le texte
     const text = pdfData.text || '';
