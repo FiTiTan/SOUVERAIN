@@ -3,7 +3,6 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../design-system';
 import type { ReputationAction } from '../../types/reputation';
@@ -15,13 +14,14 @@ interface ActionCardProps {
 
 export const ActionCard: React.FC<ActionCardProps> = ({ action, onComplete }) => {
   const { theme } = useTheme();
-  const navigate = useNavigate();
 
   const handleClick = () => {
     if (action.actionType === 'internal' && action.route) {
-      navigate(action.route);
+      // TODO: Implémenter navigation interne (via Shell state)
+      console.log('[ActionCard] Navigate to:', action.route);
     } else if (action.actionType === 'external' && action.link) {
-      window.electron?.shell.openExternal(action.link);
+      // @ts-ignore
+      window.electron?.shell?.openExternal(action.link);
     }
   };
 
