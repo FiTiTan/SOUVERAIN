@@ -187,14 +187,9 @@ function processRepeat<T>(
       // 2. Remplacer les variables
       for (const [key, value] of Object.entries(replacements)) {
         const varRegex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-        // SERVICE_ICON contient du SVG, ne pas échapper
-        const finalValue = key === 'SERVICE_ICON' ? value : escapeHtml(value);
-        
-        // Debug: Log SVG icons
-        if (key === 'SERVICE_ICON' && value) {
-          console.log('[SVG Debug] Icon value:', value.substring(0, 100));
-          console.log('[SVG Debug] Starts with <svg:', value.trim().startsWith('<svg'));
-        }
+        // SERVICE_ICON et SOCIAL_ICON contiennent du SVG, ne pas échapper
+        const isSvgField = key === 'SERVICE_ICON' || key === 'SOCIAL_ICON';
+        const finalValue = isSvgField ? value : escapeHtml(value);
         
         block = block.replace(varRegex, finalValue);
       }

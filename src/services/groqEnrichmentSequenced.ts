@@ -214,6 +214,7 @@ export async function enrichPortfolioDataSequenced(
     // Fusionner les résultats
     const merged: EnrichedPortfolioData = {
       ...heroAbout,
+      heroTitle: anonymizedData.name, // FORCER le nom original (fix bug "Jean Jean")
       services: servicesWithIcons,
       projects: enrichedProjects.map((p: any, i: number) => ({
         ...p,
