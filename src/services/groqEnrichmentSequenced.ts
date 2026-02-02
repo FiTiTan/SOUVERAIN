@@ -39,11 +39,12 @@ async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: num
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: systemPrompt + '\n\nIMPORTANT: Réponds UNIQUEMENT avec du JSON valide, aucun texte avant ou après.' },
         { role: 'user', content: userPrompt },
       ],
       temperature: 0.4,
       max_tokens: maxTokens,
+      response_format: { type: 'json_object' },
     }),
   });
 
@@ -59,7 +60,18 @@ async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: num
   // Nettoyer backticks markdown
   content = content.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim();
   
-  return JSON.parse(content);
+  // Extraire JSON si entouré de texte
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    content = jsonMatch[0];
+  }
+  
+  try {
+    return JSON.parse(content);
+  } catch (parseError) {
+    console.error('[GroqSequenced] Failed to parse JSON:', content.substring(0, 200));
+    throw new Error(`Invalid JSON response: ${parseError.message}`);
+  }
 }
 
 /**
@@ -90,20 +102,19 @@ async function enrichServices(data: RawPortfolioData): Promise<any[]> {
   }
 
   const systemPrompt = `Expert copywriting. Enrichis services.
-Retourne JSON array: [{"title","description","icon"}]
+Retourne objet JSON: {"services": [{"title","description","icon"}]}
 description: 20-35 mots spécifiques.
 icon: SVG <svg viewBox='0 0 48 48' stroke='currentColor'...> minimaliste.`;
 
   const userPrompt = `Services: ${data.services.join(', ')}
 Profil: ${data.profileType}
 
-Génère array JSON enrichi.`;
+Génère objet JSON avec clé "services" contenant array enrichi.`;
 
   console.log('[GroqSequenced] Step 2/3: Enriching services...');
   const result = await callGroq(systemPrompt, userPrompt, 1200);
   
-  // Normaliser si Groq retourne {services:[...]} au lieu de [...]
-  return Array.isArray(result) ? result : (result.services || []);
+  return result.services || [];
 }
 
 /**
@@ -115,7 +126,7 @@ async function enrichProjects(data: RawPortfolioData): Promise<any[]> {
   }
 
   const systemPrompt = `Expert copywriting. Enrichis projets.
-Retourne JSON array: [{"title","description","category"}]
+Retourne objet JSON: {"projects": [{"title","description","category"}]}
 description: 40-80 mots, contexte+résultats.`;
 
   const projectsSummary = data.projects.map(p => 
@@ -124,12 +135,12 @@ description: 40-80 mots, contexte+résultats.`;
 
   const userPrompt = `Projets: ${projectsSummary}
 
-Génère array JSON enrichi.`;
+Génère objet JSON avec clé "projects" contenant array enrichi.`;
 
   console.log('[GroqSequenced] Step 3/3: Enriching projects...');
   const result = await callGroq(systemPrompt, userPrompt, 1500);
   
-  return Array.isArray(result) ? result : (result.projects || []);
+  return result.projects || [];
 }
 
 /**
