@@ -3,6 +3,7 @@
 // 100% déterministe, PAS d'IA
 
 import type { EnrichedPortfolioData } from './groqEnrichmentService';
+import { getSocialIcon } from '../utils/socialIcons';
 
 export interface PortfolioFlags {
   showPracticalInfo: boolean;
@@ -138,6 +139,7 @@ function processRepeatZones(html: string, data: EnrichedPortfolioData): string {
     'SOCIAL_PLATFORM': link.platform,
     'SOCIAL_URL': link.url,
     'SOCIAL_LABEL': link.label || capitalizeFirst(link.platform),
+    'SOCIAL_ICON': getSocialIcon(link.platform),
   }));
 
   return result;
