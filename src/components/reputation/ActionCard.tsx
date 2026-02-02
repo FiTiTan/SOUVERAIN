@@ -6,6 +6,7 @@ import React from 'react';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../design-system';
 import type { ReputationAction } from '../../types/reputation';
+import { UserIcon, ShareIcon, FileTextIcon, MessageCircleIcon, CheckIcon } from '../icons/FeatherIcons';
 
 interface ActionCardProps {
   action: ReputationAction;
@@ -27,17 +28,20 @@ export const ActionCard: React.FC<ActionCardProps> = ({ action, onComplete }) =>
 
   const getPriorityColor = () => {
     switch (action.priority) {
-      case 'high': return '#EF4444';
-      case 'medium': return '#F59E0B';
-      case 'low': return '#6B7280';
+      case 'high': return theme.semantic.error;
+      case 'medium': return theme.semantic.warning;
+      case 'low': return theme.text.tertiary;
     }
   };
 
-  const categoryIcons: Record<ReputationAction['category'], string> = {
-    profile: '👤',
-    social: '🔗',
-    content: '📄',
-    engagement: '💬',
+  const getCategoryIcon = (category: ReputationAction['category']) => {
+    const iconProps = { size: 24, color: theme.text.secondary };
+    switch (category) {
+      case 'profile': return <UserIcon {...iconProps} />;
+      case 'social': return <ShareIcon {...iconProps} />;
+      case 'content': return <FileTextIcon {...iconProps} />;
+      case 'engagement': return <MessageCircleIcon {...iconProps} />;
+    }
   };
 
   return (
@@ -64,10 +68,10 @@ export const ActionCard: React.FC<ActionCardProps> = ({ action, onComplete }) =>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
         {/* Icon */}
         <div style={{
-          fontSize: '1.5rem',
           flexShrink: 0,
+          paddingTop: '0.125rem',
         }}>
-          {categoryIcons[action.category]}
+          {getCategoryIcon(action.category)}
         </div>
 
         {/* Content */}
@@ -119,10 +123,9 @@ export const ActionCard: React.FC<ActionCardProps> = ({ action, onComplete }) =>
         {/* Completed check */}
         {action.completed && (
           <div style={{
-            fontSize: '1.5rem',
-            color: '#10B981',
+            flexShrink: 0,
           }}>
-            ✓
+            <CheckIcon size={24} color={theme.semantic.success} strokeWidth={2.5} />
           </div>
         )}
       </div>

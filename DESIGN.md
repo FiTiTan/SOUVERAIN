@@ -1,292 +1,172 @@
-# DESIGN.md - CALM-UI Design System
+# SOUVERAIN - CALM UI Design System
 
-**Règle absolue :** Tous les nouveaux composants SOUVERAIN doivent respecter ce design system.
-
-## 🎨 CALM-UI Principles
-
-**CALM** = **C**onsistent, **A**ccessible, **L**ightweight, **M**inimalist
-
-### Core Values
-- ❌ **PAS d'émojis** dans l'UI (sauf cas exceptionnels type onboarding)
-- ✅ **Icônes SVG uniquement** (Feather Icons ou custom)
-- ✅ **Typographie cohérente** (design-system.ts)
-- ✅ **Couleurs sémantiques** (theme colors)
-- ✅ **Animations subtiles** (transitions.fast/normal/slow)
+> **Philosophy:** "Calm", "Clean", "Focus".  
+> The interface should feel like a breathing space. Avoid clutter, harsh lines, and aggressive colors. Prioritize white space, soft shadows, and organic roundness.
 
 ---
 
-## 🎯 Typography
+## 1. Core Variables
 
-**Import :**
-```typescript
-import { typography } from '../../design-system';
-```
+### Colors (Theme Palette)
+Used for Icons and Glows.
 
-**Tailles disponibles :**
-```typescript
-typography.fontSize = {
-  xs: '0.75rem',    // 12px - Labels, badges
-  sm: '0.875rem',   // 14px - Body secondaire
-  base: '1rem',     // 16px - Body principal
-  lg: '1.125rem',   // 18px - Sous-titres
-  xl: '1.25rem',    // 20px - Titres sections
-  '2xl': '1.5rem',  // 24px - Titres pages
-  '3xl': '1.875rem',// 30px - Hero titles
-}
+| Theme | Icon Background (Solid) | Shadow (Diffuse) | Glow (Soft Bloom) |
+| :--- | :--- | :--- | :--- |
+| **Blue** | `#3B82F6` | `rgba(59, 130, 246, 0.4)` | `rgba(59, 130, 246, 0.25)` |
+| **Teal** | `#14B8A6` | `rgba(20, 184, 166, 0.4)` | `rgba(20, 184, 166, 0.25)` |
+| **Purple** | `#8B5CF6` | `rgba(139, 92, 246, 0.4)` | `rgba(139, 92, 246, 0.25)` |
+| **Pink** | `#EC4899` | `rgba(236, 72, 153, 0.4)` | `rgba(236, 72, 153, 0.25)` |
 
-typography.fontWeight = {
-  normal: 400,
-  medium: 500,
-  semibold: 600,
-  bold: 700,
-}
-```
-
-**Usage :**
-```typescript
-fontSize: typography.fontSize.base,
-fontWeight: typography.fontWeight.semibold,
-```
+### Typography
+- **Font Family:** Sans-serif (via `design-system.ts`).
+- **Page Titles:** Thin/Light weight (`200` - `300`), Large size (`3.5rem`), Centered.
+- **Card Titles:** Semibold (`600`), Centered.
+- **Body Text:** Light/Regular, Grey (`text.secondary`), Centered.
 
 ---
 
-## 🎨 Colors (Theme-aware)
+## 2. Component: "Calm Card"
 
-**Import :**
-```typescript
-import { useTheme } from '../../ThemeContext';
-const { theme, mode } = useTheme();
-```
+The foundational element of the Dashboard and Choice screens.
 
-**Couleurs disponibles :**
-```typescript
-// Texte
-theme.text.primary    // Titres, texte principal
-theme.text.secondary  // Descriptions, labels
-theme.text.tertiary   // Placeholders, hints
+### Structure
+- **Dimensions:** Min `280px`, Max `320px`.
+- **Height:** Fixed Standard `360px` (or `min-height: 360px` with `flex: 1`).
+- **Border Radius:** `32px` (Critical for the organic feel).
+- **Padding:** `2.5rem` (Generous internal breathing room).
+- **Alignment:** Flex Column, Center/Center.
 
-// Backgrounds
-theme.bg.primary      // Fond principal
-theme.bg.secondary    // Cards, panels
-theme.bg.tertiary     // Inputs, disabled states
+### Page Layout (Mascot Space)
+- **Header:** Must reserve **1/5th of screen height (20vh)**.
+- **Purpose:** Dedicated space for the AI Mascot and tutorial text.
+- **Implementation:**
+  ```tsx
+  <div style={{ minHeight: '20vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    {/* Mascot & Title Area */}
+  </div>
+  ```
 
-// Borders
-theme.border.default  // Bordures normales
-theme.border.light    // Dividers, subtle borders
+### States
 
-// Accents
-theme.accent.primary  // Boutons CTA, highlights
-theme.accent.secondary
+#### Default State (Rest)
+- **Background (Light Mode):** `rgba(255, 255, 255, 0.7)` with `backdropFilter: blur(20px)`.
+- **Background (Dark Mode):** `rgba(30, 30, 35, 0.6)`.
+- **Border:**
+  - Light: `1px solid rgba(255,255,255,0.8)`
+  - Dark: `1px solid rgba(255,255,255,0.05)`
+- **Shadow:** Standard neutral shadow.
+  - `0 20px 40px -10px rgba(200, 210, 230, 0.4)` (Light)
 
-// Sémantique
-theme.semantic.success  // #10B981 (vert)
-theme.semantic.warning  // #F59E0B (orange)
-theme.semantic.error    // #EF4444 (rouge)
-theme.semantic.info     // #3B82F6 (bleu)
-```
+#### Hover State (Overlay)
+- **Movement:** `y: -8px`, `scale: 1.02`.
+- **Shadow (The "Glow"):**
+  - **No Border Color Change.**
+  - **Soft Bloom:** A large colored shadow matching the card's theme.
+  - CSS: `box-shadow: 0 20px 40px -10px rgba(neutral), 0 20px 60px -20px ${ThemeColor.shadow}`.
 
-**Exemple :**
-```typescript
-style={{
-  color: theme.text.primary,
-  backgroundColor: theme.bg.secondary,
-  border: `1px solid ${theme.border.default}`,
-}}
-```
+### Iconography
+- **Container:** `80px` x `80px` Circle.
+- **Background:** Solid Linear Gradient (135deg, ThemeColor, ThemeColor).
+- **Icon:** White (`#FFFFFF`), Standardized SVG (`32px`).
+- **Initial Shadow:** Subtle.
+- **Hover Interaction:** 
+  - Independent or Sync: Rotates `5deg`, Scales `1.1`.
+  - **No extra colored glow** on the icon itself (keep it clean).
 
 ---
 
-## 📐 Spacing & Radius
+## 3. Implementation Reference (React + Framer Motion)
 
-**Border Radius :**
-```typescript
-import { borderRadius } from '../../design-system';
-
-borderRadius.sm   // 0.25rem (4px)
-borderRadius.md   // 0.5rem (8px)
-borderRadius.lg   // 0.75rem (12px)
-borderRadius.xl   // 1rem (16px)
-borderRadius.full // 9999px (cercle)
-```
-
-**Spacing conventions :**
-```typescript
-// Padding cards
-padding: '1.5rem'  // Standard card padding
-
-// Gaps
-gap: '1rem'        // Entre éléments de même groupe
-gap: '0.5rem'      // Entre icône et texte
-
-// Margins sections
-marginBottom: '2rem'  // Entre sections
+```tsx
+<motion.div
+  style={{
+    borderRadius: '32px',
+    background: 'rgba(255, 255, 255, 0.7)',
+    backdropFilter: 'blur(20px)',
+    // ... base styles
+  }}
+  whileHover="hover"
+  initial="initial"
+  variants={{
+    hover: {
+      y: -8,
+      scale: 1.02,
+      boxShadow: `
+        0 20px 40px -10px rgba(200, 210, 230, 0.4),
+        0 20px 60px -20px ${THEME_COLOR_SHADOW}
+      `
+    }
+  }}
+>
+   {/* Icon */}
+   <motion.div
+     style={{ 
+       width: '80px', height: '80px', borderRadius: '50%',
+       background: THEME_COLOR_bg,
+       color: 'white' 
+     }}
+     variants={{
+       hover: { rotate: 5, scale: 1.1 }
+     }}
+   >
+     <Icon />
+   </motion.div>
+</motion.div>
 ```
 
 ---
 
-## ⚡ Transitions
+## 4. Utility Components
 
-**Import :**
-```typescript
-import { transitions } from '../../design-system';
-```
+### Action Button (e.g., Delete/Close)
+Used for secondary actions on cards (top-right absolute position).
 
-**Disponibles :**
-```typescript
-transitions.fast   // 150ms - Hover, petits éléments
-transitions.normal // 300ms - Modals, panels
-transitions.slow   // 500ms - Grandes animations
-```
+- **Position:** Absolute, Top: `1.5rem`, Right: `1.5rem`.
+- **Shape:** Circle (`32px` X `32px`).
+- **Initial State:** 
+  - Background: `transparent`.
+  - Opacity: `0.4` (Subtle).
+  - Color: Secondary Text.
+- **Hover State:**
+  - Opacity: `1.0`.
+  - Scale: `1.1`.
+  - **Contextual Background:** e.g., Red (`rgba(239, 68, 68, 0.1)`) for destructive actions.
 
-**Usage :**
-```typescript
-transition: transitions.fast,
-// ou
-transition: 'all 150ms ease',
-```
-
----
-
-## 🎭 Icons - SVG Uniquement
-
-**❌ INTERDIT :**
-```typescript
-// Émojis
-<span>📊</span>
-<div>🔥 Actions prioritaires</div>
-```
-
-**✅ CORRECT :**
-```typescript
-// SVG inline (Feather Icons style)
-const TrendingUpIcon = () => (
-  <svg 
-    width="20" 
-    height="20" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2"
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-    <polyline points="17 6 23 6 23 12" />
-  </svg>
-);
-```
-
-**Icônes courantes disponibles :**
-
-Consulter `/src/components/Sidebar.tsx` pour les icônes existantes :
-- `FileText` - Documents, CV
-- `TrendingUp` - Stats, croissance
-- `Briefcase` - Portfolio, projets
-- `Target` - Objectifs, jobs
-- `Linkedin` - LinkedIn
-- `Lock` - Sécurité, vault
-- `ShoppingBag` - Boutique
-- `Settings` - Paramètres
-- `ChevronLeft` - Navigation
-
-**Créer de nouvelles icônes :**
-1. Aller sur [Feather Icons](https://feathericons.com)
-2. Copier le SVG
-3. Wrapper dans un composant React
-4. Utiliser `currentColor` pour hériter la couleur
-
----
-
-## 📦 Component Structure Template
-
-```typescript
-/**
- * [NOM] - [Description courte]
- */
-
-import React from 'react';
-import { useTheme } from '../../ThemeContext';
-import { typography, borderRadius, transitions } from '../../design-system';
-
-interface [NOM]Props {
-  // Props typées
-}
-
-export const [NOM]: React.FC<[NOM]Props> = ({ ...props }) => {
-  const { theme } = useTheme();
-
-  // Styles memoizés si composant complexe
-  const containerStyle: React.CSSProperties = {
-    padding: '1.5rem',
-    backgroundColor: theme.bg.secondary,
-    border: `1px solid ${theme.border.default}`,
-    borderRadius: borderRadius.lg,
-  };
-
-  return (
-    <div style={containerStyle}>
-      {/* Contenu */}
-    </div>
-  );
-};
+**Reference Code:**
+```tsx
+<motion.button
+  initial={{ opacity: 0.4 }}
+  whileHover={{ opacity: 1, scale: 1.1, backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
+  whileTap={{ scale: 0.9 }}
+  style={{
+    position: 'absolute',
+    top: '1.5rem', right: '1.5rem',
+    width: '32px', height: '32px',
+    borderRadius: '50%',
+    background: 'transparent',
+    color: theme.text.secondary
+  }}
+>
+  <Icon />
+</motion.button>
 ```
 
 ---
 
-## 🚫 Anti-Patterns (À ÉVITER)
+## 5. Performance & Optimization (Critical)
 
-### ❌ Émojis hardcodés
-```typescript
-<h2>🔥 Actions prioritaires</h2>
+Glassmorphism (`backdrop-filter`) is computationally expensive. To prevent scroll lag and visual glitches (black borders), **Hardware Acceleration** must be forced on all heavy glass elements.
+
+### Rule: GPU Layer Promotion
+Any component using `backdrop-filter` or large `filter: blur()` **MUST** include:
+
+```css
+transform: translate3d(0, 0, 0);
+will-change: transform; /* Optional, use sparingly on animating elements */
 ```
 
-### ❌ Couleurs hardcodées
-```typescript
-backgroundColor: '#3A3A3A'  // Utiliser theme.bg.secondary
-color: '#FFFFFF'            // Utiliser theme.text.primary
-```
-
-### ❌ Font-sizes en px
-```typescript
-fontSize: '16px'  // Utiliser typography.fontSize.base
-```
-
-### ❌ Transitions inline sans variable
-```typescript
-transition: 'all 0.3s ease'  // Utiliser transitions.normal
-```
-
----
-
-## ✅ Checklist Nouveau Composant
-
-Avant de commit un nouveau composant :
-
-- [ ] Import `useTheme`, `typography`, `borderRadius`, `transitions`
-- [ ] Utilise `theme.*` pour toutes les couleurs
-- [ ] Utilise `typography.fontSize.*` pour les tailles
-- [ ] Utilise `borderRadius.*` pour les arrondis
-- [ ] Utilise `transitions.*` pour les animations
-- [ ] **Aucun émoji** dans le JSX (sauf onboarding)
-- [ ] **Icônes SVG uniquement** (pas d'émojis, pas d'images)
-- [ ] Types TypeScript complets
-- [ ] Compatible dark/light mode (via `theme`)
-
----
-
-## 📚 Références
-
-- **Design System :** `/src/design-system.ts`
-- **Theme Context :** `/src/ThemeContext.tsx`
-- **Icônes existantes :** `/src/components/Sidebar.tsx`
-- **Exemples CALM-UI :**
-  - `/src/components/reputation/` (module récent conforme)
-  - `/src/components/portfolio/wizard/` (wizard v2)
-
----
-
-## 🎯 Objectif
-
-**Chaque nouveau composant doit être indiscernable des composants existants.**  
-Cohérence > Créativité.  
-CALM-UI = Expérience utilisateur apaisante et professionnelle.
+### Checklist
+- [x] **Shell Ambient Orbs:** REPLACED `filter: blur()` with `radial-gradient` (Much faster).
+- [x] **CalmCard:** Hover effects + Blur → Needs `translate3d`.
+- [x] **Modals/Overlays:** Fixed overlays → Needs `translate3d`.
+- [x] **Sticky Headers:** `backdrop-filter` → Needs `translate3d`.

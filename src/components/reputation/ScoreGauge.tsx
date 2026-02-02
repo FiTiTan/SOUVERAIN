@@ -21,9 +21,9 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score, size = 180, label
 
   // Couleur selon le score
   const getColor = (s: number) => {
-    if (s >= 80) return '#10B981'; // Vert
-    if (s >= 60) return '#F59E0B'; // Orange
-    return '#EF4444'; // Rouge
+    if (s >= 80) return theme.semantic.success;
+    if (s >= 60) return theme.semantic.warning;
+    return theme.semantic.error;
   };
 
   const color = getColor(score);

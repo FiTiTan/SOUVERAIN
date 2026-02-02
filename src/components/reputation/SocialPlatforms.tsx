@@ -6,6 +6,8 @@ import React from 'react';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius } from '../../design-system';
 import type { SocialPlatformStatus } from '../../types/reputation';
+import { GlobeIcon } from '../icons/FeatherIcons';
+import { BriefcaseIcon, GithubIcon, TwitterIcon, InstagramIcon, UsersIcon } from '../icons/MoreFeatherIcons';
 
 interface SocialPlatformsProps {
   platforms: SocialPlatformStatus[];
@@ -14,20 +16,15 @@ interface SocialPlatformsProps {
 export const SocialPlatforms: React.FC<SocialPlatformsProps> = ({ platforms }) => {
   const { theme } = useTheme();
 
-  const platformIcons: Record<SocialPlatformStatus['platform'], string> = {
-    linkedin: '💼',
-    github: '🐙',
-    twitter: '🐦',
-    instagram: '📷',
-    facebook: '👥',
-  };
-
-  const platformColors: Record<SocialPlatformStatus['platform'], string> = {
-    linkedin: '#0A66C2',
-    github: '#181717',
-    twitter: '#1DA1F2',
-    instagram: '#E4405F',
-    facebook: '#1877F2',
+  const getPlatformIcon = (platform: SocialPlatformStatus['platform']) => {
+    const iconProps = { size: 24, color: theme.text.primary };
+    switch (platform) {
+      case 'linkedin': return <BriefcaseIcon {...iconProps} />;
+      case 'github': return <GithubIcon {...iconProps} />;
+      case 'twitter': return <TwitterIcon {...iconProps} />;
+      case 'instagram': return <InstagramIcon {...iconProps} />;
+      case 'facebook': return <UsersIcon {...iconProps} />;
+    }
   };
 
   return (
@@ -37,8 +34,12 @@ export const SocialPlatforms: React.FC<SocialPlatformsProps> = ({ platforms }) =
         fontWeight: typography.fontWeight.semibold,
         color: theme.text.primary,
         marginBottom: '1rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
       }}>
-        🌐 Réseaux sociaux
+        <GlobeIcon size={20} color={theme.accent.primary} strokeWidth={2} />
+        Réseaux sociaux
       </h2>
 
       <div style={{
@@ -62,10 +63,8 @@ export const SocialPlatforms: React.FC<SocialPlatformsProps> = ({ platforms }) =
               gap: '0.75rem',
               marginBottom: '0.75rem',
             }}>
-              <div style={{
-                fontSize: '1.75rem',
-              }}>
-                {platformIcons[platform.platform]}
+              <div>
+                {getPlatformIcon(platform.platform)}
               </div>
               <div style={{ flex: 1 }}>
                 <h3 style={{
@@ -81,7 +80,7 @@ export const SocialPlatforms: React.FC<SocialPlatformsProps> = ({ platforms }) =
                 width: '12px',
                 height: '12px',
                 borderRadius: '50%',
-                backgroundColor: platform.connected ? '#10B981' : '#EF4444',
+                backgroundColor: platform.connected ? theme.semantic.success : theme.semantic.error,
               }} />
             </div>
 
@@ -103,9 +102,9 @@ export const SocialPlatforms: React.FC<SocialPlatformsProps> = ({ platforms }) =
                 {platform.issues.length > 0 && (
                   <div style={{
                     fontSize: typography.fontSize.xs,
-                    color: '#F59E0B',
+                    color: theme.semantic.warning,
                   }}>
-                    ⚠️ {platform.issues.join(', ')}
+                    {platform.issues.join(', ')}
                   </div>
                 )}
               </>
@@ -118,8 +117,8 @@ export const SocialPlatforms: React.FC<SocialPlatformsProps> = ({ platforms }) =
                 style={{
                   width: '100%',
                   padding: '0.5rem',
-                  backgroundColor: platformColors[platform.platform],
-                  color: '#FFFFFF',
+                  backgroundColor: theme.accent.primary,
+                  color: theme.text.inverse,
                   border: 'none',
                   borderRadius: borderRadius.md,
                   fontSize: typography.fontSize.sm,

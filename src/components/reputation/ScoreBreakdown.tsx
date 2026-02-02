@@ -6,6 +6,8 @@ import React from 'react';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius } from '../../design-system';
 import type { ReputationScore } from '../../types/reputation';
+import { ClipboardIcon, ShareIcon, RefreshCwIcon, MessageCircleIcon } from '../icons/FeatherIcons';
+import { ClipboardIcon as ClipboardIcon2, RefreshCwIcon as RefreshIcon2 } from '../icons/MoreFeatherIcons';
 
 interface ScoreBreakdownProps {
   breakdown: ReputationScore['breakdown'];
@@ -14,11 +16,17 @@ interface ScoreBreakdownProps {
 export const ScoreBreakdown: React.FC<ScoreBreakdownProps> = ({ breakdown }) => {
   const { theme } = useTheme();
 
+  const getScoreColor = (value: number) => {
+    if (value >= 80) return theme.semantic.success;
+    if (value >= 60) return theme.semantic.warning;
+    return theme.semantic.error;
+  };
+
   const items = [
-    { key: 'profileCompleteness', label: 'Complétude du profil', icon: '📋', value: breakdown.profileCompleteness },
-    { key: 'socialPresence', label: 'Présence sociale', icon: '🔗', value: breakdown.socialPresence },
-    { key: 'contentFreshness', label: 'Fraîcheur du contenu', icon: '🔄', value: breakdown.contentFreshness },
-    { key: 'engagement', label: 'Engagement', icon: '💬', value: breakdown.engagement },
+    { key: 'profileCompleteness', label: 'Complétude du profil', icon: ClipboardIcon2, value: breakdown.profileCompleteness },
+    { key: 'socialPresence', label: 'Présence sociale', icon: ShareIcon, value: breakdown.socialPresence },
+    { key: 'contentFreshness', label: 'Fraîcheur du contenu', icon: RefreshIcon2, value: breakdown.contentFreshness },
+    { key: 'engagement', label: 'Engagement', icon: MessageCircleIcon, value: breakdown.engagement },
   ];
 
   return (
@@ -42,48 +50,53 @@ export const ScoreBreakdown: React.FC<ScoreBreakdownProps> = ({ breakdown }) => 
         flexDirection: 'column',
         gap: '1.25rem',
       }}>
-        {items.map(item => (
-          <div key={item.key}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '0.5rem',
-            }}>
-              <span style={{ fontSize: '1.25rem' }}>{item.icon}</span>
-              <span style={{
-                flex: 1,
-                fontSize: typography.fontSize.sm,
-                fontWeight: typography.fontWeight.medium,
-                color: theme.text.primary,
-              }}>
-                {item.label}
-              </span>
-              <span style={{
-                fontSize: typography.fontSize.base,
-                fontWeight: typography.fontWeight.semibold,
-                color: item.value >= 80 ? '#10B981' : item.value >= 60 ? '#F59E0B' : '#EF4444',
-              }}>
-                {item.value}
-              </span>
-            </div>
-
-            {/* Progress bar */}
-            <div style={{
-              height: '6px',
-              backgroundColor: theme.bg.tertiary,
-              borderRadius: '3px',
-              overflow: 'hidden',
-            }}>
+        {items.map(item => {
+          const IconComponent = item.icon;
+          const scoreColor = getScoreColor(item.value);
+          
+          return (
+            <div key={item.key}>
               <div style={{
-                height: '100%',
-                width: `${item.value}%`,
-                backgroundColor: item.value >= 80 ? '#10B981' : item.value >= 60 ? '#F59E0B' : '#EF4444',
-                transition: 'width 0.5s ease-in-out',
-              }} />
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                marginBottom: '0.5rem',
+              }}>
+                <IconComponent size={18} color={theme.text.secondary} />
+                <span style={{
+                  flex: 1,
+                  fontSize: typography.fontSize.sm,
+                  fontWeight: typography.fontWeight.medium,
+                  color: theme.text.primary,
+                }}>
+                  {item.label}
+                </span>
+                <span style={{
+                  fontSize: typography.fontSize.base,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: scoreColor,
+                }}>
+                  {item.value}
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div style={{
+                height: '6px',
+                backgroundColor: theme.bg.tertiary,
+                borderRadius: '3px',
+                overflow: 'hidden',
+              }}>
+                <div style={{
+                  height: '100%',
+                  width: `${item.value}%`,
+                  backgroundColor: scoreColor,
+                  transition: 'width 0.5s ease-in-out',
+                }} />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

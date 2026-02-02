@@ -11,6 +11,7 @@ import { ScoreGauge } from './ScoreGauge';
 import { ActionCard } from './ActionCard';
 import { ScoreBreakdown } from './ScoreBreakdown';
 import { SocialPlatforms } from './SocialPlatforms';
+import { ZapIcon, LightbulbIcon, TargetIcon, CheckIcon } from '../icons/FeatherIcons';
 
 export const ReputationDashboard: React.FC = () => {
   const { theme } = useTheme();
@@ -119,8 +120,12 @@ export const ReputationDashboard: React.FC = () => {
             fontWeight: typography.fontWeight.semibold,
             color: theme.text.primary,
             marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
           }}>
-            🔥 Actions prioritaires
+            <ZapIcon size={20} color={theme.semantic.error} strokeWidth={2} />
+            Actions prioritaires
           </h2>
           <div style={{
             display: 'grid',
@@ -142,8 +147,12 @@ export const ReputationDashboard: React.FC = () => {
             fontWeight: typography.fontWeight.semibold,
             color: theme.text.primary,
             marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
           }}>
-            💡 Recommandations
+            <LightbulbIcon size={20} color={theme.accent.primary} strokeWidth={2} />
+            Recommandations
           </h2>
           <div style={{
             display: 'grid',
@@ -172,8 +181,12 @@ export const ReputationDashboard: React.FC = () => {
           fontWeight: typography.fontWeight.semibold,
           color: theme.text.primary,
           marginBottom: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
         }}>
-          🎯 Objectif : {data.goals.targetScore} points
+          <TargetIcon size={20} color={theme.accent.primary} strokeWidth={2} />
+          Objectif : {data.goals.targetScore} points
         </h3>
         
         <div style={{
@@ -208,9 +221,10 @@ export const ReputationDashboard: React.FC = () => {
               {milestone.achieved && (
                 <div style={{
                   marginTop: '0.5rem',
-                  fontSize: '1.5rem',
+                  display: 'flex',
+                  justifyContent: 'center',
                 }}>
-                  ✓
+                  <CheckIcon size={20} color={theme.accent.primary} strokeWidth={2.5} />
                 </div>
               )}
             </div>
