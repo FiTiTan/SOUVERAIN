@@ -1,12 +1,54 @@
 /**
  * SOUVERAIN - Wizard Step 5: Génération
- * Écran de génération avec progress
+ * Écran de génération avec progress et mise en avant de l'anonymisation
  */
 
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { WizardStepProps } from '../types';
+import {
+  LoaderIcon,
+  CheckCircleIcon,
+  CircleIcon,
+  ShieldIcon,
+  SparklesIcon,
+  LayoutIcon,
+} from '../../icons/FeatherIcons';
+
+interface StepInfo {
+  id: string;
+  label: string;
+  icon: typeof ShieldIcon;
+  description: string;
+}
+
+const GENERATION_STEPS: StepInfo[] = [
+  {
+    id: 'anonymize',
+    label: 'Anonymisation des données',
+    icon: ShieldIcon,
+    description: '🔒 Vos données sensibles sont protégées avant envoi à l\'IA',
+  },
+  {
+    id: 'enrich',
+    label: 'Enrichissement par IA',
+    icon: SparklesIcon,
+    description: 'Génération de contenu professionnel et percutant',
+  },
+  {
+    id: 'layout',
+    label: 'Mise en page',
+    icon: LayoutIcon,
+    description: 'Application du template et injection des données',
+  },
+  {
+    id: 'finalize',
+    label: 'Finalisation',
+    icon: CheckCircleIcon,
+    description: 'Portfolio prêt pour la personnalisation',
+  },
+];
 
 export const WizardStepGeneration: React.FC<WizardStepProps> = ({
   formData,
@@ -17,6 +59,7 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
   const { theme } = useTheme();
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('Initialisation...');
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
@@ -32,6 +75,17 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
       const result = await generatePortfolioFromWizardV2(formData, (step, progressValue) => {
         setCurrentStep(step);
         setProgress(progressValue);
+        
+        // Déterminer l'étape actuelle selon la progression
+        if (progressValue < 25) {
+          setCurrentStepIndex(0); // Anonymisation
+        } else if (progressValue < 75) {
+          setCurrentStepIndex(1); // Enrichissement IA
+        } else if (progressValue < 95) {
+          setCurrentStepIndex(2); // Mise en page
+        } else {
+          setCurrentStepIndex(3); // Finalisation
+        }
       });
 
       if (!result.success) {
@@ -44,6 +98,7 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
         _generatedHTML: result.html 
       });
 
+      setCurrentStepIndex(3);
       setIsComplete(true);
     } catch (error: any) {
       console.error('[Generation] Error:', error);
@@ -52,14 +107,12 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
     }
   };
 
-  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
   // Styles
   const containerStyle: React.CSSProperties = {
-    padding: '2rem',
-    maxWidth: '600px',
+    padding: '3rem 2rem',
+    maxWidth: '700px',
     margin: '0 auto',
-    minHeight: '60vh',
+    minHeight: '70vh',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -71,26 +124,33 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
   };
 
   const titleStyle: React.CSSProperties = {
-    fontSize: typography.fontSize['2xl'],
+    fontSize: typography.fontSize['3xl'],
     fontWeight: typography.fontWeight.bold,
     color: theme.text.primary,
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
   };
 
-  const spinnerStyle: React.CSSProperties = {
-    fontSize: '4rem',
-    textAlign: 'center',
+  const subtitleStyle: React.CSSProperties = {
+    fontSize: typography.fontSize.base,
+    color: theme.text.secondary,
+    lineHeight: 1.6,
+  };
+
+  const spinnerContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: '2rem',
-    animation: 'spin 2s linear infinite',
+    minHeight: '80px',
   };
 
   const progressBarContainerStyle: React.CSSProperties = {
     width: '100%',
-    height: '12px',
+    height: '8px',
     backgroundColor: theme.bg.tertiary,
     borderRadius: borderRadius.full,
     overflow: 'hidden',
-    marginBottom: '1.5rem',
+    marginBottom: '0.5rem',
   };
 
   const progressBarStyle: React.CSSProperties = {
@@ -98,39 +158,89 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
     backgroundColor: theme.accent.primary,
     borderRadius: borderRadius.full,
     width: `${progress}%`,
-    transition: 'width 0.3s ease',
+    transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
   };
 
   const progressTextStyle: React.CSSProperties = {
-    textAlign: 'center',
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.medium,
-    color: theme.text.primary,
-    marginBottom: '1rem',
+    textAlign: 'right',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    color: theme.accent.primary,
+    marginBottom: '2rem',
   };
 
   const statusTextStyle: React.CSSProperties = {
     textAlign: 'center',
     fontSize: typography.fontSize.base,
     color: theme.text.secondary,
-    marginBottom: '2rem',
+    marginBottom: '3rem',
   };
 
   const stepsListStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.75rem',
-    marginTop: '2rem',
+    gap: '1rem',
+    marginBottom: '2rem',
   };
 
-  const stepItemStyle = (done: boolean, active: boolean): React.CSSProperties => ({
+  const getStepStatus = (index: number): 'done' | 'active' | 'pending' => {
+    if (index < currentStepIndex) return 'done';
+    if (index === currentStepIndex) return 'active';
+    return 'pending';
+  };
+
+  const stepItemStyle = (status: 'done' | 'active' | 'pending'): React.CSSProperties => ({
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem',
+    padding: '1.25rem 1.5rem',
+    backgroundColor: status === 'active' 
+      ? theme.accent.muted 
+      : status === 'done' 
+        ? theme.semantic.successBg 
+        : 'transparent',
+    border: `1px solid ${
+      status === 'active' 
+        ? theme.accent.primary 
+        : status === 'done' 
+          ? theme.semantic.success 
+          : theme.border.default
+    }`,
+    borderRadius: borderRadius.lg,
+    transition: transitions.normal,
+  });
+
+  const iconWrapperStyle = (status: 'done' | 'active' | 'pending'): React.CSSProperties => ({
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
-    padding: '0.75rem 1rem',
-    backgroundColor: active ? theme.accent.muted : 'transparent',
-    borderRadius: borderRadius.md,
-    color: done ? theme.semantic.success : active ? theme.text.primary : theme.text.tertiary,
+    justifyContent: 'center',
+    flexShrink: 0,
+    backgroundColor: status === 'done' 
+      ? theme.semantic.success 
+      : status === 'active' 
+        ? theme.accent.primary 
+        : theme.bg.tertiary,
+    color: status === 'done' || status === 'active' ? '#FFFFFF' : theme.text.tertiary,
+  });
+
+  const stepContentStyle: React.CSSProperties = {
+    flex: 1,
+  };
+
+  const stepLabelStyle = (status: 'done' | 'active' | 'pending'): React.CSSProperties => ({
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: status === 'pending' ? theme.text.tertiary : theme.text.primary,
+    marginBottom: '0.25rem',
+  });
+
+  const stepDescStyle = (status: 'done' | 'active' | 'pending'): React.CSSProperties => ({
+    fontSize: typography.fontSize.sm,
+    color: status === 'pending' ? theme.text.tertiary : theme.text.secondary,
+    lineHeight: 1.5,
   });
 
   return (
@@ -138,27 +248,37 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
       {/* Header */}
       <div style={headerStyle}>
         <h1 style={titleStyle}>ÉTAPE 5 : GÉNÉRATION</h1>
+        <p style={subtitleStyle}>
+          Création de votre portfolio avec anonymisation des données sensibles
+        </p>
       </div>
 
-      {/* Spinner */}
-      {!isComplete && (
-        <div style={spinnerStyle}>
-          ⏳
-        </div>
-      )}
-
-      {isComplete && (
-        <div style={{ ...spinnerStyle, animation: 'none' }}>
-          ✅
-        </div>
-      )}
+      {/* Spinner ou Success icon */}
+      <div style={spinnerContainerStyle}>
+        {!isComplete ? (
+          <div style={{ 
+            animation: 'spin 1.5s linear infinite',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <LoaderIcon size={64} color={theme.accent.primary} strokeWidth={2} />
+          </div>
+        ) : (
+          <div style={{ 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <CheckCircleIcon size={64} color={theme.semantic.success} strokeWidth={2.5} />
+          </div>
+        )}
+      </div>
 
       {/* Progress bar */}
       <div style={progressBarContainerStyle}>
         <div style={progressBarStyle} />
       </div>
-
-      {/* Progress text */}
       <div style={progressTextStyle}>
         {progress}%
       </div>
@@ -170,23 +290,57 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
 
       {/* Steps checklist */}
       <div style={stepsListStyle}>
-        <div style={stepItemStyle(progress >= 25, progress >= 0 && progress < 50)}>
-          <span>{progress >= 25 ? '✅' : '○'}</span>
-          <span>Données analysées</span>
-        </div>
-        <div style={stepItemStyle(progress >= 50, progress >= 25 && progress < 75)}>
-          <span>{progress >= 50 ? '✅' : '○'}</span>
-          <span>Contenu enrichi</span>
-        </div>
-        <div style={stepItemStyle(progress >= 75, progress >= 50 && progress < 100)}>
-          <span>{progress >= 75 ? '✅' : '○'}</span>
-          <span>Mise en page en cours</span>
-        </div>
-        <div style={stepItemStyle(progress >= 100, false)}>
-          <span>{progress >= 100 ? '✅' : '○'}</span>
-          <span>Finalisation</span>
-        </div>
+        {GENERATION_STEPS.map((step, index) => {
+          const status = getStepStatus(index);
+          const StepIcon = step.icon;
+          
+          return (
+            <div key={step.id} style={stepItemStyle(status)}>
+              <div style={iconWrapperStyle(status)}>
+                {status === 'done' ? (
+                  <CheckCircleIcon size={20} color="#FFFFFF" strokeWidth={2.5} />
+                ) : status === 'active' ? (
+                  <StepIcon size={20} color="#FFFFFF" strokeWidth={2} />
+                ) : (
+                  <CircleIcon size={20} color={theme.text.tertiary} strokeWidth={2} />
+                )}
+              </div>
+              <div style={stepContentStyle}>
+                <div style={stepLabelStyle(status)}>
+                  {step.label}
+                </div>
+                <div style={stepDescStyle(status)}>
+                  {step.description}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
+
+      {/* Security Badge */}
+      {!isComplete && currentStepIndex === 0 && (
+        <div style={{
+          padding: '1rem 1.5rem',
+          backgroundColor: theme.semantic.infoBg,
+          border: `1px solid ${theme.semantic.info}`,
+          borderRadius: borderRadius.md,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          marginBottom: '2rem',
+        }}>
+          <ShieldIcon size={24} color={theme.semantic.info} strokeWidth={2} />
+          <div style={{
+            fontSize: typography.fontSize.sm,
+            color: theme.text.secondary,
+            lineHeight: 1.5,
+          }}>
+            <strong>Sécurité :</strong> Vos données personnelles (emails, téléphones, noms) sont 
+            automatiquement anonymisées avant l'enrichissement par IA, puis restaurées après.
+          </div>
+        </div>
+      )}
 
       {/* Bouton Continuer */}
       {isComplete && (
@@ -194,15 +348,23 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
           <button
             onClick={onNext}
             style={{
-              padding: '0.75rem 2rem',
+              padding: '1rem 2.5rem',
               fontSize: typography.fontSize.base,
               fontWeight: typography.fontWeight.semibold,
-              backgroundColor: '#3A3A3A',
+              backgroundColor: theme.accent.primary,
               color: '#FFFFFF',
               border: 'none',
               borderRadius: borderRadius.lg,
               cursor: 'pointer',
               transition: transitions.fast,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             Continuer vers la personnalisation →
