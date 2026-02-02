@@ -39,77 +39,46 @@ export async function enhanceText(text: string, options: EnhanceOptions): Promis
   let userPrompt = '';
 
   if (options.type === 'tagline') {
-    systemPrompt = `Tu es un expert en personal branding et copywriting. Tu transformes les taglines génériques en accroches percutantes et mémorables.
+    systemPrompt = `Expert personal branding. Transforme taglines génériques en accroches percutantes.
 
-INTERDICTIONS ABSOLUES:
-❌ "Passionné par", "Spécialisé dans", "Expert en"
-❌ "Dynamique", "Motivé", "Créatif"
-❌ "Solutions innovantes", "Expériences uniques"
-❌ Jargon vague ("moderne", "performant", "de qualité")
+INTERDIT: "Passionné", "Spécialisé", "Expert", "Dynamique", "Solutions innovantes", jargon vague.
 
 RÈGLES:
-✅ Commence par un VERBE D'ACTION fort (je conçois, je développe, je transforme, je crée)
-✅ Sois ULTRA-SPÉCIFIQUE (technologies, secteurs, méthodes)
-✅ Montre le RÉSULTAT concret, pas le processus
-✅ Maximum 15-20 mots
-✅ Ton professionnel mais direct
+- Verbe action fort en début
+- Ultra-spécifique (technos, secteurs)
+- Résultat concret
+- Max 15-20 mots
 
-EXEMPLES DE TRANSFORMATION:
+EXEMPLES:
+❌ "Passionné développement web"
+✅ "Je développe des apps React 100k+ users/jour"
 
-❌ "Passionné par le développement web moderne et performant"
-✅ "Je développe des applications React qui servent 100k+ utilisateurs/jour"
+❌ "Designer UX/UI créatif"
+✅ "Interfaces SaaS qui +40% rétention"`;
 
-❌ "Designer créatif spécialisé en UX/UI"
-✅ "Je conçois des interfaces SaaS B2B qui augmentent la rétention de 40%"
-
-❌ "Consultant en stratégie digitale innovante"
-✅ "J'aide les PME industrielles à générer des leads qualifiés via LinkedIn"`;
-
-    userPrompt = `Transforme ce tagline générique en accroche PERCUTANTE et CONCRÈTE:
-
+    userPrompt = `Transforme en accroche percutante:
 "${text}"
-
-${options.context ? `Contexte: ${options.context.name || ''} - ${options.context.activity || ''} (${options.context.profileType || ''})` : ''}
-
-Applique les règles. Retourne UNIQUEMENT le tagline amélioré (pas d'explication).`;
+${options.context ? `(${options.context.profileType})` : ''}
+Retourne UNIQUEMENT le tagline.`;
   } else {
-    systemPrompt = `Tu es un expert en copywriting B2B/B2C. Tu transformes les value propositions génériques en messages qui CONVERTISSENT.
+    systemPrompt = `Expert copywriting. Transforme value props génériques en messages qui convertissent.
 
-INTERDICTIONS ABSOLUES:
-❌ "Je transforme vos idées en applications web"
-❌ "Solutions personnalisées et sur-mesure"
-❌ "Accompagnement de A à Z"
-❌ "Écoute de vos besoins"
-❌ Promesses vagues sans preuve
+INTERDIT: "Solutions sur-mesure", "Accompagnement A-Z", "Écoute besoins", promesses vagues.
 
-RÈGLES:
-✅ Commence par le PROBLÈME du client (frustration, manque, coût)
-✅ Enchaîne sur la SOLUTION concrète (méthode, outil, résultat)
-✅ Quantifie quand possible (délais, économies, gains)
-✅ Maximum 30-40 mots
-✅ Ton direct, pas commercial
+STRUCTURE: [Problème client] → [Solution] → [Résultat mesurable]
+Max 30-40 mots. Ton direct. Quantifie si possible.
 
-STRUCTURE RECOMMANDÉE:
-[Problème client] → [Solution] → [Résultat mesurable]
+EXEMPLES:
+❌ "Sites web adaptés vos besoins"
+✅ "Site WordPress rame ? Migration Webflow en 2 sem, -70% temps chargement"
 
-EXEMPLES DE TRANSFORMATION:
+❌ "Accompagnement stratégie digitale"
+✅ "Posts LinkedIn 0 engagement ? Formation contenu viral 30j (50+ profils testés)"`;
 
-❌ "Je crée des sites web modernes et performants adaptés à vos besoins"
-✅ "Votre site WordPress rame et perd des clients ? Je le migre vers Webflow en 2 semaines, -70% de temps de chargement garanti"
-
-❌ "Accompagnement personnalisé pour développer votre stratégie digitale"
-✅ "Vos posts LinkedIn ont 0 engagement ? Je vous forme à créer du contenu viral en 30 jours (méthode testée sur 50+ profils)"
-
-❌ "Designer UX/UI pour des expériences utilisateur exceptionnelles"
-✅ "Vos utilisateurs abandonnent au checkout ? J'optimise votre tunnel pour +25% de conversion en 3 sprints"`;
-
-    userPrompt = `Transforme cette value proposition générique en message qui CONVERTIT:
-
+    userPrompt = `Transforme en message qui convertit:
 "${text}"
-
-${options.context ? `Contexte: ${options.context.name || ''} - ${options.context.activity || ''} (${options.context.profileType || ''})` : ''}
-
-Applique la structure [Problème] → [Solution] → [Résultat]. Retourne UNIQUEMENT la value prop améliorée (pas d'explication).`;
+${options.context ? `(${options.context.profileType})` : ''}
+Structure: Problème→Solution→Résultat. Retourne UNIQUEMENT value prop.`;
   }
 
   try {

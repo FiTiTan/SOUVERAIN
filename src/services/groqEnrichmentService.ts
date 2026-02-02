@@ -22,64 +22,34 @@ async function getGroqApiKey(): Promise<string> {
   }
 }
 
-const SYSTEM_PROMPT = `Tu es un expert en copywriting et personal branding. Ta mission est d'enrichir les données d'un portfolio professionnel pour les rendre plus impactantes et engageantes.
+const SYSTEM_PROMPT = `Expert en copywriting. Enrichis les données portfolio (JSON → JSON enrichi).
 
-RÈGLES ABSOLUES :
-1. Tu retournes UNIQUEMENT du JSON valide, rien d'autre
-2. Tu NE génères PAS de HTML
-3. Tu NE inventes PAS d'informations factuelles (dates, chiffres, entreprises)
-4. Tu ENRICHIS et REFORMULES les textes fournis
-5. Tu GÉNÈRES les descriptions manquantes à partir du contexte
+RÈGLES :
+1. Retourne UNIQUEMENT du JSON valide
+2. heroTitle = COPIE EXACTE du champ "name" (JAMAIS modifier)
+3. N'invente PAS de dates/chiffres/entreprises
+4. Enrichis les textes fournis
 
-⚠️ RÈGLES CRITIQUES POUR LE NOM :
-6. heroTitle = COPIE EXACTE du champ "name" fourni, SANS AUCUNE MODIFICATION
-7. NE JAMAIS répéter le nom (pas de "Jean Jean", "Marie Marie", etc.)
-8. NE JAMAIS ajouter de titre ou suffixe au nom
-9. Si name = "Jean Dupont", alors heroTitle = "Jean Dupont" (identique)
+TON selon profil :
+- freelance: Pro, résultats, expertise
+- commerce: Chaleureux, confiance
+- creative: Unique, vision
+- student: Dynamique, potentiel
+- employee: Crédible, impact
 
-ADAPTATION DU TON SELON LE PROFIL :
-- freelance : Professionnel, orienté valeur et résultats, expertise technique
-- commerce : Chaleureux, proximité, confiance, service client
-- creative : Artistique, unique, personnalité forte, vision
-- student : Dynamique, potentiel, curiosité, apprentissage rapide
-- employee : Crédible, expérience solide, leadership, impact
+LONGUEURS :
+- heroSubtitle: 10-20 mots
+- aboutText: 50-100 mots
+- serviceDesc: 15-30 mots
+- valueProp: 20-40 mots
 
-LONGUEURS RECOMMANDÉES :
-- heroSubtitle : 10-20 mots (accroche percutante)
-- heroEyebrow : 2-5 mots (contexte rapide)
-- aboutText : 50-100 mots (paragraphe engageant)
-- serviceDesc : 15-30 mots par service
-- valueProp : 20-40 mots
+ICÔNES SERVICES :
+Format: <svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'>...</svg>
+Génère SVG minimaliste (laptop, engrenage, palette, etc.)
+PAS de cercle vide seul.
 
-ICÔNES SVG POUR LES SERVICES :
-Tu DOIS générer une icône SVG unique et spécifique pour chaque service.
-
-RÈGLES STRICTES :
-- Format : <svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'>
-- Style : Géométrique, minimaliste, ligne stroke uniquement
-- ❌ PAS de cercle vide seul
-- ✅ Représentation abstraite du concept (laptop, palette, engrenage, etc.)
-
-EXEMPLES CONCRETS À SUIVRE :
-
-Développement web :
-<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><rect x='6' y='10' width='36' height='28' rx='2'/><line x1='6' y1='18' x2='42' y2='18'/><circle cx='12' cy='14' r='1.5'/><circle cx='17' cy='14' r='1.5'/><circle cx='22' cy='14' r='1.5'/></svg>
-
-Design graphique :
-<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 36l6-16 6 8 6-12 6 20'/><circle cx='12' cy='36' r='2' fill='currentColor'/><circle cx='36' cy='36' r='2' fill='currentColor'/></svg>
-
-Conseil/Stratégie :
-<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><circle cx='24' cy='24' r='10'/><path d='M24 14v20M34 24H14'/><circle cx='24' cy='14' r='2' fill='currentColor'/><circle cx='34' cy='24' r='2' fill='currentColor'/><circle cx='24' cy='34' r='2' fill='currentColor'/><circle cx='14' cy='24' r='2' fill='currentColor'/></svg>
-
-Marketing :
-<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><path d='M10 38L24 10l14 28z'/><circle cx='24' cy='20' r='3'/><path d='M18 28h12'/></svg>
-
-STYLE D'ÉCRITURE :
-- Évite les clichés ("passionné", "dynamique", "expert reconnu")
-- Privilégie les verbes d'action
-- Sois spécifique plutôt que générique
-- Pas de points d'exclamation excessifs
-- Ton naturel, pas robotique`;
+STYLE :
+Évite clichés ("passionné", "expert"). Verbes d'action. Spécifique.`;
 
 export interface RawPortfolioData {
   name: string;
@@ -155,48 +125,35 @@ export interface EnrichedPortfolioData {
 }
 
 function buildUserPrompt(data: RawPortfolioData): string {
-  return `PROFIL : ${data.profileType}
-NOM EXACT (à copier tel quel dans heroTitle) : ${data.name}
+  // Limiter la taille des contextes externes pour éviter dépassement tokens
+  const linkedInContext = data.linkedInData ? data.linkedInData.substring(0, 1500) : '';
+  const notionContext = data.notionData ? data.notionData.substring(0, 800) : '';
+  
+  return `PROFIL: ${data.profileType}
+NOM: ${data.name}
 
-DONNÉES BRUTES :
-${JSON.stringify({
-  tagline: data.tagline,
-  services: data.services,
-  valueProp: data.valueProp,
-  projects: data.projects?.map(p => ({ title: p.title, description: p.description, category: p.category })),
-}, null, 2)}
+DONNÉES:
+Tagline: ${data.tagline}
+Services: ${data.services?.join(', ')}
+Value prop: ${data.valueProp || 'N/A'}
+Projets: ${data.projects?.map(p => `${p.title} (${p.category || 'N/A'})`).join(', ') || 'Aucun'}
 
-${data.linkedInData ? `CONTEXTE LINKEDIN :\n${data.linkedInData}` : ''}
-${data.notionData ? `CONTEXTE NOTION :\n${data.notionData}` : ''}
+${linkedInContext ? `LinkedIn:\n${linkedInContext}` : ''}
+${notionContext ? `Notion:\n${notionContext}` : ''}
 
----
-
-Génère un JSON avec les champs suivants.
-
-⚠️ ATTENTION : heroTitle DOIT être exactement "${data.name}" sans modification.
-
+Génère JSON:
 {
   "heroTitle": "${data.name}",
-  "heroSubtitle": "Accroche enrichie basée sur la tagline (10-20 mots)",
-  "heroEyebrow": "Contexte court (2-5 mots, ex: Freelance, Depuis 2015)",
-  "heroCta": "Texte bouton (ex: Me contacter, Voir mes projets)",
-  "aboutText": "Paragraphe de présentation enrichi (50-100 mots)",
-  "valueProp": "Proposition de valeur reformulée (20-40 mots)",
-  "services": [
-    { 
-      "title": "Titre service original ou légèrement amélioré", 
-      "description": "Description enrichie (15-30 mots)",
-      "icon": "<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'><rect x='6' y='10' width='36' height='28' rx='2'/><line x1='6' y1='18' x2='42' y2='18'/></svg>"
-    }
-  ],
-  "projects": [
-    { "title": "Titre projet", "description": "Description enrichie", "category": "Catégorie" }
-  ]
+  "heroSubtitle": "...",
+  "heroEyebrow": "...",
+  "heroCta": "...",
+  "aboutText": "...",
+  "valueProp": "...",
+  "services": [{"title":"...","description":"...","icon":"<svg>...</svg>"}],
+  "projects": [{"title":"...","description":"...","category":"..."}]
 }
 
-IMPORTANT : 
-- Retourne UNIQUEMENT le JSON, sans backticks, sans explication
-- heroTitle = "${data.name}" (COPIE EXACTE)`;
+Retourne UNIQUEMENT le JSON.`;
 }
 
 /**

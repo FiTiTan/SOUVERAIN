@@ -23,139 +23,76 @@ async function getGroqApiKey(): Promise<string> {
   }
 }
 
-const SYSTEM_PROMPT = `Tu es un expert en copywriting et personal branding. Ta mission est de créer un portfolio professionnel complet et impactant à partir de TOUTES les données fournies.
+const SYSTEM_PROMPT = `Expert copywriting. Crée portfolio pro à partir des données fournies.
 
-## RÈGLES ABSOLUES
+RÈGLES :
+1. heroTitle = NOM EXACT (JAMAIS modifier)
+2. Utilise données formulaire + PDF + LinkedIn + Notion
+3. N'invente PAS (dates, chiffres, entreprises)
+4. Enrichis textes fournis
 
-1. UTILISE TOUTES LES DONNÉES DISPONIBLES
-   - Données formulaire (nom, tagline, services)
-   - Contenu des PDF/BPL (descriptions détaillées des projets)
-   - Profil LinkedIn (parcours, expériences, compétences)
-   - Pages Notion (informations complémentaires)
+LONGUEURS :
+- heroSubtitle: 15-25 mots
+- aboutText: 100-150 mots (synthèse parcours)
+- services: 30-50 mots/service
+- projets: 50-100 mots (basé BPL si dispo)
 
-2. GÉNÈRE DU CONTENU RICHE
-   - Descriptions de projets : 50-100 mots, basées sur les BPL fournis
-   - About text : 100-150 mots, synthèse du parcours LinkedIn + formulaire
-   - Services : 30-50 mots par service, détaillés et spécifiques
+STYLE : Pro, verbes action, résultats concrets, pas clichés.
 
-3. STRUCTURE DU CONTENU
-   - heroTitle : NOM EXACT fourni (JAMAIS modifier)
-   - heroSubtitle : Accroche percutante (15-25 mots)
-   - aboutText : Narration engageante du parcours
-   - Chaque projet : titre, description riche, catégorie, points clés
-
-4. STYLE D'ÉCRITURE
-   - Professionnel mais humain
-   - Verbes d'action
-   - Résultats concrets quand disponibles dans les BPL
-   - Pas de clichés ("passionné", "expert reconnu")
-   - Pas d'exclamations excessives
-
-5. NE PAS INVENTER
-   - Si une info n'est pas dans les données, ne pas l'inventer
-   - Reformuler et enrichir, pas inventer
-
-## NOTES SUR LES PLACEHOLDERS
-
-Les données sont anonymisées. Tu verras des placeholders comme :
-- PERSON_001, PERSON_002 (personnes)
-- COMPANY_001, COMPANY_002 (entreprises)
-- CITY_001 (villes)
-- EMAIL_001, PHONE_001 (contacts)
-
-GARDE CES PLACEHOLDERS TELS QUELS. Ils seront remplacés après.`;
+PLACEHOLDERS : Garde PERSON_001, COMPANY_001, etc. tels quels (anonymisation).`;
 
 function buildUserPrompt(data: ExtractedData): string {
   const { formData, documents, linkedInData, notionData, projectContexts } = data;
 
-  // Construire le contexte des projets avec leurs BPL
+  // Limiter la taille des contextes pour éviter dépassement tokens
   const projectsContext = projectContexts.map((pc, i) => {
-    let context = `\n### Projet ${i + 1}: ${pc.projectTitle}`;
+    let context = `Projet ${i + 1}: ${pc.projectTitle}`;
     if (pc.documentContent) {
-      context += `\n\nCONTENU DU BPL/DOCUMENT :\n"""\n${pc.documentContent.substring(0, 3000)}\n"""`;
-    }
-    if (pc.images.length > 0) {
-      context += `\nImages disponibles : ${pc.images.length}`;
+      context += `\nBPL: ${pc.documentContent.substring(0, 1200)}`;
     }
     return context;
   }).join('\n');
 
-  // Documents généraux (non associés à un projet)
   const generalDocsContext = documents
     .filter(d => d.type === 'pdf' && d.content)
-    .map(d => `\n### Document: ${d.filename}\n"""\n${d.content?.substring(0, 2000)}\n"""`)
+    .map(d => `Doc: ${d.filename}\n${d.content?.substring(0, 800)}`)
     .join('\n');
 
-  return `## DONNÉES FORMULAIRE
+  return `FORMULAIRE:
+Nom: ${formData.name}
+Profil: ${formData.profileType}
+Tagline: ${formData.tagline}
+Services: ${formData.services?.join(', ')}
+Value prop: ${formData.valueProp || 'N/A'}
 
-Nom : ${formData.name}
-Type de profil : ${formData.profileType}
-Tagline : ${formData.tagline}
-Services : ${formData.services?.join(', ')}
-Proposition de valeur : ${formData.valueProp || 'Non fournie'}
+PROJETS:
+${projectsContext || 'Aucun'}
 
-Email : ${formData.email}
-Téléphone : ${formData.phone || 'Non fourni'}
-Adresse : ${formData.address || 'Non fournie'}
+DOCS:
+${generalDocsContext || 'Aucun'}
 
-## PROJETS ET LEURS DOCUMENTS
-${projectsContext || 'Aucun projet avec documentation'}
+LINKEDIN:
+${linkedInData ? linkedInData.substring(0, 1500) : 'N/A'}
 
-## DOCUMENTS GÉNÉRAUX
-${generalDocsContext || 'Aucun document général'}
-
-## PROFIL LINKEDIN
-${linkedInData ? `"""\n${linkedInData.substring(0, 3000)}\n"""` : 'Non connecté'}
-
-## PAGES NOTION
-${notionData ? `"""\n${notionData.substring(0, 2000)}\n"""` : 'Non connecté'}
+NOTION:
+${notionData ? notionData.substring(0, 1000) : 'N/A'}
 
 ---
 
-## GÉNÈRE LE JSON SUIVANT
-
-Utilise TOUTES les informations ci-dessus pour créer un portfolio riche et complet.
-
+Génère JSON:
 {
   "heroTitle": "${formData.name}",
-  "heroSubtitle": "Accroche percutante basée sur le profil (15-25 mots)",
-  "heroEyebrow": "Contexte court (ex: Freelance depuis 2018, Paris)",
-  "heroCta": "Texte bouton d'action",
-  
-  "aboutText": "Paragraphe de présentation RICHE (100-150 mots). Utilise les infos LinkedIn et formulaire pour créer une narration engageante du parcours.",
-  
-  "valueProp": "Proposition de valeur reformulée et impactante (30-50 mots)",
-  
-  "services": [
-    {
-      "title": "Titre du service",
-      "description": "Description DÉTAILLÉE du service (30-50 mots). Explique ce que tu fais concrètement."
-    }
-  ],
-  
-  "projects": [
-    {
-      "title": "Titre du projet",
-      "description": "Description RICHE basée sur le BPL (50-100 mots). Inclus : contexte, défis, solutions, résultats si disponibles.",
-      "category": "Catégorie",
-      "highlights": ["Point clé 1", "Point clé 2", "Point clé 3"]
-    }
-  ],
-  
-  "testimonials": [
-    {
-      "text": "Témoignage (si fourni dans les données)",
-      "author": "Nom",
-      "role": "Rôle"
-    }
-  ]
+  "heroSubtitle": "...(15-25 mots)",
+  "heroEyebrow": "...",
+  "heroCta": "...",
+  "aboutText": "...(100-150 mots, synthèse parcours)",
+  "valueProp": "...(30-50 mots)",
+  "services": [{"title":"...","description":"...(30-50 mots)"}],
+  "projects": [{"title":"...","description":"...(50-100 mots, basé BPL)","category":"...","highlights":["...","...","..."]}],
+  "testimonials": [{"text":"...","author":"...","role":"..."}]
 }
 
-IMPORTANT :
-- Retourne UNIQUEMENT le JSON, sans backticks, sans explication
-- heroTitle = "${formData.name}" EXACTEMENT
-- Utilise le contenu des BPL pour enrichir les descriptions de projets
-- Les placeholders (PERSON_001, etc.) doivent rester tels quels`;
+Retourne UNIQUEMENT JSON. heroTitle = "${formData.name}" exact. Garde placeholders (PERSON_001, etc.).`;
 }
 
 /**
@@ -194,7 +131,7 @@ export async function enrichPortfolioDataV3(
           { role: 'user', content: userPrompt },
         ],
         temperature: 0.4,
-        max_tokens: 4000,
+        max_tokens: 3000,
       }),
     });
 
