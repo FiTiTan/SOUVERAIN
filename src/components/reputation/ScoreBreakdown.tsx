@@ -6,8 +6,8 @@ import React from 'react';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius } from '../../design-system';
 import type { ReputationScore } from '../../types/reputation';
-import { ClipboardIcon, ShareIcon, RefreshCwIcon, MessageCircleIcon } from '../icons/FeatherIcons';
-import { ClipboardIcon as ClipboardIcon2, RefreshCwIcon as RefreshIcon2 } from '../icons/MoreFeatherIcons';
+import { ShareIcon, MessageCircleIcon } from '../icons/FeatherIcons';
+import { ClipboardIcon, RefreshCwIcon } from '../icons/MoreFeatherIcons';
 
 interface ScoreBreakdownProps {
   breakdown: ReputationScore['breakdown'];
@@ -23,9 +23,9 @@ export const ScoreBreakdown: React.FC<ScoreBreakdownProps> = ({ breakdown }) => 
   };
 
   const items = [
-    { key: 'profileCompleteness', label: 'Complétude du profil', icon: ClipboardIcon2, value: breakdown.profileCompleteness },
+    { key: 'profileCompleteness', label: 'Complétude du profil', icon: ClipboardIcon, value: breakdown.profileCompleteness },
     { key: 'socialPresence', label: 'Présence sociale', icon: ShareIcon, value: breakdown.socialPresence },
-    { key: 'contentFreshness', label: 'Fraîcheur du contenu', icon: RefreshIcon2, value: breakdown.contentFreshness },
+    { key: 'contentFreshness', label: 'Fraîcheur du contenu', icon: RefreshCwIcon, value: breakdown.contentFreshness },
     { key: 'engagement', label: 'Engagement', icon: MessageCircleIcon, value: breakdown.engagement },
   ];
 
