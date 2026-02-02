@@ -8,6 +8,7 @@ import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { WizardStepProps, ProfileType, ImportSource } from '../types';
 import { SourceImporter } from './SourceImporter';
+import { SocialLinksGrid } from './SocialLinksGrid';
 
 export const WizardStepAbout: React.FC<WizardStepProps> = ({
   formData,
@@ -52,23 +53,6 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     } finally {
       setIsImporting(false);
     }
-  };
-
-  const handleSocialLinkChange = (index: number, field: 'platform' | 'url', value: string) => {
-    const updated = [...formData.socialLinks];
-    updated[index] = { ...updated[index], [field]: value };
-    onUpdate({ socialLinks: updated });
-  };
-
-  const handleAddSocialLink = () => {
-    onUpdate({
-      socialLinks: [...formData.socialLinks, { platform: '', url: '' }],
-    });
-  };
-
-  const handleRemoveSocialLink = (index: number) => {
-    const updated = formData.socialLinks.filter((_, i) => i !== index);
-    onUpdate({ socialLinks: updated });
   };
 
   const canProceed = formData.name.trim().length > 0 && formData.tagline.trim().length > 0;
@@ -155,14 +139,6 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     transition: transitions.fast,
   };
 
-  const socialLinkRowStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: '150px 1fr auto',
-    gap: '0.75rem',
-    alignItems: 'end',
-    marginBottom: '0.75rem',
-  };
-
   const buttonStyle = (variant: 'primary' | 'secondary' | 'danger'): React.CSSProperties => {
     const baseStyle: React.CSSProperties = {
       padding: '0.75rem 1.5rem',
@@ -209,7 +185,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     <div style={containerStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={titleStyle}>STEP 1 : À PROPOS</h1>
+        <h1 style={titleStyle}>ÉTAPE 1 : À PROPOS</h1>
         <p style={subtitleStyle}>Qui êtes-vous ou que représentez-vous ?</p>
       </div>
 
@@ -221,17 +197,20 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
             style={profileTypeCardStyle(formData.profileType === 'person')}
             onClick={() => handleProfileTypeChange('person')}
           >
-            <div style={iconStyle}>👤</div>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
             <div>
-              <div style={{ fontWeight: typography.fontWeight.semibold, marginBottom: '0.25rem' }}>
+              <div style={{ fontWeight: typography.fontWeight.semibold, marginBottom: '0.5rem' }}>
                 Une personne
               </div>
-              <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary }}>
+              <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary, marginBottom: '1rem' }}>
                 Freelance, salarié, chercheur...
               </div>
-            </div>
-            <div style={{ fontSize: '1.5rem' }}>
-              {formData.profileType === 'person' ? '●' : '○'}
+              <div style={{ fontSize: typography.fontSize.xs, color: theme.text.secondary, lineHeight: '1.4' }}>
+                Mettez en valeur votre parcours professionnel, vos compétences et vos réalisations pour décrocher de nouvelles opportunités.
+              </div>
             </div>
           </div>
 
@@ -239,29 +218,123 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
             style={profileTypeCardStyle(formData.profileType === 'place')}
             onClick={() => handleProfileTypeChange('place')}
           >
-            <div style={iconStyle}>📍</div>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
             <div>
-              <div style={{ fontWeight: typography.fontWeight.semibold, marginBottom: '0.25rem' }}>
+              <div style={{ fontWeight: typography.fontWeight.semibold, marginBottom: '0.5rem' }}>
                 Un lieu / Une entreprise
               </div>
-              <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary }}>
+              <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary, marginBottom: '1rem' }}>
                 Restaurant, boutique, cabinet...
               </div>
-            </div>
-            <div style={{ fontSize: '1.5rem' }}>
-              {formData.profileType === 'place' ? '●' : '○'}
+              <div style={{ fontSize: typography.fontSize.xs, color: theme.text.secondary, lineHeight: '1.4' }}>
+                Présentez votre établissement, vos services et attirez de nouveaux clients avec un portfolio professionnel.
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Import de données */}
+      {/* Réseaux sociaux */}
       <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Importez vos informations :</h2>
-        <SourceImporter
-          profileType={formData.profileType}
-          onImport={handleImportSuccess}
+        <h2 style={sectionTitleStyle}>Réseaux sociaux :</h2>
+        <SocialLinksGrid
+          selectedLinks={formData.socialLinks}
+          onUpdate={(links) => onUpdate({ socialLinks: links })}
         />
+      </div>
+
+      {/* Import de site web */}
+      <div style={sectionStyle}>
+        <h2 style={sectionTitleStyle}>
+          Import depuis un site web
+          <span
+            title="Importez vos informations depuis Google Business, TripAdvisor, votre site web personnel, ou tout autre site professionnel. Nous extrairons automatiquement les données pertinentes."
+            style={{
+              marginLeft: '0.5rem',
+              cursor: 'help',
+              color: theme.text.tertiary,
+              fontSize: typography.fontSize.xs,
+              border: `1px solid ${theme.border.default}`,
+              borderRadius: '50%',
+              width: '18px',
+              height: '18px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              verticalAlign: 'middle',
+            }}
+          >
+            ?
+          </span>
+        </h2>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <input
+            type="url"
+            placeholder="https://..."
+            style={{
+              ...inputStyle,
+              flex: 1,
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                // TODO: Handle URL import
+              }
+            }}
+          />
+          <button
+            style={{
+              ...buttonStyle('primary'),
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Importer
+          </button>
+        </div>
+        <div style={{
+          marginTop: '0.75rem',
+          fontSize: typography.fontSize.xs,
+          color: theme.text.tertiary,
+          display: 'flex',
+          gap: '0.5rem',
+          flexWrap: 'wrap',
+        }}>
+          <span>Sources recommandées :</span>
+          <span>Google Business</span>
+          <span>•</span>
+          <span>TripAdvisor</span>
+          <span>•</span>
+          <span>Site web</span>
+        </div>
+      </div>
+
+      {/* Import PDF / Texte */}
+      <div style={sectionStyle}>
+        <h2 style={sectionTitleStyle}>Import depuis fichier :</h2>
+        <div style={{
+          border: `2px dashed ${theme.border.default}`,
+          borderRadius: borderRadius.lg,
+          padding: '1.5rem',
+          backgroundColor: theme.bg.secondary,
+          textAlign: 'center',
+        }}>
+          <p style={{
+            fontSize: typography.fontSize.sm,
+            color: theme.text.secondary,
+            marginBottom: '1rem',
+          }}>
+            Importez un CV, une bio, ou tout autre document
+          </p>
+          <button
+            style={{
+              ...buttonStyle('secondary'),
+            }}
+          >
+            📄 Choisir un fichier (PDF, TXT)
+          </button>
+        </div>
         {importError && (
           <div style={{ color: theme.semantic.error, marginTop: '0.5rem', fontSize: typography.fontSize.sm }}>
             ⚠️ {importError}
@@ -292,7 +365,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         </div>
 
         <div style={formGroupStyle}>
-          <label style={labelStyle}>Titre / Métier</label>
+          <label style={labelStyle}>Activité</label>
           <input
             type="text"
             value={formData.title || ''}
@@ -303,7 +376,27 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         </div>
 
         <div style={formGroupStyle}>
-          <label style={labelStyle}>Tagline *</label>
+          <label style={labelStyle}>
+            Tagline *
+            <span
+              title="Une phrase courte et percutante qui résume votre identité ou votre proposition de valeur (ex: 'Créateur d'expériences digitales mémorables')"
+              style={{
+                marginLeft: '0.5rem',
+                cursor: 'help',
+                color: theme.text.tertiary,
+                fontSize: typography.fontSize.xs,
+                border: `1px solid ${theme.border.default}`,
+                borderRadius: '50%',
+                width: '16px',
+                height: '16px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              ?
+            </span>
+          </label>
           <input
             type="text"
             value={formData.tagline}
@@ -361,38 +454,6 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
             </div>
           </>
         )}
-      </div>
-
-      {/* Réseaux sociaux */}
-      <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Réseaux sociaux :</h2>
-        {formData.socialLinks.map((link, index) => (
-          <div key={index} style={socialLinkRowStyle}>
-            <input
-              type="text"
-              value={link.platform}
-              onChange={(e) => handleSocialLinkChange(index, 'platform', e.target.value)}
-              placeholder="LinkedIn"
-              style={inputStyle}
-            />
-            <input
-              type="url"
-              value={link.url}
-              onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
-              placeholder="https://linkedin.com/in/..."
-              style={inputStyle}
-            />
-            <button
-              onClick={() => handleRemoveSocialLink(index)}
-              style={{ ...buttonStyle('danger'), padding: '0.75rem' }}
-            >
-              🗑️
-            </button>
-          </div>
-        ))}
-        <button onClick={handleAddSocialLink} style={buttonStyle('secondary')}>
-          + Ajouter un réseau social
-        </button>
       </div>
 
       {/* Footer avec navigation */}

@@ -116,40 +116,78 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
   };
 
   const progressBarContainerStyle: React.CSSProperties = {
-    padding: '1rem 2rem',
+    padding: '1.5rem 2rem',
     backgroundColor: theme.bg.secondary,
     borderBottom: `1px solid ${theme.border.light}`,
   };
 
-  const progressBarStyle: React.CSSProperties = {
+  const progressTrackStyle: React.CSSProperties = {
+    position: 'relative',
+    height: '4px',
+    backgroundColor: theme.bg.tertiary,
+    borderRadius: '999px',
+    marginBottom: '1.5rem',
+    overflow: 'visible',
+  };
+
+  const progressFillStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    backgroundColor: theme.accent.primary,
+    borderRadius: '999px',
+    width: `${((currentStep - 1) / (TOTAL_STEPS - 1)) * 100}%`,
+    transition: transitions.normal,
+  };
+
+  const stepsContainerStyle: React.CSSProperties = {
+    position: 'relative',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: '0.5rem',
   };
 
-  const stepIndicatorStyle = (step: number, active: boolean, completed: boolean): React.CSSProperties => ({
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
-    backgroundColor: completed
-      ? theme.semantic.success
-      : active
-      ? theme.accent.primary
-      : theme.bg.tertiary,
-    color: active || completed ? '#FFFFFF' : theme.text.tertiary,
-  });
+  const stepItemStyle = (step: number): React.CSSProperties => {
+    const active = currentStep === step;
+    const completed = currentStep > step;
+    
+    return {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      flex: 1,
+      position: 'relative',
+    };
+  };
 
-  const stepLabelStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: typography.fontSize.xs,
-    color: theme.text.tertiary,
+  const stepDotStyle = (step: number): React.CSSProperties => {
+    const active = currentStep === step;
+    const completed = currentStep > step;
+    
+    return {
+      width: '12px',
+      height: '12px',
+      borderRadius: '50%',
+      backgroundColor: completed || active ? theme.accent.primary : theme.bg.tertiary,
+      border: `3px solid ${theme.bg.secondary}`,
+      marginBottom: '0.5rem',
+      transition: transitions.fast,
+      zIndex: 1,
+    };
+  };
+
+  const stepLabelStyle = (step: number): React.CSSProperties => {
+    const active = currentStep === step;
+    const completed = currentStep > step;
+    
+    return {
+      fontSize: typography.fontSize.xs,
+      color: active ? theme.text.primary : completed ? theme.text.secondary : theme.text.tertiary,
+      fontWeight: active ? typography.fontWeight.semibold : typography.fontWeight.normal,
+      textAlign: 'center',
+      transition: transitions.fast,
+    };
   };
 
   const contentStyle: React.CSSProperties = {
@@ -161,28 +199,27 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
     <div style={containerStyle}>
       {/* Progress bar */}
       <div style={progressBarContainerStyle}>
-        <div style={progressBarStyle}>
-          {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((step) => (
-            <div
-              key={step}
-              style={stepIndicatorStyle(
-                step,
-                currentStep === step,
-                currentStep > step
-              )}
-            >
-              {currentStep > step ? '✓' : step}
-            </div>
-          ))}
+        <div style={stepsContainerStyle}>
+          {[
+            'À propos',
+            'Expertise',
+            'Réalisations',
+            'Template',
+            'Génération',
+            'Preview',
+            'Export'
+          ].map((label, index) => {
+            const step = index + 1;
+            return (
+              <div key={step} style={stepItemStyle(step)}>
+                <div style={stepDotStyle(step)} />
+                <span style={stepLabelStyle(step)}>{label}</span>
+              </div>
+            );
+          })}
         </div>
-        <div style={stepLabelStyle}>
-          <span>À propos</span>
-          <span>Expertise</span>
-          <span>Réalisations</span>
-          <span>Template</span>
-          <span>Génération</span>
-          <span>Preview</span>
-          <span>Export</span>
+        <div style={progressTrackStyle}>
+          <div style={progressFillStyle} />
         </div>
       </div>
 
