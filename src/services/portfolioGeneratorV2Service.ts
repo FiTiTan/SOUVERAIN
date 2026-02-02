@@ -5,7 +5,7 @@
 
 import type { PortfolioFormDataV2 } from '../components/portfolio/types';
 import type { EnrichedPortfolioData, RawPortfolioData } from './groqEnrichmentService';
-import { enrichPortfolioWithGroq } from './groqEnrichmentService';
+import { enrichPortfolioData } from './groqEnrichmentService';
 import { injectDataIntoTemplate, computeFlags } from './templateInjectorService';
 import { getLabels } from '../config/portfolioLabels';
 
@@ -134,7 +134,7 @@ export async function generatePortfolioFromWizardV2(
     let enrichedData: EnrichedPortfolioData;
     
     try {
-      enrichedData = await enrichPortfolioWithGroq(rawData);
+      enrichedData = await enrichPortfolioData(rawData);
       console.log('[GeneratorV2] ✅ GROQ enrichment successful');
     } catch (groqError) {
       console.warn('[GeneratorV2] ⚠️ GROQ enrichment failed, fallback to basic data:', groqError);
