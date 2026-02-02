@@ -36,15 +36,25 @@ export const WizardStepExpertise: React.FC<WizardStepProps> = ({
   };
 
   const handleEnhanceValueProp = async () => {
+    if (!formData.valueProp || formData.valueProp.trim().length === 0) {
+      return;
+    }
+
     setIsEnhancingValueProp(true);
     try {
-      // TODO: Appeler l'API GROQ pour améliorer la proposition de valeur
-      // Pour l'instant, on simule
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // Placeholder pour le moment
-      console.log('Amélioration IA de la proposition de valeur');
-    } catch (error) {
+      const { enhanceText } = await import('../../../services/groqTextEnhancer');
+      const enhanced = await enhanceText(formData.valueProp, {
+        type: 'valueProp',
+        context: {
+          name: formData.name,
+          activity: formData.title,
+          profileType: formData.profileType,
+        },
+      });
+      onUpdate({ valueProp: enhanced });
+    } catch (error: any) {
       console.error('Erreur amélioration IA:', error);
+      alert(error.message || 'Erreur lors de l\'amélioration IA');
     } finally {
       setIsEnhancingValueProp(false);
     }

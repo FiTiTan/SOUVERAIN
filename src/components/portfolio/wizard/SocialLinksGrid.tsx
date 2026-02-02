@@ -180,7 +180,7 @@ export const SocialLinksGrid: React.FC<SocialLinksGridProps> = ({
   // Styles
   const gridStyle: React.CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+    gridTemplateColumns: 'repeat(2, 1fr)',
     gap: '1rem',
     marginBottom: '1rem',
   };

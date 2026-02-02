@@ -89,6 +89,10 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
     }
   };
 
+  const handleStepClick = (step: number) => {
+    setCurrentStep(step);
+  };
+
   const renderStep = () => {
     const stepProps = {
       formData,
@@ -126,18 +130,28 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
   };
 
   const progressBarContainerStyle: React.CSSProperties = {
-    padding: '1.5rem 2rem',
-    backgroundColor: theme.bg.secondary,
+    position: 'sticky',
+    top: 0,
+    padding: '0.75rem 2rem',
+    backgroundColor: theme.bg.primary,
     borderBottom: `1px solid ${theme.border.light}`,
+    zIndex: 100,
+  };
+
+  const stepsWrapperStyle: React.CSSProperties = {
+    maxWidth: '600px',
+    margin: '0 auto',
+    position: 'relative',
   };
 
   const progressTrackStyle: React.CSSProperties = {
-    position: 'relative',
-    height: '4px',
+    position: 'absolute',
+    top: '10px',
+    left: '30px',
+    right: '30px',
+    height: '3px',
     backgroundColor: theme.bg.tertiary,
-    borderRadius: '999px',
-    marginBottom: '1.5rem',
-    overflow: 'visible',
+    zIndex: 0,
   };
 
   const progressFillStyle: React.CSSProperties = {
@@ -145,8 +159,7 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
     top: 0,
     left: 0,
     height: '100%',
-    backgroundColor: theme.accent.primary,
-    borderRadius: '999px',
+    backgroundColor: '#3A3A3A',
     width: `${((currentStep - 1) / (TOTAL_STEPS - 1)) * 100}%`,
     transition: transitions.normal,
   };
@@ -155,7 +168,8 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
     position: 'relative',
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '0.5rem',
+    alignItems: 'flex-start',
+    zIndex: 1,
   };
 
   const stepItemStyle = (step: number): React.CSSProperties => {
@@ -166,8 +180,8 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      flex: 1,
-      position: 'relative',
+      flex: 'none',
+      cursor: 'pointer',
     };
   };
 
@@ -176,11 +190,11 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
     const completed = currentStep > step;
     
     return {
-      width: '12px',
-      height: '12px',
+      width: '20px',
+      height: '20px',
       borderRadius: '50%',
-      backgroundColor: completed || active ? theme.accent.primary : theme.bg.tertiary,
-      border: `3px solid ${theme.bg.secondary}`,
+      backgroundColor: completed || active ? '#3A3A3A' : theme.bg.tertiary,
+      border: `3px solid ${theme.bg.primary}`,
       marginBottom: '0.5rem',
       transition: transitions.fast,
       zIndex: 1,
@@ -197,6 +211,7 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
       fontWeight: active ? typography.fontWeight.semibold : typography.fontWeight.normal,
       textAlign: 'center',
       transition: transitions.fast,
+      whiteSpace: 'nowrap',
     };
   };
 
@@ -209,27 +224,33 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
     <div style={containerStyle}>
       {/* Progress bar */}
       <div style={progressBarContainerStyle}>
-        <div style={stepsContainerStyle}>
-          {[
-            'À propos',
-            'Expertise',
-            'Réalisations',
-            'Template',
-            'Génération',
-            'Preview',
-            'Export'
-          ].map((label, index) => {
-            const step = index + 1;
-            return (
-              <div key={step} style={stepItemStyle(step)}>
-                <div style={stepDotStyle(step)} />
-                <span style={stepLabelStyle(step)}>{label}</span>
-              </div>
-            );
-          })}
-        </div>
-        <div style={progressTrackStyle}>
-          <div style={progressFillStyle} />
+        <div style={stepsWrapperStyle}>
+          <div style={progressTrackStyle}>
+            <div style={progressFillStyle} />
+          </div>
+          <div style={stepsContainerStyle}>
+            {[
+              'À propos',
+              'Expertise',
+              'Réalisations',
+              'Template',
+              'Génération',
+              'Preview',
+              'Export'
+            ].map((label, index) => {
+              const step = index + 1;
+              return (
+                <div 
+                  key={step} 
+                  style={stepItemStyle(step)}
+                  onClick={() => handleStepClick(step)}
+                >
+                  <div style={stepDotStyle(step)} />
+                  <span style={stepLabelStyle(step)}>{label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 

@@ -119,9 +119,10 @@ export const AIEnhanceButton: React.FC<AIEnhanceButtonProps> = ({
         {isLoading ? (
           '⏳'
         ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
-            <circle cx="12" cy="12" r="3"/>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0l1.545 7.455L21 9l-7.455 1.545L12 18l-1.545-7.455L3 9l7.455-1.545L12 0z"/>
+            <path d="M6 14l.727 3.273L10 18l-3.273.727L6 22l-.727-3.273L2 18l3.273-.727L6 14z" opacity="0.7"/>
+            <path d="M18 2l.545 2.455L21 5l-2.455.545L18 8l-.545-2.455L15 5l2.455-.545L18 2z" opacity="0.7"/>
           </svg>
         )}
       </button>

@@ -58,14 +58,25 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
   };
 
   const handleEnhanceTagline = async () => {
+    if (!formData.tagline || formData.tagline.trim().length === 0) {
+      return;
+    }
+
     setIsEnhancingTagline(true);
     try {
-      // TODO: Appeler l'API GROQ pour améliorer le tagline
-      // Pour l'instant, on simule
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Amélioration IA du tagline');
-    } catch (error) {
+      const { enhanceText } = await import('../../../services/groqTextEnhancer');
+      const enhanced = await enhanceText(formData.tagline, {
+        type: 'tagline',
+        context: {
+          name: formData.name,
+          activity: formData.title,
+          profileType: formData.profileType,
+        },
+      });
+      onUpdate({ tagline: enhanced });
+    } catch (error: any) {
       console.error('Erreur amélioration IA:', error);
+      alert(error.message || 'Erreur lors de l\'amélioration IA');
     } finally {
       setIsEnhancingTagline(false);
     }
@@ -264,43 +275,135 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
       {/* Import de site web */}
       <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>
-          Import depuis un site web
-          <span
-            title="Importez vos informations depuis Google Business, TripAdvisor, votre site web personnel, ou tout autre site professionnel. Nous extrairons automatiquement les données pertinentes."
-            style={{
-              marginLeft: '0.5rem',
-              cursor: 'help',
-              color: theme.text.tertiary,
-              fontSize: typography.fontSize.xs,
-              border: `1px solid ${theme.border.default}`,
-              borderRadius: '50%',
-              width: '18px',
-              height: '18px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              verticalAlign: 'middle',
-            }}
-          >
-            ?
-          </span>
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <h2 style={{ ...sectionTitleStyle, marginBottom: 0 }}>
+            Import depuis un site web
+            <span style={{ position: 'relative' }}>
+              <span
+                onMouseEnter={(e) => {
+                  const tooltip = e.currentTarget.querySelector('.tooltip-content') as HTMLElement;
+                  if (tooltip) tooltip.style.display = 'block';
+                }}
+                onMouseLeave={(e) => {
+                  const tooltip = e.currentTarget.querySelector('.tooltip-content') as HTMLElement;
+                  if (tooltip) tooltip.style.display = 'none';
+                }}
+                style={{
+                  marginLeft: '0.5rem',
+                  cursor: 'help',
+                  color: theme.text.tertiary,
+                  fontSize: typography.fontSize.xs,
+                  border: `1px solid ${theme.border.default}`,
+                  borderRadius: '50%',
+                  width: '18px',
+                  height: '18px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  verticalAlign: 'middle',
+                }}
+              >
+                ?
+                <div
+                  className="tooltip-content"
+                  style={{
+                    display: 'none',
+                    position: 'absolute',
+                    top: '100%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    marginTop: '0.5rem',
+                    padding: '0.75rem 1rem',
+                    backgroundColor: 'rgba(34, 197, 94, 0.95)',
+                    color: '#FFFFFF',
+                    fontSize: typography.fontSize.sm,
+                    borderRadius: borderRadius.lg,
+                    border: '2px dashed rgba(255, 255, 255, 0.5)',
+                    minWidth: '250px',
+                    maxWidth: '300px',
+                    zIndex: 1000,
+                    boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+                    animation: 'bounce 0.3s ease-out',
+                  }}
+                >
+                  <div style={{ fontWeight: typography.fontWeight.semibold, marginBottom: '0.25rem' }}>
+                    💡 Sources recommandées
+                  </div>
+                  <div style={{ fontSize: typography.fontSize.xs, lineHeight: '1.4' }}>
+                    Google Business • TripAdvisor • LinkedIn • Site web personnel
+                  </div>
+                </div>
+              </span>
+            </span>
+          </h2>
+        </div>
+        {(formData.importSources || []).filter(s => s.type === 'website').map((source, index) => (
+          <div key={index} style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            <input
+              type="url"
+              value={source.url || ''}
+              readOnly
+              style={{
+                ...inputStyle,
+                flex: 1,
+                opacity: 0.7,
+              }}
+            />
+            <button
+              onClick={() => {
+                const updated = formData.importSources.filter((_, i) => i !== index);
+                onUpdate({ importSources: updated });
+              }}
+              style={{
+                ...buttonStyle('secondary'),
+                color: theme.semantic.error,
+                borderColor: theme.semantic.error,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Retirer
+            </button>
+          </div>
+        ))}
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <input
             type="url"
             placeholder="https://..."
+            id="website-import-input"
             style={{
               ...inputStyle,
               flex: 1,
             }}
             onKeyPress={(e) => {
               if (e.key === 'Enter') {
-                // TODO: Handle URL import
+                const input = document.getElementById('website-import-input') as HTMLInputElement;
+                if (input && input.value.trim()) {
+                  const newSource: ImportSource = {
+                    type: 'website',
+                    url: input.value.trim(),
+                  };
+                  onUpdate({
+                    importSources: [...(formData.importSources || []), newSource],
+                  });
+                  input.value = '';
+                }
               }
             }}
           />
           <button
+            onClick={() => {
+              const input = document.getElementById('website-import-input') as HTMLInputElement;
+              if (input && input.value.trim()) {
+                const newSource: ImportSource = {
+                  type: 'website',
+                  url: input.value.trim(),
+                };
+                onUpdate({
+                  importSources: [...(formData.importSources || []), newSource],
+                });
+                input.value = '';
+              }
+            }}
             style={{
               ...buttonStyle('primary'),
               whiteSpace: 'nowrap',
@@ -308,21 +411,6 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
           >
             Importer
           </button>
-        </div>
-        <div style={{
-          marginTop: '0.75rem',
-          fontSize: typography.fontSize.xs,
-          color: theme.text.tertiary,
-          display: 'flex',
-          gap: '0.5rem',
-          flexWrap: 'wrap',
-        }}>
-          <span>Sources recommandées :</span>
-          <span>Google Business</span>
-          <span>•</span>
-          <span>TripAdvisor</span>
-          <span>•</span>
-          <span>Site web</span>
         </div>
       </div>
 
