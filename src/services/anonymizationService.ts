@@ -302,11 +302,72 @@ export const detectAndAnonymize = async (
             locations: [] as string[]
         };
 
-        // Normaliser les types
-        const entities = entitiesRaw.map((e: any) => ({
-            type: e.type.toLowerCase(),
-            value: e.value
-        }));
+        // ============================================================
+        // FILTRAGE DES ENTITÉS VALIDES
+        // BERT peut retourner des types non gérés (MISC, O, B-MISC, etc.)
+        // On ne garde que les types qu'on sait anonymiser/dé-anonymiser
+        // ============================================================
+        
+        const VALID_ENTITY_TYPES = [
+            'person', 'per',           // Personnes
+            'company', 'organization', 'org',  // Entreprises
+            'email',                   // Emails
+            'phone',                   // Téléphones
+            'amount', 'money',         // Montants
+            'address',                 // Adresses
+            'location', 'loc', 'gpe'   // Lieux (GPE = Geo-Political Entity)
+        ];
+
+        // Mapping des types BERT vers nos types internes
+        const TYPE_MAPPING: { [key: string]: string } = {
+            'per': 'person',
+            'org': 'company',
+            'organization': 'company',
+            'loc': 'location',
+            'gpe': 'location',
+            'money': 'amount',
+        };
+
+        const entities = entitiesRaw
+            .map((e: any) => {
+                // Nettoyer le type : 
+                // - lowercase
+                // - supprimer préfixes BERT (B-PER → per, I-LOC → loc)
+                let cleanType = e.type.toLowerCase().replace(/^b-|^i-/g, '');
+                
+                // Mapper vers notre type interne si nécessaire
+                if (TYPE_MAPPING[cleanType]) {
+                    cleanType = TYPE_MAPPING[cleanType];
+                }
+                
+                return {
+                    type: cleanType,
+                    value: e.value
+                };
+            })
+            .filter(e => {
+                // Vérifier que le type est valide
+                const isValid = VALID_ENTITY_TYPES.includes(e.type);
+                
+                if (!isValid) {
+                    // Log pour debug (à retirer en prod si trop verbeux)
+                    console.log(`[Anonymization] ⏭️ Skipping invalid type: "${e.type}" for: "${e.value.substring(0, 50)}${e.value.length > 50 ? '...' : ''}"`);
+                }
+                
+                return isValid;
+            })
+            .filter(e => {
+                // Filtrer aussi les valeurs trop courtes (< 2 chars) ou trop longues (> 100 chars)
+                // pour éviter les faux positifs
+                const len = e.value.length;
+                if (len < 2 || len > 100) {
+                    console.log(`[Anonymization] ⏭️ Skipping invalid length (${len}): "${e.value.substring(0, 30)}..."`);
+                    return false;
+                }
+                return true;
+            });
+
+        console.log(`[Anonymization] ✅ Filtered: ${entitiesRaw.length} raw → ${entities.length} valid entities`);
 
         for (const entity of entities) {
             let token = await getExistingToken(portfolioId, entity.value);
