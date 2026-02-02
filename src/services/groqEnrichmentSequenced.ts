@@ -1,9 +1,14 @@
 /**
- * SOUVERAIN - GROQ Enrichment Service (Sequenced) - V2 ENRICHED
- * Séquence les appels Groq en plusieurs étapes pour éviter dépassement tokens
- * Hero → Services → Projects
+ * SOUVERAIN - GROQ Enrichment Service (Sequenced) - V4 FINAL
  * 
- * V2: Prompts enrichis pour générer du contenu plus détaillé (~500-800 mots total)
+ * Structure validée :
+ * - heroSubtitle : 15-30 mots
+ * - aboutText : 80-120 mots
+ * - valueProp : 20-30 mots
+ * - Service : 30-50 mots chacun
+ * - Projet : 60-80 mots chacun (synthétique mais substantiel)
+ * 
+ * Ton : 100% impersonnel (freelances, agences, boutiques, lieux)
  */
 
 import { detectAndAnonymize, deanonymize } from './anonymizationService';
@@ -13,15 +18,32 @@ import type { RawPortfolioData, EnrichedPortfolioData } from './groqEnrichmentSe
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // ============================================================
-// CONTENT QUALITY GUIDELINES
+// GUIDELINES GLOBALES
 // ============================================================
 
+const TONE_GUIDELINES = `
+TON IMPERSONNEL OBLIGATOIRE :
+- JAMAIS de "je", "nous", "notre", "mon", "mes"
+- Formulations : "Conception de...", "Spécialisé dans...", "Une approche..."
+- Fonctionne pour : freelances, agences, boutiques, restaurants, entreprises
+- Factuel, professionnel, orienté bénéfice client
+
+INTERDICTIONS :
+- Pas de clichés : "passionné", "innovant", "sur-mesure", "unique"
+- Pas de superlatifs sans preuve : "le meilleur", "expert reconnu"
+- Pas de phrases creuses : "solutions de qualité", "accompagnement personnalisé"
+`;
+
 const PLACEHOLDER_RULES = `
-RÈGLES CRITIQUES POUR LES PLACEHOLDERS :
-- Ne modifie JAMAIS les tokens entre crochets : [PERSON_1], [COMPANY_1], [LOCATION_1], [EMAIL_1], etc.
-- Garde-les EXACTEMENT tels quels dans ta réponse
-- Ils seront remplacés automatiquement après génération
-- Si tu vois [PERSON_1], écris [PERSON_1] dans ta réponse, pas autre chose`;
+PLACEHOLDERS - RÈGLES CRITIQUES :
+- Les tokens [PERSON_1], [COMPANY_1], [LOCATION_1] sont des données anonymisées
+- GARDE-LES EXACTEMENT tels quels, ils seront remplacés automatiquement
+- N'invente JAMAIS de nouveaux placeholders
+`;
+
+// ============================================================
+// API
+// ============================================================
 
 async function getGroqApiKey(): Promise<string> {
   try {
@@ -37,9 +59,6 @@ async function getGroqApiKey(): Promise<string> {
   }
 }
 
-/**
- * Appel générique à Groq
- */
 async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: number = 1500): Promise<any> {
   const apiKey = await getGroqApiKey();
   
@@ -52,10 +71,10 @@ async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: num
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
       messages: [
-        { role: 'system', content: systemPrompt + '\n\nIMPORTANT: Réponds UNIQUEMENT avec du JSON valide, aucun texte avant ou après.' },
+        { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      temperature: 0.5, // Un peu plus de créativité
+      temperature: 0.5,
       max_tokens: maxTokens,
       response_format: { type: 'json_object' },
     }),
@@ -70,10 +89,8 @@ async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: num
   const result = await response.json();
   let content = result.choices[0].message.content;
   
-  // Nettoyer backticks markdown
   content = content.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim();
   
-  // Extraire JSON si entouré de texte
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     content = jsonMatch[0];
@@ -87,130 +104,151 @@ async function callGroq(systemPrompt: string, userPrompt: string, maxTokens: num
   }
 }
 
-/**
- * ÉTAPE 1 : Enrichir Hero + About + Value Prop
- * OBJECTIF : aboutText = 80-120 mots, valueProp = 30-50 mots
- */
+// ============================================================
+// UTILITAIRES
+// ============================================================
+
+function cleanSvgQuotes(svg: string): string {
+  if (!svg) return svg;
+  return svg.replace(/(\w+)='([^']*)'/g, '$1="$2"');
+}
+
+function cleanOrphanPlaceholders(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/\s*\[PERSON_\d+\]\s*/g, ' ')
+    .replace(/\s*\[COMPANY_\d+\]\s*/g, ' ')
+    .replace(/\s*\[LOCATION_\d+\]\s*/g, ' ')
+    .replace(/\s*\[EMAIL_\d+\]\s*/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function countWords(text: string): number {
+  if (!text) return 0;
+  return text.split(/\s+/).filter(w => w.length > 0).length;
+}
+
+// ============================================================
+// ÉTAPE 1 : HERO + ABOUT
+// ============================================================
+
 async function enrichHeroAndAbout(data: RawPortfolioData): Promise<any> {
-  const systemPrompt = `Tu es un expert en copywriting pour portfolios professionnels haut de gamme.
-Tu crées du contenu RICHE, AUTHENTIQUE et DÉTAILLÉ.
+  const systemPrompt = `Tu es un copywriter expert pour portfolios professionnels haut de gamme.
+
+${TONE_GUIDELINES}
 
 ${PLACEHOLDER_RULES}
 
-LONGUEURS REQUISES :
-- heroSubtitle : 15-25 mots, accrocheur et mémorable
-- aboutText : 80-120 mots MINIMUM (4-5 phrases complètes)
-- valueProp : 30-50 mots (2 phrases percutantes)
+SECTIONS À GÉNÉRER :
 
-QUALITÉ REQUISE :
-- Utilise les VRAIES informations fournies
-- Sois spécifique, pas générique
-- Évite les clichés ("passionné", "innovant", "solutions sur-mesure")
-- Préfère des verbes d'action et des résultats concrets
+1. heroTitle : COPIE EXACTE du nom fourni, aucune modification
+2. heroSubtitle (15-30 mots) : Accroche percutante qui résume l'expertise et donne envie
+3. heroEyebrow (2-4 mots) : Rôle ou statut (ex: "Freelance", "Studio créatif", "Restaurant")
+4. heroCta (2-4 mots) : Call-to-action (ex: "Découvrir les projets", "Voir la carte")
+5. aboutText (80-120 mots) : Texte de présentation qui crée la confiance
 
-Retourne JSON: {"heroTitle","heroSubtitle","heroEyebrow","heroCta","aboutText","valueProp"}`;
+STRUCTURE aboutText :
+- Phrase 1-2 : Positionnement et expertise
+- Phrase 3 : Mention de projets/réalisations concrets (utilise le contexte fourni)
+- Phrase 4 : Approche ou méthodologie
+- Phrase 5 : Bénéfice client
 
-  // Extraire du contexte des projets si disponible
+6. valueProp (20-30 mots) : La promesse client en 1-2 phrases. Répond à "Qu'est-ce que j'y gagne ?"
+
+Réponds UNIQUEMENT en JSON valide :
+{"heroTitle","heroSubtitle","heroEyebrow","heroCta","aboutText","valueProp"}`;
+
   const projectsContext = data.projects?.map(p => 
-    `${p.title}: ${(p.description || '').substring(0, 500)}`
-  ).join('\n') || '';
+    `- ${p.title}: ${(p.description || '').substring(0, 400)}`
+  ).join('\n') || 'Aucun projet';
 
-  const userPrompt = `INFORMATIONS DU PROFIL :
-- Nom exact (à copier tel quel) : ${data.name}
-- Type de profil : ${data.profileType}
-- Tagline actuelle : ${data.tagline || 'À créer'}
-- Proposition de valeur : ${data.valueProp || 'À créer à partir du contexte'}
-- Services proposés : ${data.services?.join(', ') || 'Non spécifiés'}
+  const userPrompt = `PROFIL :
+- Nom (à copier tel quel) : ${data.name}
+- Type : ${data.profileType}
+- Tagline : ${data.tagline || 'À créer'}
+- Services : ${data.services?.join(', ') || 'Non spécifiés'}
 
-CONTEXTE DES PROJETS (utilise ces infos pour enrichir le aboutText) :
-${projectsContext || 'Aucun projet fourni'}
+CONTEXTE PROJETS (utilise pour enrichir aboutText) :
+${projectsContext}
 
-RÈGLES STRICTES :
-1. heroTitle = EXACTEMENT "${data.name}" sans modification
-2. aboutText doit faire AU MOINS 80 mots (4-5 phrases)
-3. Utilise le contexte des projets pour rendre le texte spécifique et crédible
-4. valueProp doit expliquer le bénéfice CLIENT concret`;
+RAPPEL LONGUEURS :
+- heroSubtitle : 15-30 mots
+- aboutText : 80-120 mots (5 phrases)
+- valueProp : 20-30 mots`;
 
   console.log('[GroqSequenced] Step 1/3: Enriching hero & about...');
   return await callGroq(systemPrompt, userPrompt, 1200);
 }
 
-/**
- * ÉTAPE 2 : Enrichir Services
- * OBJECTIF : Chaque description = 40-60 mots
- */
+// ============================================================
+// ÉTAPE 2 : SERVICES
+// ============================================================
+
 async function enrichServices(data: RawPortfolioData): Promise<any[]> {
   if (!data.services || data.services.length === 0) {
     return [];
   }
 
-  const systemPrompt = `Tu es un expert en copywriting pour portfolios professionnels.
-Tu crées des descriptions de services DÉTAILLÉES et CONVAINCANTES.
+  const systemPrompt = `Tu es un copywriter expert pour portfolios professionnels.
 
-${PLACEHOLDER_RULES}
+${TONE_GUIDELINES}
 
-LONGUEUR REQUISE PAR SERVICE :
-- description : 40-60 mots MINIMUM (2-3 phrases complètes)
+SECTION SERVICES :
 
-STRUCTURE DE CHAQUE DESCRIPTION :
-1. Phrase 1 : CE QUE c'est concrètement
-2. Phrase 2 : COMMENT ça fonctionne / la méthodologie
-3. Phrase 3 : Le BÉNÉFICE client / résultat attendu
+Objectif : Clarifier l'offre en quelques mots percutants
 
-QUALITÉ :
-- Verbes d'action (concevoir, optimiser, transformer, développer...)
-- Résultats concrets quand possible (%, temps, impact)
-- Vocabulaire adapté au secteur
+Contraintes par service :
+- title : Nom du service (garder celui fourni ou améliorer légèrement)
+- description : 30-50 mots (2-3 phrases max)
+- icon : SVG minimaliste 48x48
 
-Retourne: {"services": [{"title","description","icon"}]}
-icon: SVG minimaliste <svg viewBox="0 0 48 48" stroke="currentColor"...> avec GUILLEMETS DOUBLES uniquement.`;
+STRUCTURE description :
+- Phrase 1 : Ce que c'est concrètement
+- Phrase 2 : Le bénéfice client direct
 
-  // Contexte des projets pour adapter le ton
-  const projectsContext = data.projects?.map(p => 
-    `${p.title}: ${(p.description || '').substring(0, 300)}`
-  ).join(' | ') || '';
+INTERDICTIONS ABSOLUES :
+- JAMAIS de noms de personnes
+- JAMAIS de placeholders [PERSON_X], [COMPANY_X]
+- JAMAIS de "je", "nous", "notre"
+
+EXEMPLES BONS :
+✅ "Conception de sites web optimisés pour la conversion. Navigation fluide et design moderne qui transforment les visiteurs en clients."
+✅ "Développement d'applications mobiles natives. Des apps performantes qui répondent aux attentes des utilisateurs exigeants."
+
+EXEMPLES MAUVAIS :
+❌ "Je crée des sites web pour mes clients..."
+❌ "Notre expertise en développement..."
+❌ "Solutions innovantes et sur-mesure..."
+
+Réponds en JSON : {"services": [{"title","description","icon"}]}
+icon = <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">...</svg>`;
 
   const userPrompt = `SERVICES À ENRICHIR :
 ${data.services.map((s, i) => `${i + 1}. ${s}`).join('\n')}
 
-PROFIL : ${data.name} - ${data.profileType}
+TYPE DE PROFIL : ${data.profileType}
 
-CONTEXTE (projets réalisés, utilise pour adapter le vocabulaire) :
-${projectsContext || 'Aucun contexte'}
-
-RÈGLES :
-- Chaque description DOIT faire 40-60 mots (2-3 phrases)
-- Pas de phrases creuses type "service de qualité" ou "expertise reconnue"
-- SVG avec guillemets DOUBLES uniquement`;
+RAPPEL : 30-50 mots par description, ton impersonnel, aucun placeholder`;
 
   console.log('[GroqSequenced] Step 2/3: Enriching services...');
   const result = await callGroq(systemPrompt, userPrompt, 1500);
   
-  // Nettoyer les SVG : forcer guillemets doubles
   if (result.services) {
     result.services = result.services.map((service: any) => ({
       ...service,
-      icon: service.icon ? cleanSvgQuotes(service.icon) : service.icon,
+      icon: service.icon ? cleanSvgQuotes(service.icon) : null,
+      description: cleanOrphanPlaceholders(service.description),
     }));
   }
   
   return result.services || [];
 }
 
-/**
- * Nettoie un SVG en forçant les guillemets doubles
- */
-function cleanSvgQuotes(svg: string): string {
-  if (!svg) return svg;
-  return svg.replace(/(\w+)='([^']*)'/g, '$1="$2"');
-}
+// ============================================================
+// ÉTAPE 3 : PROJETS
+// ============================================================
 
-/**
- * ÉTAPE 3 : Enrichir Projects (par batch)
- * OBJECTIF : Chaque description = 60-100 mots
- * 
- * C'EST ICI QUE LE CONTENU DU PDF DOIT ÊTRE EXPLOITÉ !
- */
 async function enrichProjects(data: RawPortfolioData): Promise<any[]> {
   if (!data.projects || data.projects.length === 0) {
     return [];
@@ -218,34 +256,45 @@ async function enrichProjects(data: RawPortfolioData): Promise<any[]> {
 
   console.log('[GroqSequenced] Step 3/3: Enriching projects...');
   
-  // DEBUG LOG
-  console.log('[GroqSequenced] enrichProjects - input projects:', data.projects.map(p => ({
+  console.log('[GroqSequenced] enrichProjects - input:', data.projects.map(p => ({
     title: p.title,
     descLength: p.description?.length || 0,
-    descPreview: p.description?.substring(0, 200)
   })));
 
-  const systemPrompt = `Tu es un expert en copywriting pour portfolios professionnels.
-Tu crées des descriptions de projets RICHES et DÉTAILLÉES basées sur le contenu fourni.
+  const systemPrompt = `Tu es un copywriter expert pour portfolios professionnels.
+
+${TONE_GUIDELINES}
 
 ${PLACEHOLDER_RULES}
 
-LONGUEUR REQUISE PAR PROJET :
-- description : 60-100 mots MINIMUM (3-4 phrases complètes)
+SECTION PROJETS/RÉALISATIONS :
 
-STRUCTURE DE CHAQUE DESCRIPTION :
-1. Phrase 1 : Le CONTEXTE / problème à résoudre
-2. Phrase 2 : La SOLUTION apportée / ce qui a été fait
-3. Phrase 3 : Les RÉSULTATS / impact / bénéfices
-4. Phrase 4 (optionnel) : Point technique notable ou apprentissage
+Objectif : Prouver l'expertise par des exemples concrets et donner envie d'en savoir plus
 
-QUALITÉ :
-- Extrais les informations SPÉCIFIQUES du contenu fourni
-- Cite des chiffres, métriques, technologies si disponibles
-- Pas de descriptions génériques - chaque projet doit être unique
-- Utilise le vocabulaire du domaine (tech, food, service, etc.)
+Contraintes par projet :
+- title : Nom du projet (garder celui fourni)
+- description : 60-80 mots (4-6 lignes max) - SYNTHÉTIQUE mais SUBSTANTIEL
+- category : Type de projet (Application Mobile, Site Web, Branding, etc.)
 
-Retourne: {"projects": [{"title","description","category"}]}`;
+STRUCTURE description (4 phrases) :
+1. CONTEXTE : Quel problème ou besoin ? (1 phrase)
+2. SOLUTION : Quelle approche ou réalisation ? (1-2 phrases)
+3. RÉSULTAT : Quel impact ou bénéfice ? (1 phrase)
+4. POINT NOTABLE (optionnel) : Techno, chiffre clé, innovation
+
+CE QU'IL FAUT EXTRAIRE du contenu source :
+- Les enjeux business ou humains
+- Les chiffres clés s'il y en a
+- Les technologies ou méthodes utilisées
+- Les résultats ou impacts
+
+EXEMPLE BON (72 mots) :
+"Réponse au défi de maintenir une routine sportive sur le long terme. L'application s'inspire des mécaniques de progression des jeux RPG pour transformer l'effort physique en expérience engageante. Le système utilise le MET (Équivalent Métabolique) pour quantifier équitablement tout type d'activité. Objectif : rendre l'exercice addictif et créer des habitudes durables chez les utilisateurs."
+
+EXEMPLE MAUVAIS :
+"Une application innovante qui révolutionne le fitness avec une approche unique..." (trop vague, pas de substance)
+
+Réponds en JSON : {"projects": [{"title","description","category"}]}`;
 
   const batchSize = 2;
   const enrichedProjects: any[] = [];
@@ -253,54 +302,54 @@ Retourne: {"projects": [{"title","description","category"}]}`;
   for (let i = 0; i < data.projects.length; i += batchSize) {
     const batch = data.projects.slice(i, i + batchSize);
     
-    // IMPORTANT : Passer BEAUCOUP plus de contenu (2000 chars au lieu de 150)
     const projectsDetails = batch.map(p => {
       const desc = p.description || '';
-      // Prendre les 2000 premiers caractères pour avoir du contexte riche
-      const truncatedDesc = desc.length > 2000 
-        ? desc.substring(0, 2000) + '... [contenu tronqué]'
+      // 2500 chars pour avoir assez de contexte
+      const truncatedDesc = desc.length > 2500 
+        ? desc.substring(0, 2500) + '...'
         : desc;
       
       return `
-### PROJET : ${p.title}
-Catégorie : ${p.category || 'Non spécifiée'}
+===== PROJET : ${p.title} =====
+Catégorie actuelle : ${p.category || 'À déterminer'}
 
-CONTENU SOURCE (utilise ces informations) :
-${truncatedDesc || 'Pas de description fournie'}
+CONTENU SOURCE À SYNTHÉTISER :
+${truncatedDesc || 'Pas de contenu - génère une description générique'}
 `;
-    }).join('\n---\n');
+    }).join('\n');
 
     const userPrompt = `PROJETS À ENRICHIR :
 
 ${projectsDetails}
 
-RÈGLES STRICTES :
-1. Chaque description DOIT faire 60-100 mots (3-4 phrases)
-2. Extrais les informations CLÉS du contenu source
-3. Mentionne des éléments SPÉCIFIQUES (chiffres, technologies, résultats)
-4. Ne génère PAS de contenu générique - base-toi sur le contenu fourni
-5. Si le contenu parle d'un business plan, mentionne la vision, le marché cible, etc.
-6. Garde les placeholders [PERSON_X], [COMPANY_X] tels quels`;
+RAPPELS :
+- 60-80 mots par description (4-6 lignes)
+- Extraire les ENJEUX et ÉLÉMENTS CLÉS
+- Rester SYNTHÉTIQUE mais SUBSTANTIEL
+- Catégorie : Application Mobile, Site Web, Branding, Business Plan, etc.`;
 
     try {
-      const result = await callGroq(systemPrompt, userPrompt, 1200);
+      const result = await callGroq(systemPrompt, userPrompt, 1500);
       
       if (result.projects && Array.isArray(result.projects)) {
-        enrichedProjects.push(...result.projects);
+        const projectsWithDefaults = result.projects.map((p: any, idx: number) => ({
+          ...p,
+          category: p.category || batch[idx]?.category || 'Projet',
+        }));
+        enrichedProjects.push(...projectsWithDefaults);
       } else {
-        console.warn(`[GroqSequenced] Batch ${i / batchSize + 1}: unexpected response format`);
         enrichedProjects.push(...batch.map(p => ({
           title: p.title,
-          description: p.description?.substring(0, 200) || '',
-          category: p.category
+          description: p.description?.substring(0, 300) || '',
+          category: p.category || 'Projet'
         })));
       }
     } catch (error) {
-      console.warn(`[GroqSequenced] Batch ${i / batchSize + 1} failed, using raw data:`, error);
+      console.warn(`[GroqSequenced] Batch ${Math.floor(i / batchSize) + 1} failed:`, error);
       enrichedProjects.push(...batch.map(p => ({
         title: p.title,
-        description: p.description?.substring(0, 200) || '',
-        category: p.category
+        description: p.description?.substring(0, 300) || '',
+        category: p.category || 'Projet'
       })));
     }
   }
@@ -308,47 +357,49 @@ RÈGLES STRICTES :
   return enrichedProjects;
 }
 
-/**
- * Service principal : Enrichissement séquencé
- */
+// ============================================================
+// SERVICE PRINCIPAL
+// ============================================================
+
 export async function enrichPortfolioDataSequenced(
   rawData: RawPortfolioData,
   portfolioId: string
 ): Promise<{ success: boolean; data?: EnrichedPortfolioData; error?: string }> {
   
   try {
-    console.log('[GroqSequenced] Starting sequenced enrichment...');
+    console.log('[GroqSequenced] Starting sequenced enrichment V4...');
 
-    // Anonymisation des données
+    // Anonymisation
     const dataString = JSON.stringify(rawData);
     const anonymizedResult = await detectAndAnonymize(dataString, portfolioId);
     const anonymizedData: RawPortfolioData = JSON.parse(anonymizedResult.anonymizedText);
 
-    // ÉTAPE 1 : Hero + About (séquentiel)
+    // Étape 1 : Hero + About
     const heroAbout = await enrichHeroAndAbout(anonymizedData);
 
-    // ÉTAPE 2 & 3 : Services + Projects (parallèle)
+    // Étape 2 & 3 : Services + Projects (parallèle)
     const [enrichedServices, enrichedProjects] = await Promise.all([
       enrichServices(anonymizedData).catch(err => {
-        console.warn('[GroqSequenced] Services enrichment failed, using fallback:', err);
-        return anonymizedData.services?.map(s => ({ title: s, description: '' })) || [];
+        console.warn('[GroqSequenced] Services failed:', err);
+        return anonymizedData.services?.map(s => ({ title: s, description: '', icon: '' })) || [];
       }),
       enrichProjects(anonymizedData).catch(err => {
-        console.warn('[GroqSequenced] Projects enrichment failed, using fallback:', err);
+        console.warn('[GroqSequenced] Projects failed:', err);
         return anonymizedData.projects || [];
       }),
     ]);
 
-    // Enrichir icônes services avec fallback
+    // Icônes fallback
     const servicesWithIcons = enrichServicesWithIcons(enrichedServices);
 
-    // Fusionner les résultats
+    // Fusion
     const merged: EnrichedPortfolioData = {
       ...heroAbout,
-      heroTitle: anonymizedData.name, // FORCER le nom original
+      heroTitle: anonymizedData.name,
       services: servicesWithIcons,
       projects: enrichedProjects.map((p: any, i: number) => ({
         ...p,
+        category: p.category || 'Projet',
         image: rawData.projects?.[i]?.image,
         link: rawData.projects?.[i]?.link,
       })),
@@ -368,25 +419,39 @@ export async function enrichPortfolioDataSequenced(
     const deanonymizedString = deanonymize(finalDataString, anonymizedResult.mappings);
     const finalData: EnrichedPortfolioData = JSON.parse(deanonymizedString);
 
-    console.log('[GroqSequenced] ✓ Sequenced enrichment complete');
-    
-    // LOG de validation du contenu
-    console.log('[GroqSequenced] Content stats:', {
-      aboutTextWords: finalData.aboutText?.split(/\s+/).length || 0,
-      valuePropWords: finalData.valueProp?.split(/\s+/).length || 0,
+    // Stats de validation
+    const stats = {
+      heroSubtitleWords: countWords(finalData.heroSubtitle),
+      aboutTextWords: countWords(finalData.aboutText),
+      valuePropWords: countWords(finalData.valueProp),
       servicesCount: finalData.services?.length || 0,
-      avgServiceDescWords: finalData.services?.reduce((acc, s) => acc + (s.description?.split(/\s+/).length || 0), 0) / (finalData.services?.length || 1),
+      avgServiceWords: Math.round((finalData.services?.reduce((acc, s) => acc + countWords(s.description), 0) || 0) / (finalData.services?.length || 1)),
       projectsCount: finalData.projects?.length || 0,
-      avgProjectDescWords: finalData.projects?.reduce((acc, p) => acc + (p.description?.split(/\s+/).length || 0), 0) / (finalData.projects?.length || 1),
-    });
+      avgProjectWords: Math.round((finalData.projects?.reduce((acc, p) => acc + countWords(p.description), 0) || 0) / (finalData.projects?.length || 1)),
+    };
+    
+    console.log('[GroqSequenced] ✓ Complete. Stats:', stats);
+    
+    // Warnings si hors limites
+    if (stats.heroSubtitleWords < 15 || stats.heroSubtitleWords > 30) {
+      console.warn(`[GroqSequenced] ⚠️ heroSubtitle: ${stats.heroSubtitleWords} mots (attendu: 15-30)`);
+    }
+    if (stats.aboutTextWords < 80 || stats.aboutTextWords > 120) {
+      console.warn(`[GroqSequenced] ⚠️ aboutText: ${stats.aboutTextWords} mots (attendu: 80-120)`);
+    }
+    if (stats.avgServiceWords < 30 || stats.avgServiceWords > 50) {
+      console.warn(`[GroqSequenced] ⚠️ services avg: ${stats.avgServiceWords} mots (attendu: 30-50)`);
+    }
+    if (stats.avgProjectWords < 60 || stats.avgProjectWords > 80) {
+      console.warn(`[GroqSequenced] ⚠️ projects avg: ${stats.avgProjectWords} mots (attendu: 60-80)`);
+    }
     
     return { success: true, data: finalData };
 
   } catch (error: any) {
     console.error('[GroqSequenced] Error:', error);
     
-    // Fallback basique
-    console.warn('[GroqSequenced] Using fallback enrichment');
+    // Fallback
     const fallbackData: EnrichedPortfolioData = {
       heroTitle: rawData.name,
       heroSubtitle: rawData.tagline,
@@ -394,12 +459,8 @@ export async function enrichPortfolioDataSequenced(
       heroCta: 'Me contacter',
       aboutText: rawData.valueProp || rawData.tagline,
       valueProp: rawData.valueProp,
-      services: rawData.services?.map(s => ({
-        title: s,
-        description: '',
-        icon: '',
-      })) || [],
-      projects: rawData.projects || [],
+      services: rawData.services?.map(s => ({ title: s, description: '', icon: '' })) || [],
+      projects: rawData.projects?.map(p => ({ ...p, category: p.category || 'Projet' })) || [],
       testimonials: rawData.testimonials || [],
       email: rawData.email,
       phone: rawData.phone,
