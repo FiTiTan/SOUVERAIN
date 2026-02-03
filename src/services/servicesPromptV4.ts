@@ -3,7 +3,7 @@
  * 
  * V5 : Focus sur CLARTÉ et PUISSANCE
  * - Phrases courtes et directes
- * - ValueProp = fil rouge OBLIGATOIRE
+ * - ValueProp = fil rouge pour COHÉRENCE (pas forcée dans chaque service)
  * - Pas de formulations alambiquées
  */
 
@@ -15,18 +15,20 @@ CONTEXTE :
 - Type : {{PROFILE_TYPE}}
 
 ══════════════════════════════════════════════════════════════
-🎯 PROPOSITION DE VALEUR (OBLIGATOIRE DANS CHAQUE DESCRIPTION)
+🎯 PROPOSITION DE VALEUR (CONTEXTE DE COHÉRENCE)
 ══════════════════════════════════════════════════════════════
 
 "{{VALUE_PROP}}"
 
-Cette phrase DOIT apparaître ou être reflétée dans CHAQUE service.
-C'est le message clé. Tout le reste en découle.
+Cette proposition définit le POSITIONNEMENT global.
+- Les services doivent être COHÉRENTS avec ce positionnement
+- Mentionner la ValueProp UNIQUEMENT si c'est PERTINENT pour le service
+- NE PAS forcer la mention dans chaque description
 
 Exemple :
 - ValueProp : "Café avec une offre 100% sans gluten"
-- Service 1 : "Pâtisseries sans gluten" → description DOIT mentionner "sans gluten"
-- Service 2 : "Cafés de spécialité" → description peut mentionner "accompagnement sans gluten"
+- Service "Pâtisseries" → OUI mentionner "sans gluten" (pertinent)
+- Service "Cafés de spécialité" → NON, le café est naturellement sans gluten
 
 ══════════════════════════════════════════════════════════════
 📝 STYLE D'ÉCRITURE - POWERFUL SENTENCES
@@ -47,7 +49,7 @@ RÈGLES DE STYLE :
 2. Un FAIT par phrase
 3. CONCRET > abstrait
 4. BÉNÉFICE CLIENT clair
-5. Pas de mots creux ("expérience", "unique", "raffiné", "authentique")
+5. Éviter les mots creux ("expérience unique", "authentique", "raffiné")
 
 ══════════════════════════════════════════════════════════════
 🏷️ TYPE DE CONTENU SELON L'ACTIVITÉ
@@ -110,7 +112,7 @@ ${expertises.map((e, i) => `${i + 1}. ${e}`).join('\n')}
 
 → Génère EXACTEMENT 3 services basés sur ces expertises.
 → Reformule en titres COURTS (2-4 mots).
-→ Chaque description DOIT refléter la PROPOSITION DE VALEUR.`;
+→ Descriptions concrètes et directes.`;
   }
   
   return `══════════════════════════════════════════════════════════════
@@ -118,7 +120,7 @@ ${expertises.map((e, i) => `${i + 1}. ${e}`).join('\n')}
 ══════════════════════════════════════════════════════════════
 
 → Déduis 3 services CONCRETS pour ce type d'activité.
-→ Chaque description DOIT refléter la PROPOSITION DE VALEUR.`;
+→ Reste cohérent avec le positionnement global.`;
 }
 
 /**
