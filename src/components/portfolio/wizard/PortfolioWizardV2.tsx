@@ -52,6 +52,14 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
   const [formData, setFormData] = useState<PortfolioFormDataV2>(INITIAL_FORM_DATA);
 
   const handleUpdate = (updates: Partial<PortfolioFormDataV2>) => {
+    // DEBUG LOG - À SUPPRIMER APRÈS FIX
+    if (updates.realisations) {
+      console.log('[WizardV2] handleUpdate - realisations updated:', {
+        count: updates.realisations.length,
+        titles: updates.realisations.map(r => r.title),
+      });
+    }
+    
     setFormData(prev => {
       const updated = { ...prev, ...updates };
       
@@ -66,6 +74,16 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
   };
 
   const handleNext = () => {
+    // DEBUG LOG - À SUPPRIMER APRÈS FIX
+    console.log(`[WizardV2] handleNext from step ${currentStep}:`, {
+      realisationsCount: formData.realisations.length,
+      realisations: formData.realisations.map(r => ({
+        id: r.id,
+        title: r.title,
+        hasExtractedContent: !!r.extractedContent,
+      })),
+    });
+    
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep(prev => prev + 1);
     } else if (onComplete) {
