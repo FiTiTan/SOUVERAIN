@@ -1,3 +1,10 @@
+/**
+ * SOUVERAIN - Wizard Progress
+ * Barre de progression sticky en haut du wizard
+ * 
+ * FIX: Position sticky pour rester visible sur toutes les étapes
+ */
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../../ThemeContext';
@@ -12,8 +19,19 @@ export const WizardProgress: React.FC<WizardProgressProps> = ({ currentStep, tot
 
   const percentage = (currentStep / totalSteps) * 100;
 
+  // ✅ FIX: Container sticky
+  const containerStyle: React.CSSProperties = {
+    position: 'sticky',
+    top: 0,
+    zIndex: 50,
+    backgroundColor: theme.bg.primary,
+    borderBottom: `1px solid ${theme.border.light}`,
+    padding: '1rem 2rem',
+    marginBottom: '0',
+  };
+
   return (
-    <div style={{ marginBottom: '2rem' }}>
+    <div style={containerStyle}>
       {/* Step indicator */}
       <div
         style={{

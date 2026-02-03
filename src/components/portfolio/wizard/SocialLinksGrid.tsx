@@ -1,6 +1,8 @@
 /**
  * SOUVERAIN - Social Links Grid
  * Grille de boutons pour ajouter des réseaux sociaux avec popup modal
+ * 
+ * FIX: Toggle ON/OFF (clic sur sélectionné = désélectionner)
  */
 
 import React, { useState } from 'react';
@@ -143,7 +145,18 @@ export const SocialLinksGrid: React.FC<SocialLinksGridProps> = ({
   const [modalUrl, setModalUrl] = useState('');
 
   const handleOpenModal = (platformId: string) => {
-    const existing = selectedLinks.find(l => l.platform === platformId);
+    const platform = SOCIAL_PLATFORMS.find(p => p.id === platformId);
+    if (!platform) return;
+
+    // ✅ FIX: Si déjà actif, on désélectionne (toggle OFF)
+    if (isPlatformActive(platformId)) {
+      const updated = selectedLinks.filter(l => l.platform !== platform.name);
+      onUpdate(updated);
+      return;
+    }
+
+    // Sinon, ouvrir le modal pour saisir l'URL
+    const existing = selectedLinks.find(l => l.platform === platform.name);
     setModalUrl(existing?.url || '');
     setModalOpen(platformId);
   };
@@ -154,7 +167,7 @@ export const SocialLinksGrid: React.FC<SocialLinksGridProps> = ({
     const platform = SOCIAL_PLATFORMS.find(p => p.id === modalOpen);
     if (!platform) return;
 
-    const updated = selectedLinks.filter(l => l.platform !== modalOpen);
+    const updated = selectedLinks.filter(l => l.platform !== platform.name);
     
     if (modalUrl.trim()) {
       updated.push({
@@ -174,7 +187,8 @@ export const SocialLinksGrid: React.FC<SocialLinksGridProps> = ({
   };
 
   const isPlatformActive = (platformId: string) => {
-    return selectedLinks.some(l => l.platform === SOCIAL_PLATFORMS.find(p => p.id === platformId)?.name);
+    const platform = SOCIAL_PLATFORMS.find(p => p.id === platformId);
+    return selectedLinks.some(l => l.platform === platform?.name);
   };
 
   // Styles
@@ -199,7 +213,24 @@ export const SocialLinksGrid: React.FC<SocialLinksGridProps> = ({
     cursor: 'pointer',
     transition: transitions.fast,
     minHeight: '100px',
+    position: 'relative',
   });
+
+  const removeIndicatorStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '4px',
+    right: '4px',
+    width: '18px',
+    height: '18px',
+    borderRadius: '50%',
+    backgroundColor: theme.semantic.error,
+    color: '#FFFFFF',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '12px',
+    fontWeight: 'bold',
+  };
 
   const modalOverlayStyle: React.CSSProperties = {
     position: 'fixed',
@@ -273,7 +304,12 @@ export const SocialLinksGrid: React.FC<SocialLinksGridProps> = ({
               key={platform.id}
               style={buttonStyle(platform, active)}
               onClick={() => handleOpenModal(platform.id)}
+              title={active ? 'Cliquer pour retirer' : 'Cliquer pour ajouter'}
             >
+              {/* ✅ FIX: Indicateur de suppression sur les actifs */}
+              {active && (
+                <div style={removeIndicatorStyle}>✕</div>
+              )}
               <div style={{ opacity: active ? 1 : 0.4 }}>
                 {platform.icon}
               </div>
@@ -284,6 +320,15 @@ export const SocialLinksGrid: React.FC<SocialLinksGridProps> = ({
           );
         })}
       </div>
+
+      {/* Hint */}
+      <p style={{ 
+        fontSize: typography.fontSize.xs, 
+        color: theme.text.tertiary,
+        marginTop: '0.5rem',
+      }}>
+        💡 Cliquez sur un réseau pour l'ajouter. Cliquez à nouveau pour le retirer.
+      </p>
 
       {/* Modal */}
       {modalOpen && activePlatform && (

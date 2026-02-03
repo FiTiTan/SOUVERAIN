@@ -1,9 +1,25 @@
-// Type definitions for Portfolio Wizard V2
+/**
+ * SOUVERAIN - Portfolio Wizard Types V2
+ * 
+ * Mise à jour avec :
+ * - profileContext (food, retail, tech, artisan, service, niche)
+ * - expertises (3 spécialités)
+ */
 
 // ⚡ DEV MODE - Set to false for production
 export const DEV_MODE = true;
 
-export type ProfileType = 'freelance' | 'commerce' | 'creative' | 'student' | 'employee';
+// Type de profil simple (personne ou lieu)
+export type ProfileType = 'person' | 'place';
+
+// Contexte de profil détaillé (détecté automatiquement par IA)
+export type ProfileContext = 
+  | 'food'      // Restaurant, café, boulangerie...
+  | 'retail'    // Boutique, fleuriste, librairie...
+  | 'artisan'   // Plombier, électricien, menuisier...
+  | 'service'   // Avocat, coach, comptable...
+  | 'tech'      // Développeur, designer, graphiste...
+  | 'niche';    // Tatoueur, DJ, sophrologue...
 
 export type SocialPlatform = 
   | 'instagram' 
@@ -17,27 +33,37 @@ export type SocialPlatform =
   | 'facebook'
   | 'malt'
   | 'pinterest'
+  | 'medium'
   | 'other';
 
 export interface SocialLink {
-  platform: SocialPlatform;
+  platform: string;
   url: string;
-  label?: string; // For "other" platform
+  label?: string;
 }
 
-export interface Project {
-  id?: string;
+export interface ImportSource {
+  type: 'website' | 'pdf' | 'linkedin' | 'notion';
+  url?: string;
+  filename?: string;
+  extractedData?: {
+    name?: string;
+    title?: string;
+    tagline?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    socialLinks?: SocialLink[];
+  };
+}
+
+export interface Realisation {
+  id: string;
   title: string;
-  description?: string;
-  image?: string;
+  description: string;
   category?: string;
-  link?: string;
-}
-
-export interface Testimonial {
-  text: string;
-  author: string;
-  role?: string;
+  extractedContent?: string;
+  image?: string;
 }
 
 export interface Media {
@@ -50,238 +76,153 @@ export interface Media {
   projectName?: string;
 }
 
-export interface UploadedFile {
-  path: string;           // Chemin sur disque
-  type: string;           // 'pdf', 'image', 'doc', etc.
-  filename: string;       // Nom original
-  associatedProject?: string; // ID du projet associé (optionnel)
-}
+// ============================================
+// FORMULAIRE PRINCIPAL V2
+// ============================================
 
-export interface PortfolioFormData {
-  // Step 1: Identity
+export interface PortfolioFormDataV2 {
+  // Identité
+  portfolioId: string;
   name: string;
-  profileType: ProfileType | null;
-  tagline: string;
-
-  // Step 2: Offer
-  services: string[];
-  valueProp: string;
-
-  // Step 3: Contact
+  profileType: ProfileType | null;      // person ou place
+  profileContext: ProfileContext | null; // food, retail, tech... (détecté auto)
+  title: string;                         // Métier / Type de lieu
+  
+  // Positionnement
+  expertises: string[];                  // 3 spécialités
+  tagline: string;                       // Slogan
+  valueProp: string;                     // Ce qui vous différencie
+  
+  // Contact (surtout pour les lieux)
   email: string;
   phone: string;
   address: string;
   openingHours: string;
-
-  // Step 4: Documents
-  uploadedFiles: UploadedFile[];  // ← NOUVEAU : chemins des fichiers uploadés
-  notionData: string;
-  linkedInData?: string;  // ← Ajouté pour LinkedIn
-
-  // Step 5: Social Networks
+  
+  // Sources importées
+  importSources: ImportSource[];
+  
+  // Réseaux sociaux
   socialLinks: SocialLink[];
-  socialIsMain: boolean;
-  linkedInImported: boolean;
-
-  // Step 6: Media
-  media: Media[];  // ← Changé de File[] à Media[] (contient les chemins)
-
-  // Step 7: Template
-  selectedTemplateId: string | null;
-
-  // Future: Projects (separate screen, not in wizard)
-  projects: Project[];
-  testimonials: Testimonial[];
+  
+  // Réalisations
+  realisations: Realisation[];
+  
+  // Médias
+  media: Media[];
+  imageAssignments: Record<string, string>;
+  
+  // Template
+  templateId: string | null;
 }
 
-export interface AIFlags {
-  showPracticalInfo: boolean;
-  showSocialShowcase: boolean;
-  showProjects: boolean;
-  showTestimonials: boolean;
-  profileType: ProfileType | null;
-  hasLinkedIn: boolean;
-  hasNotion: boolean;
+// ============================================
+// PROPS DES STEPS
+// ============================================
+
+export interface WizardStepProps {
+  formData: PortfolioFormDataV2;
+  onUpdate: (updates: Partial<PortfolioFormDataV2>) => void;
+  onNext: () => void;
+  onBack: () => void;
 }
 
-// Legacy alias for backward compatibility
-export type GroqFlags = AIFlags;
+// ============================================
+// HELPERS
+// ============================================
 
-export interface ProfileTypeOption {
-  id: ProfileType;
-  label: string;
-  icon: string;
-  hint: string;
-}
-
-export const PROFILE_TYPES: ProfileTypeOption[] = [
-  {
-    id: 'freelance',
-    label: 'Freelance / Indépendant',
-    icon: '💼',
-    hint: 'Consultant, développeur, designer, coach...',
-  },
-  {
-    id: 'commerce',
-    label: 'Commerce / Artisan',
-    icon: '🏪',
-    hint: 'Boutique, restaurant, artisan, prestataire local...',
-  },
-  {
-    id: 'creative',
-    label: 'Créatif / Artiste / Créateur',
-    icon: '🎨',
-    hint: 'Photographe, vidéaste, musicien, influenceur...',
-  },
-  {
-    id: 'student',
-    label: 'Étudiant / Jeune diplômé',
-    icon: '🎓',
-    hint: 'En recherche de stage, alternance ou premier emploi...',
-  },
-  {
-    id: 'employee',
-    label: 'Cadre / Employé en transition',
-    icon: '👔',
-    hint: "En recherche d'opportunités, personal branding...",
-  },
-];
-
-export const SOCIAL_PLATFORMS = [
-  { id: 'linkedin' as SocialPlatform, label: 'LinkedIn', placeholder: 'linkedin.com/in/monprofil' },
-  { id: 'instagram' as SocialPlatform, label: 'Instagram', placeholder: '@moncompte' },
-  { id: 'twitter' as SocialPlatform, label: 'Twitter / X', placeholder: 'x.com/monpseudo' },
-  { id: 'facebook' as SocialPlatform, label: 'Facebook', placeholder: 'facebook.com/mapage' },
-  { id: 'github' as SocialPlatform, label: 'GitHub', placeholder: 'github.com/monpseudo' },
-  { id: 'behance' as SocialPlatform, label: 'Behance', placeholder: 'behance.net/monportfolio' },
-  { id: 'dribbble' as SocialPlatform, label: 'Dribbble', placeholder: 'dribbble.com/monprofil' },
-  { id: 'youtube' as SocialPlatform, label: 'YouTube', placeholder: 'youtube.com/@machaine' },
-  { id: 'tiktok' as SocialPlatform, label: 'TikTok', placeholder: '@moncompte' },
-  { id: 'malt' as SocialPlatform, label: 'Malt', placeholder: 'malt.fr/profile/monprofil' },
-  { id: 'pinterest' as SocialPlatform, label: 'Pinterest', placeholder: 'pinterest.com/monprofil' },
-  { id: 'other' as SocialPlatform, label: 'Autre', placeholder: 'URL personnalisée' },
-];
-
-// Helper to get service label based on profile type
-export const getServiceLabel = (profileType: ProfileType | null): string => {
-  const labels: Record<ProfileType, string> = {
-    freelance: 'Vos services',
-    commerce: 'Vos produits/services',
-    creative: 'Vos spécialités',
-    student: 'Vos compétences',
-    employee: "Vos domaines d'expertise",
+// Labels pour les services selon le contexte
+export const getServiceLabel = (context: ProfileContext | null): string => {
+  const labels: Record<ProfileContext, string> = {
+    food: 'Spécialités',
+    retail: 'Nos produits',
+    artisan: 'Savoir-faire',
+    service: 'Services',
+    tech: 'Prestations',
+    niche: 'Services',
   };
-  return profileType ? labels[profileType] : 'Vos services';
+  return context ? labels[context] : 'Services';
 };
 
-// Helper to get service placeholder based on profile type
-export const getServicePlaceholder = (profileType: ProfileType | null, index: number): string => {
-  const placeholders: Record<ProfileType, string[]> = {
-    freelance: ['Design UX', 'Développement web', 'Conseil stratégique'],
-    commerce: ['Plomberie', 'Installation', 'Dépannage'],
-    creative: ['Photo portrait', 'Vidéo corporate', 'Montage'],
-    student: ['Python', 'Marketing digital', 'Anglais courant'],
-    employee: ['Management', 'Finance', 'Stratégie'],
+// Labels pour les réalisations selon le contexte
+export const getRealisationsLabel = (context: ProfileContext | null): string => {
+  const labels: Record<ProfileContext, string> = {
+    food: 'Notre carte',
+    retail: 'Nos produits',
+    artisan: 'Nos réalisations',
+    service: 'Nos références',
+    tech: 'Projets',
+    niche: 'Portfolio',
   };
-  return profileType ? placeholders[profileType][index] || '' : '';
+  return context ? labels[context] : 'Réalisations';
 };
 
-// Validation functions
-export const validateStep1 = (data: PortfolioFormData): boolean => {
-  return (
-    data.name.trim().length > 0 &&
-    data.profileType !== null &&
-    data.tagline.trim().length > 0 &&
-    data.tagline.length <= 150
-  );
-};
+// ============================================
+// DONNÉES INITIALES
+// ============================================
 
-export const validateStep2 = (data: PortfolioFormData): boolean => {
-  return data.services.filter(s => s.trim().length > 0).length >= 1;
-};
-
-export const validateStep3 = (data: PortfolioFormData): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(data.email);
-};
-
-export const validateStep4 = (data: PortfolioFormData): boolean => {
-  return true; // Documents are optional
-};
-
-export const validateStep5 = (data: PortfolioFormData): boolean => {
-  return true; // Social links are optional
-};
-
-export const validateStep6 = (data: PortfolioFormData): boolean => {
-  return true; // Media is optional
-};
-
-export const validateStep7 = (data: PortfolioFormData): boolean => {
-  return data.selectedTemplateId !== null;
-};
-
-// Dev autofill data
-const devFormData: PortfolioFormData = {
+const devFormData: PortfolioFormDataV2 = {
+  portfolioId: 'dev-portfolio-001',
   name: 'Jean Dupont',
-  profileType: 'freelance',
-  tagline: 'Développeur Full-Stack passionné par les solutions innovantes',
-  services: ['Développement web', 'Conseil technique', 'Formation'],
-  valueProp: 'Je transforme vos idées en applications web performantes et élégantes',
+  profileType: 'person',
+  profileContext: 'tech',
+  title: 'Développeur Full-Stack',
+  expertises: ['React / Next.js', 'Node.js / API', 'E-commerce'],
+  tagline: 'Du concept au déploiement',
+  valueProp: 'Spécialiste e-commerce, +30 boutiques livrées, code propre garanti',
   email: 'jean.dupont@example.com',
   phone: '+33 6 12 34 56 78',
-  address: '42 rue de la Tech, 75001 Paris',
-  openingHours: 'Lun-Ven 9h-18h',
-  uploadedFiles: [],
-  notionData: '',
-  linkedInData: undefined,
+  address: '',
+  openingHours: '',
+  importSources: [],
   socialLinks: [
-    { platform: 'github', url: 'github.com/jeandupont' },
-    { platform: 'linkedin', url: 'linkedin.com/in/jeandupont' },
+    { platform: 'GitHub', url: 'github.com/jeandupont' },
+    { platform: 'LinkedIn', url: 'linkedin.com/in/jeandupont' },
   ],
-  socialIsMain: false,
-  linkedInImported: false,
+  realisations: [],
   media: [],
-  selectedTemplateId: null,
-  projects: [],
-  testimonials: [],
+  imageAssignments: {},
+  templateId: null,
 };
 
-// Initial form data - Autofilled in DEV_MODE
-export const initialFormData: PortfolioFormData = DEV_MODE ? devFormData : {
+const emptyFormData: PortfolioFormDataV2 = {
+  portfolioId: '',
   name: '',
   profileType: null,
+  profileContext: null,
+  title: '',
+  expertises: ['', '', ''],
   tagline: '',
-  services: ['', '', ''],
   valueProp: '',
   email: '',
   phone: '',
   address: '',
   openingHours: '',
-  uploadedFiles: [],
-  notionData: '',
-  linkedInData: undefined,
+  importSources: [],
   socialLinks: [],
-  socialIsMain: false,
-  linkedInImported: false,
+  realisations: [],
   media: [],
-  selectedTemplateId: null,
-  projects: [],
-  testimonials: [],
+  imageAssignments: {},
+  templateId: null,
 };
 
-// Calculate AI flags based on form data
-export const calculateAIFlags = (data: PortfolioFormData): AIFlags => {
-  return {
-    showPracticalInfo: !!(data.address || data.openingHours),
-    showSocialShowcase: data.socialIsMain,
-    showProjects: data.projects.length > 0,
-    showTestimonials: data.testimonials.length > 0,
-    profileType: data.profileType,
-    hasLinkedIn: !!data.linkedInData,
-    hasNotion: !!data.notionData,
-  };
+export const initialFormData: PortfolioFormDataV2 = DEV_MODE ? devFormData : emptyFormData;
+
+// ============================================
+// VALIDATION
+// ============================================
+
+export const validateStepAbout = (data: PortfolioFormDataV2): boolean => {
+  return (
+    data.name.trim().length > 0 &&
+    data.tagline.trim().length > 0
+  );
 };
 
-// Legacy alias for backward compatibility
-export const calculateGroqFlags = calculateAIFlags;
+export const validateStepRealisations = (data: PortfolioFormDataV2): boolean => {
+  return true; // Réalisations optionnelles
+};
+
+export const validateStepTemplate = (data: PortfolioFormDataV2): boolean => {
+  return data.templateId !== null;
+};

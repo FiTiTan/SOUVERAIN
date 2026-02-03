@@ -1,15 +1,36 @@
 /**
  * SOUVERAIN - Wizard Step 1: À Propos
- * Choix personne/lieu + imports + informations de base
+ * 
+ * V2 avec :
+ * - Détection automatique du profileContext par IA
+ * - Ordre : Activité → Expertises → Slogan → Ce qui vous différencie
+ * - Labels dynamiques selon profileContext
+ * - Boutons IA ✨ pour suggestions
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
 import type { WizardStepProps, ProfileType, ImportSource } from '../types';
-import { SourceImporter } from './SourceImporter';
 import { SocialLinksGrid } from './SocialLinksGrid';
 import { AIEnhanceButtonInline } from './AIEnhanceButtonInline';
+import { AIGeneratorButton } from './AIGeneratorButton';
+import { 
+  detectProfileContext, 
+  getContextLabels,
+  type ProfileContext,
+  type ProfileContextResult 
+} from '../../../services/profileContextDetector';
+
+// Debounce helper
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 export const WizardStepAbout: React.FC<WizardStepProps> = ({
   formData,
@@ -21,6 +42,49 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [isEnhancingTagline, setIsEnhancingTagline] = useState(false);
+  const [isDetectingContext, setIsDetectingContext] = useState(false);
+  const [contextLabels, setContextLabels] = useState(getContextLabels('service', false));
+
+  // Debounce l'activité pour la détection auto
+  const debouncedActivity = useDebounce(formData.title || '', 800);
+
+  // Détection automatique du profileContext quand l'activité change
+  useEffect(() => {
+    if (!debouncedActivity || debouncedActivity.length < 3) return;
+
+    const detectContext = async () => {
+      setIsDetectingContext(true);
+      try {
+        const result = await detectProfileContext(debouncedActivity);
+        console.log('[WizardStepAbout] Detected context:', result);
+        
+        // Mettre à jour le formData avec le contexte détecté
+        onUpdate({ 
+          profileContext: result.context,
+          profileType: result.isPlace ? 'place' : 'person',
+        });
+        
+        // Mettre à jour les labels
+        setContextLabels(getContextLabels(result.context, result.isPlace));
+      } catch (error) {
+        console.error('[WizardStepAbout] Context detection error:', error);
+      } finally {
+        setIsDetectingContext(false);
+      }
+    };
+
+    detectContext();
+  }, [debouncedActivity]);
+
+  // Mettre à jour les labels quand profileContext change
+  useEffect(() => {
+    if (formData.profileContext) {
+      setContextLabels(getContextLabels(
+        formData.profileContext as ProfileContext, 
+        formData.profileType === 'place'
+      ));
+    }
+  }, [formData.profileContext, formData.profileType]);
 
   const handleProfileTypeChange = (type: ProfileType) => {
     onUpdate({ profileType: type });
@@ -31,10 +95,8 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     setImportError(null);
 
     try {
-      // Ajouter la source aux sources importées
       const updatedSources = [...formData.importSources, source];
       
-      // Si des données ont été extraites, les pré-remplir
       if (source.extractedData) {
         const extracted = source.extractedData;
         onUpdate({
@@ -82,9 +144,23 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     }
   };
 
+  // Expertises (avec valeurs par défaut)
+  const expertises = formData.expertises || ['', '', ''];
+  const hasExpertises = expertises.filter(e => e.trim() !== '').length > 0;
+  const hasSlogan = formData.tagline && formData.tagline.trim() !== '';
+
+  const handleExpertiseChange = (index: number, value: string) => {
+    const updated = [...expertises];
+    updated[index] = value;
+    onUpdate({ expertises: updated });
+  };
+
   const canProceed = formData.name.trim().length > 0 && formData.tagline.trim().length > 0;
 
-  // Styles
+  // ============================================
+  // STYLES
+  // ============================================
+
   const containerStyle: React.CSSProperties = {
     padding: '2rem',
     maxWidth: '800px',
@@ -139,10 +215,6 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     gap: '1rem',
   });
 
-  const iconStyle: React.CSSProperties = {
-    fontSize: '3rem',
-  };
-
   const formGroupStyle: React.CSSProperties = {
     marginBottom: '1.5rem',
   };
@@ -155,6 +227,13 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     marginBottom: '0.5rem',
   };
 
+  const helperStyle: React.CSSProperties = {
+    fontSize: typography.fontSize.xs,
+    color: theme.text.tertiary,
+    fontWeight: typography.fontWeight.normal,
+    marginLeft: '0.5rem',
+  };
+
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '0.75rem',
@@ -164,6 +243,12 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     backgroundColor: theme.bg.secondary,
     color: theme.text.primary,
     transition: transitions.fast,
+  };
+
+  const expertisesGridStyle: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 1fr',
+    gap: '0.75rem',
   };
 
   const buttonStyle = (variant: 'primary' | 'secondary' | 'danger'): React.CSSProperties => {
@@ -179,24 +264,11 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
     switch (variant) {
       case 'primary':
-        return {
-          ...baseStyle,
-          backgroundColor: theme.accent.primary,
-          color: '#FFFFFF',
-        };
+        return { ...baseStyle, backgroundColor: theme.accent.primary, color: '#FFFFFF' };
       case 'secondary':
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          color: theme.text.secondary,
-          border: `1px solid ${theme.border.default}`,
-        };
+        return { ...baseStyle, backgroundColor: 'transparent', color: theme.text.secondary, border: `1px solid ${theme.border.default}` };
       case 'danger':
-        return {
-          ...baseStyle,
-          backgroundColor: theme.semantic.error,
-          color: '#FFFFFF',
-        };
+        return { ...baseStyle, backgroundColor: theme.semantic.error, color: '#FFFFFF' };
     }
   };
 
@@ -207,6 +279,16 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     paddingTop: '2rem',
     borderTop: `1px solid ${theme.border.light}`,
   };
+
+  const inputWithButtonStyle: React.CSSProperties = {
+    display: 'flex',
+    gap: '0.75rem',
+    alignItems: 'flex-start',
+  };
+
+  // ============================================
+  // RENDER
+  // ============================================
 
   return (
     <div style={containerStyle}>
@@ -232,11 +314,8 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
               <div style={{ fontWeight: typography.fontWeight.semibold, marginBottom: '0.5rem' }}>
                 Une personne
               </div>
-              <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary, marginBottom: '1rem' }}>
-                Freelance, salarié, chercheur...
-              </div>
-              <div style={{ fontSize: typography.fontSize.xs, color: theme.text.secondary, lineHeight: '1.4' }}>
-                Mettez en valeur votre parcours professionnel, vos compétences et vos réalisations pour décrocher de nouvelles opportunités.
+              <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary }}>
+                Freelance, salarié, artisan...
               </div>
             </div>
           </div>
@@ -253,215 +332,19 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
               <div style={{ fontWeight: typography.fontWeight.semibold, marginBottom: '0.5rem' }}>
                 Un lieu / Une entreprise
               </div>
-              <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary, marginBottom: '1rem' }}>
+              <div style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary }}>
                 Restaurant, boutique, cabinet...
-              </div>
-              <div style={{ fontSize: typography.fontSize.xs, color: theme.text.secondary, lineHeight: '1.4' }}>
-                Présentez votre établissement, vos services et attirez de nouveaux clients avec un portfolio professionnel.
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Réseaux sociaux */}
+      {/* Informations de base */}
       <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Réseaux sociaux :</h2>
-        <SocialLinksGrid
-          selectedLinks={formData.socialLinks}
-          onUpdate={(links) => onUpdate({ socialLinks: links })}
-        />
-      </div>
+        <h2 style={sectionTitleStyle}>Informations :</h2>
 
-      {/* Import de site web */}
-      <div style={sectionStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <h2 style={{ ...sectionTitleStyle, marginBottom: 0 }}>
-            Import depuis un site web
-            <span style={{ position: 'relative' }}>
-              <span
-                onMouseEnter={(e) => {
-                  const tooltip = e.currentTarget.querySelector('.tooltip-content') as HTMLElement;
-                  if (tooltip) tooltip.style.display = 'block';
-                }}
-                onMouseLeave={(e) => {
-                  const tooltip = e.currentTarget.querySelector('.tooltip-content') as HTMLElement;
-                  if (tooltip) tooltip.style.display = 'none';
-                }}
-                style={{
-                  marginLeft: '0.5rem',
-                  cursor: 'help',
-                  color: theme.text.tertiary,
-                  fontSize: typography.fontSize.xs,
-                  border: `1px solid ${theme.border.default}`,
-                  borderRadius: '50%',
-                  width: '18px',
-                  height: '18px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  verticalAlign: 'middle',
-                }}
-              >
-                ?
-                <div
-                  className="tooltip-content"
-                  style={{
-                    display: 'none',
-                    position: 'absolute',
-                    top: '100%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    marginTop: '0.5rem',
-                    padding: '0.75rem 1rem',
-                    backgroundColor: 'rgba(187, 247, 208, 0.95)',
-                    color: '#065F46',
-                    fontSize: typography.fontSize.sm,
-                    borderRadius: borderRadius.lg,
-                    border: '2px dashed rgba(6, 95, 70, 0.3)',
-                    minWidth: '250px',
-                    maxWidth: '300px',
-                    zIndex: 1000,
-                    boxShadow: '0 4px 12px rgba(134, 239, 172, 0.4)',
-                    animation: 'bounce 0.3s ease-out',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: typography.fontWeight.semibold, marginBottom: '0.25rem' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 18l6-6-6-6"/>
-                      <circle cx="12" cy="12" r="3"/>
-                      <path d="M12 2.83V6M12 18v3.17M3.17 12H6M18 12h3.17M5.64 5.64l2.83 2.83M15.54 15.54l2.83 2.83M5.64 18.36l2.83-2.83M15.54 8.46l2.83-2.83"/>
-                    </svg>
-                    Sources recommandées
-                  </div>
-                  <div style={{ fontSize: typography.fontSize.xs, lineHeight: '1.4' }}>
-                    Google Business • TripAdvisor • LinkedIn • Site web personnel
-                  </div>
-                </div>
-              </span>
-            </span>
-          </h2>
-        </div>
-        {(formData.importSources || []).filter(s => s.type === 'website').map((source, index) => (
-          <div key={index} style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            <input
-              type="url"
-              value={source.url || ''}
-              readOnly
-              style={{
-                ...inputStyle,
-                flex: 1,
-                opacity: 0.7,
-              }}
-            />
-            <button
-              onClick={() => {
-                const updated = formData.importSources.filter((_, i) => i !== index);
-                onUpdate({ importSources: updated });
-              }}
-              style={{
-                ...buttonStyle('secondary'),
-                color: theme.semantic.error,
-                borderColor: theme.semantic.error,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Retirer
-            </button>
-          </div>
-        ))}
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <input
-            type="url"
-            placeholder="https://..."
-            id="website-import-input"
-            style={{
-              ...inputStyle,
-              flex: 1,
-            }}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                const input = document.getElementById('website-import-input') as HTMLInputElement;
-                if (input && input.value.trim()) {
-                  const newSource: ImportSource = {
-                    type: 'website',
-                    url: input.value.trim(),
-                  };
-                  onUpdate({
-                    importSources: [...(formData.importSources || []), newSource],
-                  });
-                  input.value = '';
-                }
-              }
-            }}
-          />
-          <button
-            onClick={() => {
-              const input = document.getElementById('website-import-input') as HTMLInputElement;
-              if (input && input.value.trim()) {
-                const newSource: ImportSource = {
-                  type: 'website',
-                  url: input.value.trim(),
-                };
-                onUpdate({
-                  importSources: [...(formData.importSources || []), newSource],
-                });
-                input.value = '';
-              }
-            }}
-            style={{
-              ...buttonStyle('primary'),
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Importer
-          </button>
-        </div>
-      </div>
-
-      {/* Import PDF / Texte */}
-      <div style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Import depuis fichier :</h2>
-        <div style={{
-          border: `2px dashed ${theme.border.default}`,
-          borderRadius: borderRadius.lg,
-          padding: '1.5rem',
-          backgroundColor: theme.bg.secondary,
-          textAlign: 'center',
-        }}>
-          <p style={{
-            fontSize: typography.fontSize.sm,
-            color: theme.text.secondary,
-            marginBottom: '1rem',
-          }}>
-            Importez un CV, une bio, ou tout autre document
-          </p>
-          <button
-            style={{
-              ...buttonStyle('secondary'),
-            }}
-          >
-            📄 Choisir un fichier (PDF, TXT)
-          </button>
-        </div>
-        {importError && (
-          <div style={{ color: theme.semantic.error, marginTop: '0.5rem', fontSize: typography.fontSize.sm }}>
-            ⚠️ {importError}
-          </div>
-        )}
-      </div>
-
-      {/* Informations extraites / Édition */}
-      <div style={sectionStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2 style={sectionTitleStyle}>Informations :</h2>
-          {formData.importSources.length > 0 && (
-            <span style={{ fontSize: typography.fontSize.sm, color: theme.text.tertiary }}>
-              ✓ {formData.importSources.length} source(s) importée(s)
-            </span>
-          )}
-        </div>
-
+        {/* Nom */}
         <div style={formGroupStyle}>
           <label style={labelStyle}>Nom *</label>
           <input
@@ -473,50 +356,106 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
           />
         </div>
 
+        {/* Activité / Métier (avec détection auto) */}
         <div style={formGroupStyle}>
-          <label style={labelStyle}>Activité</label>
+          <label style={labelStyle}>
+            {contextLabels.activityLabel}
+            {isDetectingContext && (
+              <span style={{ marginLeft: '0.5rem', fontSize: typography.fontSize.xs, color: theme.text.tertiary }}>
+                🔄 Détection...
+              </span>
+            )}
+          </label>
           <input
             type="text"
             value={formData.title || ''}
             onChange={(e) => onUpdate({ title: e.target.value })}
-            placeholder="Développeur Full-Stack"
+            placeholder={contextLabels.activityPlaceholder}
             style={inputStyle}
           />
+          {formData.profileContext && (
+            <div style={{ 
+              marginTop: '0.5rem', 
+              fontSize: typography.fontSize.xs, 
+              color: theme.accent.primary,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}>
+              ✓ Catégorie détectée : {formData.profileContext}
+            </div>
+          )}
         </div>
 
+        {/* Expertises / Spécialités */}
         <div style={formGroupStyle}>
           <label style={labelStyle}>
-            Tagline *
-            <span
-              title="Une phrase courte et percutante qui résume votre identité ou votre proposition de valeur (ex: 'Créateur d'expériences digitales mémorables')"
-              style={{
-                marginLeft: '0.5rem',
-                cursor: 'help',
-                color: theme.text.tertiary,
-                fontSize: typography.fontSize.xs,
-                border: `1px solid ${theme.border.default}`,
-                borderRadius: '50%',
-                width: '16px',
-                height: '16px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              ?
-            </span>
+            {contextLabels.expertisesLabel}
+            <span style={helperStyle}>{contextLabels.expertisesHelper}</span>
           </label>
-          <div style={{ position: 'relative' }}>
+          <div style={expertisesGridStyle}>
+            {[0, 1, 2].map((index) => (
+              <input
+                key={index}
+                type="text"
+                value={expertises[index] || ''}
+                onChange={(e) => handleExpertiseChange(index, e.target.value)}
+                placeholder={contextLabels.expertisesPlaceholders[index]}
+                style={inputStyle}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Slogan */}
+        <div style={formGroupStyle}>
+          <label style={labelStyle}>
+            Votre slogan *
+            <span style={helperStyle}>Votre promesse en une phrase.</span>
+          </label>
+          <div style={inputWithButtonStyle}>
+            <div style={{ flex: 1, position: 'relative' }}>
+              <input
+                type="text"
+                value={formData.tagline}
+                onChange={(e) => onUpdate({ tagline: e.target.value })}
+                placeholder="Ex: Des apps qui convertissent"
+                style={{ ...inputStyle, paddingRight: '45px' }}
+              />
+              <AIEnhanceButtonInline
+                onEnhance={handleEnhanceTagline}
+                isLoading={isEnhancingTagline}
+              />
+            </div>
+            <AIGeneratorButton
+              type="slogan"
+              activity={formData.title || ''}
+              expertises={expertises}
+              onSelect={(value) => onUpdate({ tagline: value })}
+            />
+          </div>
+        </div>
+
+        {/* Ce qui vous différencie */}
+        <div style={formGroupStyle}>
+          <label style={labelStyle}>
+            Ce qui vous différencie
+            <span style={helperStyle}>Pourquoi vous plutôt qu'un autre ?</span>
+          </label>
+          <div style={inputWithButtonStyle}>
             <input
               type="text"
-              value={formData.tagline}
-              onChange={(e) => onUpdate({ tagline: e.target.value })}
-              placeholder="Passionné par les solutions innovantes"
-              style={{ ...inputStyle, paddingRight: '45px' }}
+              value={formData.valueProp || ''}
+              onChange={(e) => onUpdate({ valueProp: e.target.value })}
+              placeholder="Ex: Spécialiste e-commerce, +50 boutiques livrées"
+              style={{ ...inputStyle, flex: 1 }}
             />
-            <AIEnhanceButtonInline
-              onEnhance={handleEnhanceTagline}
-              isLoading={isEnhancingTagline}
+            <AIGeneratorButton
+              type="difference"
+              activity={formData.title || ''}
+              expertises={expertises}
+              slogan={formData.tagline || ''}
+              onSelect={(value) => onUpdate({ valueProp: value })}
             />
           </div>
         </div>
@@ -569,6 +508,15 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
             </div>
           </>
         )}
+      </div>
+
+      {/* Réseaux sociaux */}
+      <div style={sectionStyle}>
+        <h2 style={sectionTitleStyle}>Réseaux sociaux :</h2>
+        <SocialLinksGrid
+          selectedLinks={formData.socialLinks}
+          onUpdate={(links) => onUpdate({ socialLinks: links })}
+        />
       </div>
 
       {/* Footer avec navigation */}
