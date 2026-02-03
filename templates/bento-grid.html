@@ -359,30 +359,14 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
         }
 
         /* ============================================
-           LAYOUT ADAPTATIF - SERVICES
+           SERVICES - Toujours 3 colonnes (fixe)
+           DeepSeek génère toujours exactement 3 services
            ============================================ */
         .services-grid {
             display: grid;
-            gap: 1.5rem;
-            justify-content: center;
-            grid-auto-rows: minmax(300px, auto);
-        }
-
-        /* 1 service = large centré */
-        .services-grid:has(> :only-child) {
-            grid-template-columns: minmax(auto, 700px);
-        }
-
-        /* 2 services = 2 colonnes */
-        .services-grid:has(> :nth-child(2):last-child) {
-            grid-template-columns: repeat(2, 1fr);
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        /* 3+ services = grille 3 colonnes */
-        .services-grid:has(> :nth-child(3)) {
             grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            grid-auto-rows: minmax(300px, auto);
         }
 
         .service-card {

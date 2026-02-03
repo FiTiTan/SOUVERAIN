@@ -1,6 +1,6 @@
 /**
  * SOUVERAIN - Portfolio Wizard V2
- * Orchestrateur du parcours en 7 étapes
+ * Orchestrateur du parcours en 6 étapes (expertise retirée - services générés auto par DeepSeek)
  */
 
 import React, { useState } from 'react';
@@ -11,14 +11,13 @@ import { detectContext } from '../../../config/portfolioLabels';
 
 // Import des steps
 import { WizardStepAbout } from './WizardStepAbout';
-import { WizardStepExpertise } from './WizardStepExpertise';
 import { WizardStepRealisations } from './WizardStepRealisations';
 import { WizardStepTemplate } from './WizardStepTemplate';
 import { WizardStepGeneration } from './WizardStepGeneration';
 import { WizardStepPreview } from './WizardStepPreview';
 import { WizardStepExport } from './WizardStepExport';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
 
 const INITIAL_FORM_DATA: PortfolioFormDataV2 = {
   profileType: 'person',
@@ -31,14 +30,7 @@ const INITIAL_FORM_DATA: PortfolioFormDataV2 = {
     { platform: 'LinkedIn', url: 'https://linkedin.com/in/jean-dupont' },
     { platform: 'GitHub', url: 'https://github.com/jeandupont' },
   ],
-  services: [
-    {
-      title: 'Développement web',
-      description: 'Création d\'applications web modernes avec React, TypeScript et Node.js',
-      suggested: false,
-    },
-  ],
-  valueProp: 'Je transforme vos idées en applications web performantes et élégantes',
+  // Services et valueProp sont maintenant générés automatiquement par DeepSeek (pas de step Expertise)
   realisations: [],
   templateId: '',
   imageAssignments: {},
@@ -61,12 +53,10 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
     setFormData(prev => {
       const updated = { ...prev, ...updates };
       
-      // Auto-détecter le contexte si profileType ou services changent
-      if (updates.profileType || updates.services) {
-        updated.profileContext = detectContext(
-          updated.profileType,
-          updated.services.map(s => s.title)
-        );
+      // Auto-détecter le contexte si profileType change
+      if (updates.profileType) {
+        // Le contexte sera affiné par DeepSeek lors de la génération
+        updated.profileContext = 'tech'; // Default, sera override par l'IA
       }
       
       return updated;
@@ -105,16 +95,14 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
       case 1:
         return <WizardStepAbout {...stepProps} />;
       case 2:
-        return <WizardStepExpertise {...stepProps} />;
-      case 3:
         return <WizardStepRealisations {...stepProps} />;
-      case 4:
+      case 3:
         return <WizardStepTemplate {...stepProps} />;
-      case 5:
+      case 4:
         return <WizardStepGeneration {...stepProps} />;
-      case 6:
+      case 5:
         return <WizardStepPreview {...stepProps} />;
-      case 7:
+      case 6:
         return <WizardStepExport {...stepProps} />;
       default:
         return null;
@@ -231,7 +219,6 @@ export const PortfolioWizardV2: React.FC<PortfolioWizardV2Props> = ({
           <div style={stepsContainerStyle}>
             {[
               'À propos',
-              'Expertise',
               'Réalisations',
               'Template',
               'Génération',

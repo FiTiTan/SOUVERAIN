@@ -224,28 +224,62 @@ RAPPEL LONGUEURS :
 }
 
 // ============================================================
-// ÉTAPE 2 : SERVICES
+// ÉTAPE 2 : SERVICES (GÉNÉRATION AUTOMATIQUE)
 // ============================================================
 
-async function enrichServices(data: RawPortfolioData): Promise<any[]> {
-  if (!data.services || data.services.length === 0) {
-    return [];
-  }
+// Labels dynamiques selon secteur
+const SERVICE_LABELS: Record<string, string> = {
+  tech: 'Services',
+  freelance: 'Services',
+  artisan: 'Savoir-faire',
+  food: 'Spécialités',
+  restaurant: 'Spécialités',
+  retail: 'Offres',
+  boutique: 'Offres',
+  service: 'Prestations',
+  default: 'Expertises',
+};
 
+async function enrichServices(data: RawPortfolioData): Promise<any> {
   const systemPrompt = `Tu es un copywriter expert pour portfolios professionnels.
 
 ${TONE_GUIDELINES}
 
-SECTION SERVICES :
+${PLACEHOLDER_RULES}
 
-Objectif : Clarifier l'offre en quelques mots percutants
+SERVICES - GÉNÉRATION AUTOMATIQUE
 
-Contraintes par service :
-- title : Nom du service (garder celui fourni ou améliorer légèrement)
-- description : 30-50 mots (2-3 phrases max)
-- icon : SVG minimaliste 48x48
+Génère EXACTEMENT 3 services pertinents basés sur :
+- Type de profil : ${data.profileType}
+- Réalisations fournies
+- Secteur d'activité (à déduire du contexte)
 
-STRUCTURE description :
+FORMAT JSON :
+{
+  "services": [
+    {
+      "title": "Nom du service",
+      "description": "35-45 mots. Ce que c'est + bénéfice client.",
+      "icon": "<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'>...</svg>"
+    }
+  ],
+  "servicesLabel": "Services"
+}
+
+CONTRAINTES :
+- EXACTEMENT 3 services (ni plus, ni moins)
+- Déduits intelligemment du contexte (projets, profil, secteur)
+- Ton impersonnel obligatoire
+- Pas de clichés : "innovant", "sur-mesure", "passionné"
+- Label adapté au secteur :
+  * Tech/Freelance → "Services"
+  * Artisan → "Savoir-faire"
+  * Food/Restaurant → "Spécialités"
+  * Retail/Boutique → "Offres"
+  * Service → "Prestations"
+  * Défaut → "Expertises"
+
+STRUCTURE description (35-45 mots, 2-3 phrases) :
 - Phrase 1 : Ce que c'est concrètement
 - Phrase 2 : Le bénéfice client direct
 
@@ -263,19 +297,32 @@ EXEMPLES MAUVAIS :
 ❌ "Notre expertise en développement..."
 ❌ "Solutions innovantes et sur-mesure..."
 
-Réponds en JSON : {"services": [{"title","description","icon"}]}
-icon = <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">...</svg>`;
+Réponds UNIQUEMENT en JSON valide :
+{"services": [{"title","description","icon"}], "servicesLabel": "Services"}`;
 
-  const userPrompt = `SERVICES À ENRICHIR :
-${data.services.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+  const projectsSummary = data.projects?.map(p => 
+    `- ${p.title}: ${(p.description || '').substring(0, 200)}`
+  ).join('\n') || 'Aucun projet fourni';
 
-TYPE DE PROFIL : ${data.profileType}
+  const userPrompt = `PROFIL :
+- Type : ${data.profileType}
+- Nom : ${data.name}
+- Tagline : ${data.tagline || 'Non fourni'}
 
-RAPPEL : 30-50 mots par description, ton impersonnel, aucun placeholder`;
+CONTEXTE RÉALISATIONS (à utiliser pour déduire les services) :
+${projectsSummary}
 
-  console.log('[AI] Step 2/3: Enriching services...');
+INSTRUCTIONS :
+- Génère EXACTEMENT 3 services pertinents basés sur ce contexte
+- Déduis le secteur d'activité (tech, food, retail, etc.)
+- Adapte le label en conséquence
+- Description : 35-45 mots par service
+- Ton impersonnel obligatoire`;
+
+  console.log('[AI] Step 2/3: Generating 3 services automatically...');
   const result = await callAI(systemPrompt, userPrompt, 1500);
   
+  // Nettoyage et validation
   if (result.services) {
     result.services = result.services.map((service: any) => ({
       ...service,
@@ -284,7 +331,17 @@ RAPPEL : 30-50 mots par description, ton impersonnel, aucun placeholder`;
     }));
   }
   
-  return result.services || [];
+  // Assurer exactement 3 services
+  if (!result.services || result.services.length !== 3) {
+    console.warn('[AI] ⚠️ Expected 3 services, got:', result.services?.length || 0);
+  }
+  
+  // Label par défaut si non fourni
+  if (!result.servicesLabel) {
+    result.servicesLabel = SERVICE_LABELS.default;
+  }
+  
+  return result; // Retourne {services: [...], servicesLabel: "..."}
 }
 
 // ============================================================
@@ -419,17 +476,24 @@ export async function enrichPortfolioDataSequenced(
     // Étape 1 : Hero + About
     const heroAbout = await enrichHeroAndAbout(anonymizedData);
 
-    // Étape 2 & 3 : Services + Projects (parallèle)
-    const [enrichedServices, enrichedProjects] = await Promise.all([
+    // Étape 2 & 3 : Services (auto-générés) + Projects (parallèle)
+    const [servicesResult, enrichedProjects] = await Promise.all([
       enrichServices(anonymizedData).catch(err => {
-        console.warn('[AI] Services failed:', err);
-        return anonymizedData.services?.map(s => ({ title: s, description: '', icon: '' })) || [];
+        console.warn('[AI] Services generation failed:', err);
+        return { 
+          services: [], 
+          servicesLabel: 'Services' 
+        };
       }),
       enrichProjects(anonymizedData).catch(err => {
         console.warn('[AI] Projects failed:', err);
         return anonymizedData.projects || [];
       }),
     ]);
+
+    // Extraire services et label du résultat
+    const enrichedServices = servicesResult.services || [];
+    const servicesLabel = servicesResult.servicesLabel || 'Services';
 
     // Icônes fallback
     const servicesWithIcons = enrichServicesWithIcons(enrichedServices);
@@ -439,6 +503,7 @@ export async function enrichPortfolioDataSequenced(
       ...heroAbout,
       heroTitle: anonymizedData.name,
       services: servicesWithIcons,
+      servicesLabel: servicesLabel, // Nouveau champ
       projects: enrichedProjects.map((p: any, i: number) => ({
         ...p,
         category: p.category || 'Projet',

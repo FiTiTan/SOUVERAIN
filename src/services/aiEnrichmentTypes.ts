@@ -90,12 +90,13 @@ export interface EnrichedPortfolioData {
   aboutImage?: string;
   valueProp?: string;
   
-  // Services (enrichis)
+  // Services (auto-générés par DeepSeek)
   services: Array<{
     title: string;
     description: string;
     icon: string; // SVG inline
   }>;
+  servicesLabel?: string; // Label dynamique (Services, Savoir-faire, Prestations, etc.)
   
   // Projects (enrichis)
   projects?: Array<{
