@@ -7,7 +7,8 @@
  */
 
 import type { PortfolioFormData } from '../components/portfolio/wizard/types';
-import { generatePortfolioV3, type GenerationInputV3 } from './portfolioGeneratorServiceV3';
+import { generatePortfolioFromWizardV2 } from './portfolioGeneratorV2Service';
+import type { PortfolioFormDataV2 } from '../components/portfolio/types';
 
 interface RenderOptions {
   formData: PortfolioFormData;
@@ -58,35 +59,24 @@ export const renderPortfolioHTML = async (options: RenderOptions): Promise<{ suc
   try {
     const { formData, templateId } = options;
 
-    console.log('[PortfolioRender] ========== STARTING V3 GENERATION ==========');
+    console.log('[PortfolioRender] ========== STARTING V2 GENERATION ==========');
     console.log('[PortfolioRender] formData received:', formData);
-    console.log('[PortfolioRender] uploadedFiles from formData:', formData.uploadedFiles);
-    console.log('[PortfolioRender] uploadedFiles count:', formData.uploadedFiles?.length || 0);
-
-    // Préparer l'input pour le workflow V3
-    const generationInput: GenerationInputV3 = {
-      formData,
-      uploadedFiles: formData.uploadedFiles || [],
-      linkedInData: formData.linkedInData,
-      notionData: formData.notionData,
-      templateId,
+    
+    // Convertir formData au format V2 si nécessaire
+    const formDataV2: PortfolioFormDataV2 = {
+      ...formData as any,
+      templateId: templateId || formData.templateId,
     };
 
-    console.log('[PortfolioRender] generationInput prepared:', generationInput);
-    console.log('[PortfolioRender] ================================================');
-
-    // Utiliser le workflow V3 complet
-    const result = await generatePortfolioV3(generationInput);
+    console.log('[PortfolioRender] Calling generatePortfolioFromWizardV2...');
+    
+    // Utiliser le workflow V2
+    const result = await generatePortfolioFromWizardV2(formDataV2);
 
     console.log('[PortfolioRender] Result received:', result);
-    console.log('[PortfolioRender] Result type:', typeof result);
-    console.log('[PortfolioRender] Result.success:', result?.success);
 
     if (result && result.success) {
-      console.log('[PortfolioRender] ✓ V3 generation complete');
-      if (result.debug) {
-        console.log('[PortfolioRender] Debug:', result.debug);
-      }
+      console.log('[PortfolioRender] ✓ V2 generation complete');
       return result;
     } else if (result && !result.success) {
       console.error('[PortfolioRender] Generation failed:', result.error);
