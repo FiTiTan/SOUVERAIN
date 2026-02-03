@@ -37,28 +37,82 @@
 ### 2. 📄 **CV GENERATOR MODULE**
 
 #### Features implémentées ✅
-- **CVChoice** : Choix du parcours de création
-  - **"J'ai déjà un CV"** : Upload + analyse IA du document existant
-  - **"Je pars de zéro"** : Wizard création guidée pas à pas
-  - **"Importer LinkedIn"** : Conversion profil LinkedIn en CV
-- **CVWizard** : Création guidée en 6-7 étapes
-  - Identité (nom, email, téléphone, localisation)
-  - Objectif (poste visé, secteur, niveau)
-  - Formation (diplômes, écoles, années)
-  - Expérience (postes, entreprises, descriptions)
-  - Compétences (skills techniques + langues)
-  - Extras (LinkedIn, portfolio, hobbies)
-- **Export multi-formats**
-  - PDF optimisé
-  - DOCX éditable
-  - HTML responsive
+
+**CVChoice - 3 parcours de création** :
+- **"J'ai déjà un CV"** : Upload PDF/DOCX → Analyse IA → Suggestions d'amélioration
+- **"Je pars de zéro"** : Wizard création guidée en 6-7 étapes
+- **"Importer LinkedIn"** : Scraping profil LinkedIn → Conversion automatique en CV
+
+**CVWizard - Création guidée** :
+- **Step 1** : Identité (nom, email, téléphone, localisation)
+- **Step 2** : Objectif professionnel (poste visé, secteur, niveau d'expérience)
+- **Step 3** : Formation (diplômes, écoles, années)
+- **Step 4** : Expériences professionnelles (postes, entreprises, dates, descriptions)
+- **Step 5** : Compétences techniques + Langues (avec niveaux)
+- **Step 6** : Extras (LinkedIn, portfolio, hobbies)
+
+**Export basique** :
+- PDF optimisé
+- DOCX éditable
+- HTML responsive
 
 #### Features prévues 🚧
-- **Templates visuels multiples** (Classique, Moderne, Créatif, Minimaliste)
-- **Analyse IA approfondie** (suggestions d'amélioration détaillées)
-- **Optimisation ATS** (Applicant Tracking System - mots-clés, parsing)
-- **Versions multilingues** (FR/EN/ES/DE avec traduction IA)
-- **Templates premium** (payants, designs avancés)
+
+**Phase 1 - Templates Freemium (Sprint 2-3 semaines)** :
+
+**Templates gratuits (3-5)** :
+- **Classique ATS** : Épuré, sans design, optimisé parsing automatique (prioritaire)
+- **Moderne Clean** : Minimaliste élégant, style tech/startups
+- **Créatif Color** : Sections colorées, infographies, pour profils créatifs
+- **Academic** : Sobre, formel, pour recherche/enseignement
+- **Executive** : Premium look sobre, pour cadres/direction
+
+**Templates premium (payants)** :
+- **Tech Engineer** (4.99€) : Aesthetic code, dark mode, pour développeurs
+- **Creative Pro** (6.99€) : Bold, portfolio-like, avec mini-projets visuels
+- **Luxury Executive** (9.99€) : Ultra-premium, serif, gold accents
+- **Infographic CV** (7.99€) : Data viz, charts automatiques, visuel
+- **Video CV Ready** (5.99€) : QR codes, liens vidéo intégrés
+
+**Boutique CV Templates** :
+- Grid de templates (comme Portfolio)
+- Preview modal avec zoom
+- Achat in-app (Stripe)
+- Badge "Premium" + prix
+
+**Phase 2 - Features différenciantes (Sprint 3-4 semaines)** :
+
+**ATS Scoring** (unique CV, pas sur Portfolio) :
+- Score 0-100% compatibilité ATS par template
+- Analyse mots-clés métier
+- Suggestions d'optimisation parsing
+- Badge score visible sur chaque template
+
+**AI Rewrite pour CV** (réutilisation du système Portfolio) :
+- Boutons ✨ sur expériences/compétences
+- Popup instructions : "Plus orienté résultats", "Ajoute mots-clés ATS"
+- Régénération DeepSeek/Groq
+- Optimisation automatique du contenu
+
+**Multi-langues avec traduction IA** :
+- FR/EN/ES/DE/IT
+- Traduction automatique DeepSeek
+- Adaptation culturelle (formats dates, terminologie)
+- Export simultané multi-langues
+
+**Anonymisation RGPD** :
+- Mode "CV anonyme" (masque nom, contacts)
+- Pour candidatures initiales privacy-first
+- Révélation progressive des infos
+
+**Phase 3 - Analyse IA avancée (Sprint 5-6 semaines)** :
+
+**Coach CV intelligent** :
+- Analyse sémantique approfondie
+- Suggestions par section (expérience, formation, compétences)
+- Comparaison avec CVs top performers du secteur
+- Score global + axes d'amélioration
+- Avant/Après avec suggestions appliquées
 
 ---
 
@@ -405,11 +459,12 @@
 - IA Anonymisation
 
 ### Phase 2 - Enrichissement 🚧 (En cours)
-- AI Rewrite (Preview éditable)
-- Templates premium
-- Job Matching Module
-- LinkedIn Coach Module
-- Export PDF optimisé
+- ✅ AI Rewrite Portfolio (Preview éditable) - **Terminé**
+- 🚧 Templates CV Freemium (3-5 gratuits + premium) - **En développement**
+- 🚧 ATS Scoring pour CV - **En développement**
+- 📅 Job Matching Module - **Planifié**
+- 📅 LinkedIn Coach Module - **Planifié**
+- 🚧 Export PDF optimisé - **En cours**
 
 ### Phase 3 - Monétisation 📅 (Planifié)
 - Marketplace templates
@@ -460,14 +515,35 @@
 
 ## 🎯 **PROCHAINES FEATURES PRIORITAIRES**
 
-1. **Connecter aiEnrichmentServiceV4** dans WizardStepGeneration ✅ (Fait)
-2. **Extraire valueProp + expertises** du HTML pour AI Rewrite 🚧
-3. **Injecter data-count** dans templates pour CSS adaptatif 🚧
-4. **Implémenter Job Matching Module** 📅 (Brief prêt)
-5. **Implémenter LinkedIn Coach Module** 📅 (Brief prêt)
-6. **Marketplace templates** 📅
-7. **Hébergement portfolios** 📅
-8. **Tests E2E complets** 🚧
+### Court terme (2-4 semaines)
+
+1. ✅ **Wizard Portfolio V2 + AI Rewrite** - Terminé (3 fév 2026)
+2. 🚧 **Templates CV Freemium** - Sprint en cours
+   - 3-5 templates gratuits (Classique ATS, Moderne, Créatif)
+   - Structure boutique (comme Portfolio)
+   - Preview + achat templates premium
+3. 🚧 **ATS Scoring CV** - Sprint en cours
+   - Score compatibilité 0-100%
+   - Badge sur chaque template
+   - Suggestions optimisation
+4. 📅 **AI Rewrite pour CV** - Planifié (Sprint 3)
+   - Réutilisation système Portfolio
+   - Boutons ✨ sur expériences/compétences
+   - Optimisation contenu ATS
+
+### Moyen terme (1-2 mois)
+
+5. 📅 **Job Matching Module** (Brief prêt)
+6. 📅 **LinkedIn Coach Module** (Brief prêt)
+7. 📅 **Multi-langues CV** (FR/EN/ES/DE avec traduction IA)
+8. 📅 **Marketplace templates unifiée** (CV + Portfolio)
+
+### Long terme (3-6 mois)
+
+9. 📅 **Hébergement portfolios** (souverain.app/[username])
+10. 📅 **Analytics visiteurs** (privacy-first)
+11. 📅 **API publique** (intégrations tierces)
+12. 📅 **Tests E2E complets** (automatisation QA)
 
 ---
 
