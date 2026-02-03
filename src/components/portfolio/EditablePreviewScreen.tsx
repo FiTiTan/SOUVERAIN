@@ -7,6 +7,8 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTheme } from '../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../design-system';
 import type { LibraryImage, ImageAssignments, PortfolioPreviewData } from './types';
+import { injectAiRewriteSystem } from './injectAiRewrite';
+import { callDeepSeekRewrite } from '../../services/aiRewriteService';
 
 // ============================================================
 // UTILS
@@ -67,8 +69,15 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
       // Injecter les CSS pour les zones droppables
       injectDropZonesCSS(doc);
       
-      // Injecter les fonctionnalités d'édition
+      // ===== BRIEF 1 : Édition basique (contenteditable) =====
       injectEditableFeatures(doc);
+      
+      // ===== BRIEF 2 : AI Rewrite (boutons ✨ + régénération IA) =====
+      injectAiRewriteSystem(doc, {
+        name: portfolioData.authorName || '',
+        valueProp: '',  // TODO: extraire du HTML généré
+        expertises: [],  // TODO: extraire du HTML généré
+      });
 
       // Injecter les images assignées
       Object.entries(assignments).forEach(([zoneId, dataUrl]) => {
@@ -81,6 +90,62 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
 
     return () => clearTimeout(timer);
   }, [assignments]);
+
+  // ============================================================
+  // AI REWRITE MESSAGE HANDLER (BRIEF 2)
+  // ============================================================
+
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      // Vérifier que le message vient de l'iframe
+      if (event.source !== iframeRef.current?.contentWindow) return;
+
+      if (event.data.type === 'AI_REWRITE_REQUEST') {
+        const { currentText, instruction, fieldType, context } = event.data.payload;
+
+        try {
+          console.log('[Preview] AI Rewrite request:', { instruction, fieldType });
+
+          const result = await callDeepSeekRewrite({
+            currentText,
+            instruction,
+            fieldType,
+            context,
+          });
+
+          // Envoyer la réponse à l'iframe
+          iframeRef.current?.contentWindow?.postMessage(
+            {
+              type: 'AI_REWRITE_RESPONSE',
+              payload: {
+                newText: result.newText,
+              },
+            },
+            '*'
+          );
+        } catch (error: any) {
+          console.error('[Preview] AI Rewrite error:', error);
+
+          // Envoyer l'erreur à l'iframe
+          iframeRef.current?.contentWindow?.postMessage(
+            {
+              type: 'AI_REWRITE_RESPONSE',
+              payload: {
+                error: error.message || 'Erreur lors de la régénération',
+              },
+            },
+            '*'
+          );
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
 
   // ============================================================
   // INJECT CSS FOR DROP ZONES

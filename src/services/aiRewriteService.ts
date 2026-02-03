@@ -1,4 +1,5 @@
 /**
+ * BRIEF 2 : AI Rewrite Service
  * Service de réécriture AI pour les paragraphes du portfolio
  */
 
@@ -26,37 +27,6 @@ const FIELD_CONSTRAINTS: Record<string, string> = {
   projectDescription: '60-80 mots (4 phrases). Structure: contexte, solution, résultat.',
 };
 
-// Exemples de prompts utilisateur
-const PROMPT_EXAMPLES: Record<string, string[]> = {
-  heroSubtitle: [
-    'Plus percutant',
-    'Ajoute une notion de résultat',
-    'Plus orienté client',
-  ],
-  aboutText: [
-    'Plus concis',
-    'Ajoute des chiffres',
-    'Mets en avant l\'expertise technique',
-    'Rends le plus humain',
-  ],
-  valueProp: [
-    'Plus direct',
-    'Orienté bénéfice client',
-    'Ajoute un élément différenciant',
-  ],
-  serviceDescription: [
-    'Plus spécifique',
-    'Ajoute le bénéfice concret',
-    'Raccourcis',
-  ],
-  projectDescription: [
-    'Mets en avant les résultats',
-    'Ajoute les technologies utilisées',
-    'Plus orienté business',
-    'Ajoute des métriques',
-  ],
-};
-
 /**
  * Détermine le provider et l'URL
  */
@@ -71,7 +41,9 @@ async function getProvider(): Promise<{ url: string; model: string; key: string 
         key: deepseekResult.key,
       };
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[AiRewrite] DeepSeek not available:', e);
+  }
 
   try {
     // @ts-ignore
@@ -83,9 +55,11 @@ async function getProvider(): Promise<{ url: string; model: string; key: string 
         key: groqResult.key,
       };
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[AiRewrite] Groq not available:', e);
+  }
 
-  throw new Error('Aucun provider AI configuré. Ajoutez une clé DeepSeek ou Groq dans les paramètres.');
+  throw new Error('Aucun provider AI configuré. Ajoutez une clé DeepSeek ou Groq.');
 }
 
 /**
@@ -129,7 +103,7 @@ ${instruction}
 
 Réécris le texte en suivant l'instruction tout en respectant les contraintes.`;
 
-  console.log('[AiRewrite] Calling API with instruction:', instruction);
+  console.log('[AiRewrite] Calling API:', { fieldType, instruction });
 
   const response = await fetch(provider.url, {
     method: 'POST',
@@ -165,18 +139,7 @@ Réécris le texte en suivant l'instruction tout en respectant les contraintes.`
     .replace(/^Nouveau texte.*?:\s*/i, '')
     .trim();
 
-  console.log('[AiRewrite] Generated text:', newText.substring(0, 100) + '...');
+  console.log('[AiRewrite] Generated:', newText.substring(0, 100) + '...');
 
   return { newText };
-}
-
-/**
- * Retourne des suggestions de prompts pour un type de champ
- */
-export function getPromptSuggestions(fieldType: string): string[] {
-  return PROMPT_EXAMPLES[fieldType] || [
-    'Plus court',
-    'Plus percutant',
-    'Change le ton',
-  ];
 }
