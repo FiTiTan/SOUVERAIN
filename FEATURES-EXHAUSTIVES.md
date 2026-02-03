@@ -34,7 +34,7 @@
 
 ---
 
-### 2. 📄 **CV MODULE (BMAD - Business Model Actor Design)**
+### 2. 📄 **CV GENERATOR MODULE**
 
 #### Features implémentées ✅
 - **CVChoice** : Choix du type de CV
