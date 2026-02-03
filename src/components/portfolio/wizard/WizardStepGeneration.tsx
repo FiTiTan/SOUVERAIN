@@ -439,41 +439,85 @@ export const WizardStepGeneration: React.FC<WizardStepProps> = ({
         )}
       </div>
 
-      {/* Progress bar */}
+      {/* Progress bar avec gradient vert */}
       <div style={progressBarContainerStyle}>
-        <div style={progressBarStyle} />
+        <div style={{
+          height: '100%',
+          background: 'linear-gradient(to right, #10b981, #34d399, #6ee7b7)',
+          borderRadius: borderRadius.full,
+          width: `${progress}%`,
+          transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        }} />
       </div>
-      <div style={progressTextStyle}>
+      <div style={{
+        textAlign: 'right',
+        fontSize: typography.fontSize.sm,
+        fontWeight: typography.fontWeight.semibold,
+        color: '#10b981',
+        marginBottom: '2rem',
+      }}>
         {progress}%
       </div>
 
-      {/* Status */}
-      <div style={statusTextStyle}>
-        {currentStep}
-      </div>
-
-      {/* Steps checklist */}
-      <div style={stepsListStyle}>
-        {generationSteps.map((step, index) => {
-          const status = getStepStatus(index);
+      {/* Une seule card qui grandit avec les étapes */}
+      <div style={{
+        backgroundColor: theme.semantic.successBg,
+        border: `2px solid ${theme.semantic.success}`,
+        borderRadius: borderRadius.lg,
+        padding: '1.5rem',
+        minHeight: `${Math.max(200, currentStepIndex * 80 + 120)}px`,
+        transition: 'min-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease',
+        background: `linear-gradient(180deg, 
+          ${theme.semantic.successBg} 0%, 
+          rgba(16, 185, 129, 0.05) ${progress}%, 
+          transparent ${progress}%
+        )`,
+      }}>
+        {generationSteps.slice(0, currentStepIndex + 1).map((step, index) => {
+          const status = index < currentStepIndex ? 'done' : 'active';
           const StepIcon = step.icon;
           
           return (
-            <div key={step.id} style={stepItemStyle(status)}>
-              <div style={iconWrapperStyle(status)}>
+            <div key={step.id} style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '1rem',
+              padding: '0.75rem 0',
+              opacity: index <= currentStepIndex ? 1 : 0,
+              transform: index <= currentStepIndex ? 'translateY(0)' : 'translateY(-10px)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                backgroundColor: status === 'done' ? theme.semantic.success : '#10b981',
+                color: '#FFFFFF',
+              }}>
                 {status === 'done' ? (
                   <CheckCircleIcon size={20} color="#FFFFFF" strokeWidth={2.5} />
-                ) : status === 'active' ? (
-                  <StepIcon size={20} color="#FFFFFF" strokeWidth={2} />
                 ) : (
-                  <CircleIcon size={20} color={theme.text.tertiary} strokeWidth={2} />
+                  <StepIcon size={20} color="#FFFFFF" strokeWidth={2} />
                 )}
               </div>
-              <div style={stepContentStyle}>
-                <div style={stepLabelStyle(status)}>
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontSize: typography.fontSize.base,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: theme.text.primary,
+                  marginBottom: '0.25rem',
+                }}>
                   {step.label}
                 </div>
-                <div style={stepDescStyle(status)}>
+                <div style={{
+                  fontSize: typography.fontSize.sm,
+                  color: theme.text.secondary,
+                  lineHeight: 1.5,
+                }}>
                   {step.description}
                 </div>
               </div>
