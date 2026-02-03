@@ -37,27 +37,28 @@
 ### 2. 📄 **CV GENERATOR MODULE**
 
 #### Features implémentées ✅
-- **CVChoice** : Choix du type de CV
-  - CV Classique
-  - CV Moderne
-  - CV Créatif
-- **CVWizard** : Création guidée
-  - Informations personnelles
-  - Expérience professionnelle
-  - Formation
-  - Compétences
-  - Langues
-  - Import depuis LinkedIn
+- **CVChoice** : Choix du parcours de création
+  - **"J'ai déjà un CV"** : Upload + analyse IA du document existant
+  - **"Je pars de zéro"** : Wizard création guidée pas à pas
+  - **"Importer LinkedIn"** : Conversion profil LinkedIn en CV
+- **CVWizard** : Création guidée en 6-7 étapes
+  - Identité (nom, email, téléphone, localisation)
+  - Objectif (poste visé, secteur, niveau)
+  - Formation (diplômes, écoles, années)
+  - Expérience (postes, entreprises, descriptions)
+  - Compétences (skills techniques + langues)
+  - Extras (LinkedIn, portfolio, hobbies)
 - **Export multi-formats**
   - PDF optimisé
   - DOCX éditable
   - HTML responsive
 
 #### Features prévues 🚧
-- Templates CV premium (payants)
-- Analyse IA du CV (suggestions d'amélioration)
-- Optimisation ATS (Applicant Tracking System)
-- Versions multilingues (FR/EN/ES)
+- **Templates visuels multiples** (Classique, Moderne, Créatif, Minimaliste)
+- **Analyse IA approfondie** (suggestions d'amélioration détaillées)
+- **Optimisation ATS** (Applicant Tracking System - mots-clés, parsing)
+- **Versions multilingues** (FR/EN/ES/DE avec traduction IA)
+- **Templates premium** (payants, designs avancés)
 
 ---
 
