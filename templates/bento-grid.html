@@ -913,6 +913,118 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
                 height: 18px;
             }
         }
+
+        /* ============================================
+           ÉDITION INLINE - Contenteditable
+           ============================================ */
+        [contenteditable="true"] {
+            outline: none;
+            border-radius: 4px;
+            transition: background 0.2s, box-shadow 0.2s;
+            cursor: text;
+            position: relative;
+        }
+
+        [contenteditable="true"]:hover {
+            background: rgba(0, 113, 227, 0.05);
+        }
+
+        [contenteditable="true"]:focus {
+            background: rgba(0, 113, 227, 0.1);
+            box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.3);
+        }
+
+        /* Wrapper pour reset btn */
+        .editable-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        /* Fix pour wrappers dans liens */
+        .contact-content .editable-wrapper {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .reset-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: #ff6b6b;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reset-btn:hover {
+            background: #ff5252;
+        }
+
+        .editable-wrapper:hover .reset-btn,
+        .editable-wrapper.modified .reset-btn {
+            opacity: 1;
+        }
+
+        /* Indicateur modifié */
+        [contenteditable="true"].modified {
+            border-left: 3px solid #0071e3;
+            padding-left: 8px;
+        }
+
+        /* Toolbar preview */
+        .preview-toolbar {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .toolbar-btn {
+            padding: 0.6rem 1.2rem;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: #0077ed;
+        }
+
+        .toolbar-btn.secondary {
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        .toolbar-btn.secondary:hover {
+            background: #e8e8ed;
+        }
+
         /* ========== FIN STYLE PROTÉGÉ ========== */
     </style>
 </head>
@@ -932,10 +1044,27 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
     <!-- SECTION: hero (OBLIGATOIRE) -->
     <section class="hero" id="hero">
         <div class="hero-content">
-            <span class="hero-eyebrow">{{HERO_EYEBROW}}</span>
-            <h1>{{HERO_TITLE}}</h1>
-            <p class="hero-subtitle">{{HERO_SUBTITLE}}</p>
-            <a href="#contact" class="btn-primary">{{HERO_CTA_TEXT}}</a>
+            <div class="editable-wrapper">
+                <span class="hero-eyebrow" contenteditable="true" data-field="heroEyebrow" data-original="{{HERO_EYEBROW}}">{{HERO_EYEBROW}}</span>
+                <button class="reset-btn" title="Réinitialiser">↺</button>
+            </div>
+            
+            <div class="editable-wrapper">
+                <h1 contenteditable="true" data-field="heroTitle" data-original="{{HERO_TITLE}}">{{HERO_TITLE}}</h1>
+                <button class="reset-btn" title="Réinitialiser">↺</button>
+            </div>
+            
+            <div class="editable-wrapper">
+                <p class="hero-subtitle" contenteditable="true" data-field="heroSubtitle" data-original="{{HERO_SUBTITLE}}" data-multiline="true">{{HERO_SUBTITLE}}</p>
+                <button class="reset-btn" title="Réinitialiser">↺</button>
+            </div>
+            
+            <div class="editable-wrapper">
+                <a href="#contact" class="btn-primary">
+                    <span contenteditable="true" data-field="heroCta" data-original="{{HERO_CTA_TEXT}}">{{HERO_CTA_TEXT}}</span>
+                </a>
+                <button class="reset-btn" title="Réinitialiser">↺</button>
+            </div>
         </div>
         <div class="hero-visual" data-image-zone="hero">
             <!-- Placeholder pour image/video ou illustration -->
@@ -972,11 +1101,22 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             </div>
             <div class="about-content">
                 <div class="about-text-card">
-                    <h2>À propos</h2>
-                    <p>{{ABOUT_TEXT}}</p>
+                    <div class="editable-wrapper">
+                        <h2 contenteditable="true" data-field="aboutSectionTitle" data-original="À propos">À propos</h2>
+                        <button class="reset-btn" title="Réinitialiser">↺</button>
+                    </div>
+                    
+                    <div class="editable-wrapper">
+                        <p contenteditable="true" data-field="aboutText" data-original="{{ABOUT_TEXT}}" data-multiline="true">{{ABOUT_TEXT}}</p>
+                        <button class="reset-btn" title="Réinitialiser">↺</button>
+                    </div>
+                    
                     <!-- IF: hasValueProp -->
                     <div class="value-prop-card">
-                        <p class="value-prop">{{VALUE_PROP}}</p>
+                        <div class="editable-wrapper">
+                            <p class="value-prop" contenteditable="true" data-field="valueProp" data-original="{{VALUE_PROP}}" data-multiline="true">{{VALUE_PROP}}</p>
+                            <button class="reset-btn" title="Réinitialiser">↺</button>
+                        </div>
                     </div>
                     <!-- ENDIF: hasValueProp -->
                 </div>
@@ -986,15 +1126,25 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
 
     <!-- SECTION: services (OBLIGATOIRE) -->
     <section class="services" id="services">
-        <h2>Services</h2>
+        <div class="editable-wrapper">
+            <h2 contenteditable="true" data-field="servicesSectionTitle" data-original="Services">Services</h2>
+            <button class="reset-btn" title="Réinitialiser">↺</button>
+        </div>
+        
         <div class="services-grid">
             <!-- REPEAT: services -->
             <div class="service-card">
                 <div class="service-icon-wrapper">
                     {{SERVICE_ICON}}
                 </div>
-                <h3>{{SERVICE_TITLE}}</h3>
-                <p>{{SERVICE_DESC}}</p>
+                <div class="editable-wrapper">
+                    <h3 contenteditable="true" data-field="service{{INDEX}}Title" data-original="{{SERVICE_TITLE}}">{{SERVICE_TITLE}}</h3>
+                    <button class="reset-btn" title="Réinitialiser">↺</button>
+                </div>
+                <div class="editable-wrapper">
+                    <p contenteditable="true" data-field="service{{INDEX}}Desc" data-original="{{SERVICE_DESC}}" data-multiline="true">{{SERVICE_DESC}}</p>
+                    <button class="reset-btn" title="Réinitialiser">↺</button>
+                </div>
             </div>
             <!-- END REPEAT: services -->
         </div>
@@ -1003,7 +1153,11 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
     <!-- SECTION: projects (OPTIONNEL - SI projets fournis) -->
     <!-- IF: showProjects -->
     <section class="projects" id="projects">
-        <h2>Réalisations</h2>
+        <div class="editable-wrapper">
+            <h2 contenteditable="true" data-field="projectsSectionTitle" data-original="Réalisations">Réalisations</h2>
+            <button class="reset-btn" title="Réinitialiser">↺</button>
+        </div>
+        
         <div class="projects-grid">
             <!-- REPEAT: projects -->
             <article class="project-card">
@@ -1011,9 +1165,21 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
                     <img src="{{PROJECT_IMAGE}}" alt="{{PROJECT_TITLE}}">
                 </div>
                 <div class="project-content">
-                    <span class="project-category">{{PROJECT_CATEGORY}}</span>
-                    <h3>{{PROJECT_TITLE}}</h3>
-                    <p>{{PROJECT_DESC}}</p>
+                    <div class="editable-wrapper">
+                        <span class="project-category" contenteditable="true" data-field="project{{INDEX}}Category" data-original="{{PROJECT_CATEGORY}}">{{PROJECT_CATEGORY}}</span>
+                        <button class="reset-btn" title="Réinitialiser">↺</button>
+                    </div>
+                    
+                    <div class="editable-wrapper">
+                        <h3 contenteditable="true" data-field="project{{INDEX}}Title" data-original="{{PROJECT_TITLE}}">{{PROJECT_TITLE}}</h3>
+                        <button class="reset-btn" title="Réinitialiser">↺</button>
+                    </div>
+                    
+                    <div class="editable-wrapper">
+                        <p contenteditable="true" data-field="project{{INDEX}}Desc" data-original="{{PROJECT_DESC}}" data-multiline="true">{{PROJECT_DESC}}</p>
+                        <button class="reset-btn" title="Réinitialiser">↺</button>
+                    </div>
+                    
                     <!-- IF: hasProjectLink -->
                     <a href="{{PROJECT_LINK}}" class="project-link">Voir le projet →</a>
                     <!-- ENDIF: hasProjectLink -->
@@ -1067,11 +1233,26 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
     <!-- SECTION: contact (OBLIGATOIRE) -->
     <section class="contact" id="contact">
         <div class="contact-card">
-            <h2>Contact</h2>
+            <div class="editable-wrapper">
+                <h2 contenteditable="true" data-field="contactSectionTitle" data-original="Contact">Contact</h2>
+                <button class="reset-btn" title="Réinitialiser">↺</button>
+            </div>
+            
             <div class="contact-content">
-                <a href="mailto:{{CONTACT_EMAIL}}" class="contact-email">{{CONTACT_EMAIL}}</a>
+                <div class="editable-wrapper">
+                    <a href="mailto:{{CONTACT_EMAIL}}" class="contact-email">
+                        <span contenteditable="true" data-field="contactEmail" data-original="{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</span>
+                    </a>
+                    <button class="reset-btn" title="Réinitialiser">↺</button>
+                </div>
+                
                 <!-- IF: hasPhone -->
-                <a href="tel:{{CONTACT_PHONE}}" class="contact-phone">{{CONTACT_PHONE}}</a>
+                <div class="editable-wrapper">
+                    <a href="tel:{{CONTACT_PHONE}}" class="contact-phone">
+                        <span contenteditable="true" data-field="contactPhone" data-original="{{CONTACT_PHONE}}">{{CONTACT_PHONE}}</span>
+                    </a>
+                    <button class="reset-btn" title="Réinitialiser">↺</button>
+                </div>
                 <!-- ENDIF: hasPhone -->
             </div>
             <!-- IF: NOT showSocialShowcase -->
@@ -1212,6 +1393,105 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
                 e.preventDefault();
                 document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
             });
+        });
+
+        // ============================================
+        // ÉDITION INLINE - Contenteditable
+        // ============================================
+
+        // Détecter les modifications
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.addEventListener('input', () => {
+                const isModified = el.innerText.trim() !== el.dataset.original.trim();
+                el.classList.toggle('modified', isModified);
+                el.closest('.editable-wrapper')?.classList.toggle('modified', isModified);
+            });
+
+            // Prevent line breaks in single-line fields
+            el.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !el.dataset.multiline) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // Reset individuel
+        document.querySelectorAll('.reset-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const wrapper = btn.closest('.editable-wrapper');
+                const field = wrapper.querySelector('[contenteditable]');
+                field.innerText = field.dataset.original;
+                field.classList.remove('modified');
+                wrapper.classList.remove('modified');
+            });
+        });
+
+        // Reset global
+        document.getElementById('reset-all-btn')?.addEventListener('click', () => {
+            if (!confirm('Réinitialiser tous les textes modifiés ?')) return;
+            
+            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                el.innerText = el.dataset.original;
+                el.classList.remove('modified');
+                el.closest('.editable-wrapper')?.classList.remove('modified');
+            });
+        });
+
+        // Fonction pour récupérer le contenu édité (pour export)
+        window.getEditedContent = function() {
+            const edited = {};
+            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                const field = el.dataset.field;
+                if (field) {
+                    edited[field] = el.innerText.trim();
+                }
+            });
+            return edited;
+        };
+
+        // Log modifications (debug)
+        window.addEventListener('beforeunload', () => {
+            const edited = window.getEditedContent();
+            const modified = Object.keys(edited).filter(key => {
+                const el = document.querySelector(`[data-field="${key}"]`);
+                return el && el.classList.contains('modified');
+            });
+            if (modified.length > 0) {
+                console.log('Modifications détectées:', modified);
+            }
+        });
+    </script>
+
+    <!-- Toolbar Preview (visible uniquement en mode édition) -->
+    <div class="preview-toolbar" id="preview-toolbar" style="display: none;">
+        <button id="reset-all-btn" class="toolbar-btn secondary" title="Réinitialiser tous les textes">
+            🔄 Réinitialiser tout
+        </button>
+        <span style="color: #86868b; font-size: 0.85rem;">
+            <span id="modified-count">0</span> modif.
+        </span>
+    </div>
+
+    <script>
+        // Afficher toolbar si modifications
+        function updateToolbar() {
+            const modifiedCount = document.querySelectorAll('[contenteditable].modified').length;
+            const toolbar = document.getElementById('preview-toolbar');
+            const counter = document.getElementById('modified-count');
+            
+            if (modifiedCount > 0) {
+                toolbar.style.display = 'flex';
+                counter.textContent = modifiedCount;
+            } else {
+                toolbar.style.display = 'none';
+            }
+        }
+
+        // Observer les modifications
+        const observer = new MutationObserver(updateToolbar);
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            observer.observe(el, { childList: true, characterData: true, subtree: true });
         });
     </script>
 </body>
