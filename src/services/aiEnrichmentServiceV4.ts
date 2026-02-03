@@ -11,6 +11,8 @@
 import type { PortfolioFormDataV2 } from '../components/portfolio/types';
 import { anonymizeObject, deanonymizeObject, type EntityMap } from './anonymizationServiceV3';
 import { enrichServicesWithIcons } from '../utils/fallbackIcons';
+import { SERVICES_GENERATION_PROMPT, buildExpertisesBlock } from './servicesPromptV4';
+import { generateServicesWithValidation } from './aiValidation';
 
 // ============================================================
 // CONFIGURATION
@@ -162,91 +164,58 @@ RAPPELS :
 }
 
 /**
- * 2. SERVICES (basé sur expertises)
+ * 2. SERVICES (basé sur expertises) - PROMPT V4 OPTIMISÉ
  */
 async function enrichServices(data: RawPortfolioData): Promise<any> {
   const expertises = data.expertises?.filter(e => e.trim() !== '') || [];
-  const hasExpertises = expertises.length > 0;
-
-  const systemPrompt = `Tu es un copywriter expert pour portfolios professionnels.
-
-TON IMPERSONNEL OBLIGATOIRE :
-- JAMAIS de "je", "nous", "notre"
-- Formulations : "Conception de...", "Développement de...", "Accompagnement dans..."
-- Factuel, professionnel, orienté bénéfice client
-
-GÉNÉRATION DE SERVICES :
-
-${hasExpertises ? `
-EXPERTISES FOURNIES PAR L'UTILISATEUR :
-${expertises.map((e, i) => `${i + 1}. ${e}`).join('\n')}
-
-RÈGLE : Génère EXACTEMENT 3 services basés sur ces expertises.
-Chaque expertise devient un service avec :
-- Un titre professionnel (peut reformuler l'expertise)
-- Une description de 35-45 mots
-` : `
-AUCUNE EXPERTISE FOURNIE.
-RÈGLE : Déduis 3 services pertinents basés sur les réalisations et le type de profil.
-`}
-
-STRUCTURE PAR SERVICE :
-- title : Nom du service (professionnel)
-- description : 35-45 mots (2-3 phrases)
-  - Phrase 1 : Ce que c'est concrètement
-  - Phrase 2 : Le bénéfice client direct
-- icon : SVG minimaliste 48x48
-
-LABEL DE SECTION :
-Propose aussi un label adapté au profil :
-- tech/freelance → "Services"
-- artisan → "Savoir-faire"
-- food/restaurant → "Spécialités"
-- retail/boutique → "Offres"
-- service → "Prestations"
-- default → "Expertises"
-
-INTERDICTIONS :
-- Pas de noms de personnes
-- Pas de placeholders [PERSON_X]
-- Pas de clichés ("innovant", "sur-mesure", "passionné")
-
-Réponds en JSON :
-{
-  "servicesLabel": "Services",
-  "services": [
-    {"title", "description", "icon"}
-  ]
-}`;
-
-  const projectsContext = data.realisations?.map(p => 
-    `- ${p.title}: ${(p.description || '').substring(0, 200)}`
-  ).join('\n') || 'Aucun projet';
+  
+  // Construire le bloc expertises
+  const expertisesBlock = buildExpertisesBlock(expertises);
+  
+  // Construire le prompt système avec placeholders
+  const systemPrompt = SERVICES_GENERATION_PROMPT
+    .replace('{{NAME}}', data.name || '')
+    .replace('{{ACTIVITY}}', '') // Activity non utilisée dans ce contexte
+    .replace('{{LOCATION}}', '') // Location non utilisée
+    .replace('{{PROFILE_TYPE}}', data.profileType || '')
+    .replace('{{VALUE_PROP}}', data.valueProp || '')
+    .replace('{{EXPERTISES_BLOCK}}', expertisesBlock);
 
   const userPrompt = `TYPE DE PROFIL : ${data.profileType}
 
-${hasExpertises ? `EXPERTISES À TRANSFORMER EN SERVICES :
-${expertises.map((e, i) => `${i + 1}. ${e}`).join('\n')}` : `RÉALISATIONS (pour déduire les services) :
-${projectsContext}`}
+${expertises.length > 0 ? `EXPERTISES FOURNIES :
+${expertises.map((e, i) => `${i + 1}. ${e}`).join('\n')}` : `DÉDUIS les services basés sur le type de profil.`}
 
 RAPPELS :
 - EXACTEMENT 3 services
-- 35-45 mots par description
-- Ton impersonnel
+- 30-50 mots par description
+- Ton impersonnel STRICT (pas de je/nous/notre)
 - Label de section adapté au profil`;
 
-  const result = await callAI(systemPrompt, userPrompt, 1500);
+  // Wrapper avec validation et retry
+  const result = await generateServicesWithValidation(
+    async (wizardData) => {
+      const rawResult = await callAI(systemPrompt, userPrompt, 1500);
+      return {
+        label: rawResult.label || rawResult.servicesLabel || 'Services',
+        services: rawResult.services || []
+      };
+    },
+    { ...data, profileType: data.profileType || 'service' },
+    2 // max 2 tentatives
+  );
   
   // Nettoyer les SVG et descriptions
   if (result.services) {
     result.services = result.services.map((service: any) => ({
       ...service,
+      title: service.title || '',
+      description: cleanOrphanPlaceholders(service.description || ''),
       icon: service.icon ? cleanSvgQuotes(service.icon) : null,
-      description: cleanOrphanPlaceholders(service.description),
     }));
   }
   
-  return result;
+  return { servicesLabel: result.label, services: result.services };
 }
 
 /**
