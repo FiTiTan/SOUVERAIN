@@ -82,6 +82,7 @@ function replaceSimpleVariables(html: string, data: EnrichedPortfolioData): stri
     'ABOUT_TEXT': data.aboutText || '',
     'ABOUT_IMAGE': data.aboutImage || '',
     'VALUE_PROP': data.valueProp || '',
+    'SERVICES_LABEL': data.servicesLabel || 'Services', // Label dynamique (Services, Savoir-faire, etc.)
     'CONTACT_EMAIL': data.email || '',
     'EMAIL': data.email || '',
     'CONTACT_PHONE': data.phone || '',
