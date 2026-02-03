@@ -52,8 +52,8 @@ function convertToRawData(formData: PortfolioFormDataV2): RawPortfolioData {
                  formData.profileContext === 'service' ? 'service' :
                  formData.profileContext === 'tech' ? 'freelance' : 'freelance',
     tagline: formData.tagline,
-    services: formData.services.map(s => s.title),
-    valueProp: formData.valueProp,
+    services: [], // Services générés automatiquement par DeepSeek (plus saisis par l'user)
+    valueProp: '', // Généré par DeepSeek
     email: formData.email || '',
     phone: formData.phone,
     address: formData.address,
@@ -84,14 +84,11 @@ function convertToEnrichedData(formData: PortfolioFormDataV2): EnrichedPortfolio
     // About
     aboutText: `${formData.name} - ${formData.tagline}`,
     aboutImage: formData.imageAssignments.about,
-    valueProp: formData.valueProp,
+    valueProp: '', // Sera généré par DeepSeek
     
-    // Services
-    services: formData.services.map(s => ({
-      title: s.title,
-      description: s.description,
-      icon: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/></svg>', // Placeholder
-    })),
+    // Services (seront générés par DeepSeek - fallback vide)
+    services: [],
+    servicesLabel: 'Services', // Label par défaut
     
     // Projects/Réalisations
     projects: formData.realisations.map((r, index) => ({
