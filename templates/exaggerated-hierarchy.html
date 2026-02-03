@@ -47,6 +47,32 @@ SECTIONS_OPTIONNELLES: social_showcase, projects, testimonials, practical_info
             color: var(--color-text);
             line-height: 1.5;
             overflow-x: hidden;
+        }
+
+        /* Texte justifié et aération */
+        .about-text,
+        .service-description,
+        .project-description,
+        .value-prop,
+        .about-text-card p {
+            text-align: justify;
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            -moz-hyphens: auto;
+        }
+
+        /* Espacement paragraphes */
+        p {
+            margin-bottom: 1em;
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Aération sections */
+        section {
+            margin-bottom: 2rem;
             -webkit-font-smoothing: antialiased;
         }
 

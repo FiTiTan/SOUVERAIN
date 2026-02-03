@@ -7,7 +7,7 @@
  * 
  * Structure validée :
  * - heroSubtitle : 15-30 mots
- * - aboutText : 80-120 mots
+ * - aboutText : 60-80 mots
  * - valueProp : 20-30 mots
  * - Service : 30-50 mots chacun
  * - Projet : 60-80 mots chacun (synthétique mais substantiel)
@@ -189,13 +189,12 @@ SECTIONS À GÉNÉRER :
 2. heroSubtitle (15-30 mots) : Accroche percutante qui résume l'expertise et donne envie
 3. heroEyebrow (2-4 mots) : Rôle ou statut (ex: "Freelance", "Studio créatif", "Restaurant")
 4. heroCta (2-4 mots) : Call-to-action (ex: "Découvrir les projets", "Voir la carte")
-5. aboutText (80-120 mots) : Texte de présentation qui crée la confiance
+5. aboutText (60-80 mots) : Texte de présentation qui crée la confiance
 
-STRUCTURE aboutText :
-- Phrase 1-2 : Positionnement et expertise
-- Phrase 3 : Mention de projets/réalisations concrets (utilise le contexte fourni)
-- Phrase 4 : Approche ou méthodologie
-- Phrase 5 : Bénéfice client
+STRUCTURE aboutText (3-4 phrases max) :
+- Phrase 1 : Positionnement
+- Phrase 2 : Expertise démontrée (projet concret - utilise le contexte fourni)
+- Phrase 3 : Bénéfice client
 
 6. valueProp (20-30 mots) : La promesse client en 1-2 phrases. Répond à "Qu'est-ce que j'y gagne ?"
 
@@ -217,7 +216,7 @@ ${projectsContext}
 
 RAPPEL LONGUEURS :
 - heroSubtitle : 15-30 mots
-- aboutText : 80-120 mots (5 phrases)
+- aboutText : 60-80 mots (3-4 phrases max)
 - valueProp : 20-30 mots`;
 
   console.log('[AI] Step 1/3: Enriching hero & about...');
@@ -479,8 +478,8 @@ export async function enrichPortfolioDataSequenced(
     if (stats.heroSubtitleWords < 15 || stats.heroSubtitleWords > 30) {
       console.warn(`[AI] ⚠️ heroSubtitle: ${stats.heroSubtitleWords} mots (attendu: 15-30)`);
     }
-    if (stats.aboutTextWords < 80 || stats.aboutTextWords > 120) {
-      console.warn(`[AI] ⚠️ aboutText: ${stats.aboutTextWords} mots (attendu: 80-120)`);
+    if (stats.aboutTextWords < 60 || stats.aboutTextWords > 80) {
+      console.warn(`[AI] ⚠️ aboutText: ${stats.aboutTextWords} mots (attendu: 60-80)`);
     }
     if (stats.avgServiceWords < 30 || stats.avgServiceWords > 50) {
       console.warn(`[AI] ⚠️ services avg: ${stats.avgServiceWords} mots (attendu: 30-50)`);
