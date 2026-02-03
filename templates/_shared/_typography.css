@@ -1,0 +1,33 @@
+/* ============================================
+   TYPOGRAPHIE - PARTAGÉ TOUS TEMPLATES
+   ============================================ */
+
+/* Texte justifié pour tous les paragraphes */
+.about-text,
+.service-description,
+.project-description,
+.value-prop,
+.hero-subtitle {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+}
+
+/* Line height confortable */
+.about-text,
+.service-description,
+.project-description {
+  line-height: 1.7;
+}
+
+/* Pas de justify sur mobile (meilleure lisibilité) */
+@media (max-width: 480px) {
+  .about-text,
+  .service-description,
+  .project-description,
+  .value-prop {
+    text-align: left;
+    hyphens: none;
+  }
+}

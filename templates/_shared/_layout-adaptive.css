@@ -1,0 +1,120 @@
+/* ============================================
+   LAYOUT ADAPTATIF - PARTAGÉ TOUS TEMPLATES
+   ============================================ */
+
+/* --------------------------------------------
+   SERVICES : Toujours 3 colonnes
+   -------------------------------------------- */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------
+   PROJETS : Adaptatif selon le nombre
+   -------------------------------------------- */
+.projects-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* 1 seul projet = Layout horizontal large */
+.projects-grid[data-count="1"] {
+  grid-template-columns: 1fr;
+}
+
+.projects-grid[data-count="1"] .project-card {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.projects-grid[data-count="1"] .project-image {
+  height: 250px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* 2 projets = 2 colonnes égales */
+.projects-grid[data-count="2"] {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* 3+ projets = 2 colonnes (grille classique) */
+.projects-grid[data-count="3"],
+.projects-grid[data-count="4"],
+.projects-grid[data-count="5"],
+.projects-grid[data-count="6"] {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Alternative avec :has() pour navigateurs modernes */
+@supports selector(:has(*)) {
+  .projects-grid:has(> :only-child) {
+    grid-template-columns: 1fr;
+  }
+  
+  .projects-grid:has(> :only-child) .project-card {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  .projects-grid:has(> :nth-child(2)):not(:has(> :nth-child(3))) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .projects-grid:has(> :nth-child(3)) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .projects-grid,
+  .projects-grid[data-count="1"],
+  .projects-grid[data-count="2"],
+  .projects-grid[data-count="3"] {
+    grid-template-columns: 1fr;
+  }
+  
+  .projects-grid[data-count="1"] .project-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------
+   CONTACT : Pleine largeur
+   -------------------------------------------- */
+.contact-section {
+  width: 100%;
+}
+
+/* --------------------------------------------
+   HAUTEURS HARMONISÉES
+   -------------------------------------------- */
+.service-card,
+.project-card {
+  min-height: 200px;
+}
+
+.project-image {
+  height: 200px;
+  object-fit: cover;
+}
+
+.about-section {
+  min-height: 250px;
+}

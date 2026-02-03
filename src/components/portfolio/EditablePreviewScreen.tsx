@@ -66,6 +66,9 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
 
       // Injecter les CSS pour les zones droppables
       injectDropZonesCSS(doc);
+      
+      // Injecter les fonctionnalités d'édition
+      injectEditableFeatures(doc);
 
       // Injecter les images assignées
       Object.entries(assignments).forEach(([zoneId, dataUrl]) => {
@@ -121,6 +124,104 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
         outline: 2px solid rgba(58, 58, 58, 0.3);
         outline-offset: -2px;
       }
+    `;
+  };
+
+  // ============================================================
+  // INJECT EDITABLE FEATURES
+  // ============================================================
+
+  const injectEditableFeatures = (doc: Document) => {
+    // 1. Injecter le CSS pour les éléments éditables
+    let editableStyle = doc.getElementById('editable-style');
+    if (!editableStyle) {
+      editableStyle = doc.createElement('style');
+      editableStyle.id = 'editable-style';
+      doc.head.appendChild(editableStyle);
+    }
+
+    editableStyle.textContent = `
+      [contenteditable="true"] {
+        outline: none;
+        border-radius: 4px;
+        transition: background 0.2s;
+        cursor: text;
+        position: relative;
+      }
+      
+      [contenteditable="true"]:hover {
+        background: rgba(99, 102, 241, 0.05);
+      }
+      
+      [contenteditable="true"]:focus {
+        background: rgba(99, 102, 241, 0.1);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+      }
+      
+      [contenteditable="true"].modified {
+        border-left: 3px solid #6366f1;
+        padding-left: 0.5rem;
+      }
+    `;
+
+    // 2. Trouver et marquer les éléments éditables
+    const editableSelectors = [
+      { selector: '.hero-title, .heroTitle, h1[class*="hero"]', field: 'heroTitle' },
+      { selector: '.hero-subtitle, .heroSubtitle', field: 'heroSubtitle' },
+      { selector: '.hero-eyebrow, .heroEyebrow', field: 'heroEyebrow' },
+      { selector: '.hero-cta, button[class*="hero"]', field: 'heroCta' },
+      { selector: '.about-text, .aboutText, .bio-text', field: 'aboutText' },
+      { selector: '.value-prop, .valueProp', field: 'valueProp' },
+      { selector: '.service-title, .service h3', field: 'serviceTitle' },
+      { selector: '.service-description, .service p', field: 'serviceDescription' },
+      { selector: '.project-title, .project h3', field: 'projectTitle' },
+      { selector: '.project-description, .project p:not(.category)', field: 'projectDescription' },
+      { selector: '.contact-email, [href^="mailto"]', field: 'email' },
+      { selector: '.contact-phone, [href^="tel"]', field: 'phone' },
+    ];
+
+    editableSelectors.forEach(({ selector, field }) => {
+      const elements = doc.querySelectorAll(selector);
+      elements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        if (!htmlEl.hasAttribute('contenteditable')) {
+          htmlEl.setAttribute('contenteditable', 'true');
+          htmlEl.setAttribute('data-field', field);
+          htmlEl.setAttribute('data-original', htmlEl.innerText);
+        }
+      });
+    });
+
+    // 3. Injecter le script de détection de modifications
+    let editableScript = doc.getElementById('editable-script');
+    if (!editableScript) {
+      editableScript = doc.createElement('script');
+      editableScript.id = 'editable-script';
+      doc.body.appendChild(editableScript);
+    }
+
+    editableScript.textContent = `
+      (function() {
+        // Détecter les modifications
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+          el.addEventListener('input', () => {
+            const isModified = el.innerText !== el.getAttribute('data-original');
+            if (isModified) {
+              el.classList.add('modified');
+            } else {
+              el.classList.remove('modified');
+            }
+          });
+        });
+        
+        // Fonction de reset globale (exposée pour le bouton toolbar)
+        window.resetAllEdits = function() {
+          document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.innerText = el.getAttribute('data-original');
+            el.classList.remove('modified');
+          });
+        };
+      })();
     `;
   };
 
@@ -401,11 +502,13 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
     position: 'relative',
     backgroundColor: theme.bg.tertiary,
     overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
   };
 
   const iframeStyle: React.CSSProperties = {
     width: '100%',
-    height: '100%',
+    flex: 1,
     border: 'none',
     backgroundColor: '#FFFFFF',
     pointerEvents: isDragging ? 'none' : 'auto', // ✅ Désactiver pendant le drag pour que les événements passent
@@ -533,6 +636,47 @@ export const EditablePreviewScreen: React.FC<EditablePreviewScreenProps> = ({
 
         {/* Preview */}
         <div style={previewContainerStyle}>
+          {/* Toolbar d'édition */}
+          <div style={{
+            padding: '0.75rem 1rem',
+            backgroundColor: theme.bg.secondary,
+            borderBottom: `1px solid ${theme.border.light}`,
+            display: 'flex',
+            gap: '1rem',
+            alignItems: 'center',
+          }}>
+            <span style={{
+              fontSize: typography.fontSize.sm,
+              color: theme.text.secondary,
+            }}>
+              💡 Cliquez sur les textes pour les modifier
+            </span>
+            <div style={{ flex: 1 }} />
+            <button
+              onClick={() => {
+                const iframe = iframeRef.current;
+                if (iframe?.contentWindow) {
+                  // @ts-ignore
+                  iframe.contentWindow.resetAllEdits?.();
+                }
+              }}
+              style={{
+                padding: '0.5rem 1rem',
+                fontSize: typography.fontSize.xs,
+                fontWeight: typography.fontWeight.medium,
+                backgroundColor: 'transparent',
+                color: theme.text.secondary,
+                border: `1px solid ${theme.border.default}`,
+                borderRadius: borderRadius.md,
+                cursor: 'pointer',
+                transition: transitions.fast,
+              }}
+            >
+              ↺ Tout réinitialiser
+            </button>
+          </div>
+          
+          {/* iframe */}
           <iframe
             ref={iframeRef}
             srcDoc={initialHtml}

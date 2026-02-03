@@ -179,6 +179,12 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
     });
   };
 
+  const updateExpertise = (index: number, value: string) => {
+    const updated = [...formData.expertises];
+    updated[index] = value;
+    onUpdate({ expertises: updated });
+  };
+
   // On peut passer même sans réalisations (c'est optionnel)
   const canProceed = true;
 
@@ -278,9 +284,173 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
     <div style={containerStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={titleStyle}>ÉTAPE 3 : RÉALISATIONS</h1>
-        <p style={subtitleStyle}>Mettez en avant un à trois projet(s) ou réalisation(s) sur votre portfolio</p>
+        <h1 style={titleStyle}>ÉTAPE 2 : RÉALISATIONS</h1>
+        <p style={subtitleStyle}>Définissez votre positionnement et importez vos projets</p>
       </div>
+
+      {/* ========== ENCART POSITIONNEMENT ========== */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+        border: '1px solid rgba(99, 102, 241, 0.15)',
+        borderRadius: borderRadius.lg,
+        padding: '1.5rem',
+        marginBottom: '2rem',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          marginBottom: '1.5rem',
+          flexWrap: 'wrap',
+        }}>
+          <span style={{ fontSize: '1.5rem' }}>🎯</span>
+          <h3 style={{
+            fontSize: typography.fontSize.lg,
+            fontWeight: typography.fontWeight.semibold,
+            margin: 0,
+            color: theme.text.primary,
+          }}>
+            Votre positionnement
+          </h3>
+          <p style={{
+            width: '100%',
+            fontSize: typography.fontSize.sm,
+            color: theme.text.secondary,
+            margin: '0.5rem 0 0 0',
+          }}>
+            Ces informations guident l'IA pour générer un portfolio cohérent
+          </p>
+        </div>
+
+        <div style={{ marginBottom: '1.25rem' }}>
+          <label htmlFor="valueProp" style={{
+            display: 'block',
+            fontWeight: typography.fontWeight.medium,
+            marginBottom: '0.5rem',
+            color: theme.text.primary,
+          }}>
+            Proposition de valeur
+            <span style={{
+              display: 'block',
+              fontSize: typography.fontSize.sm,
+              fontWeight: typography.fontWeight.normal,
+              color: theme.text.tertiary,
+              marginTop: '0.25rem',
+            }}>
+              Ce qu'on doit retenir de vous en une phrase
+            </span>
+          </label>
+          <input
+            id="valueProp"
+            type="text"
+            placeholder="Ex: Expert en applications mobiles gamifiées"
+            value={formData.valueProp}
+            onChange={(e) => onUpdate({ valueProp: e.target.value })}
+            maxLength={150}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem',
+              border: `1px solid ${theme.border.default}`,
+              borderRadius: borderRadius.md,
+              fontSize: typography.fontSize.base,
+              backgroundColor: theme.bg.primary,
+              color: theme.text.primary,
+              transition: transitions.fast,
+            }}
+          />
+        </div>
+
+        <div>
+          <label style={{
+            display: 'block',
+            fontWeight: typography.fontWeight.medium,
+            marginBottom: '0.5rem',
+            color: theme.text.primary,
+          }}>
+            Vos 3 expertises clés
+            <span style={{
+              display: 'block',
+              fontSize: typography.fontSize.sm,
+              fontWeight: typography.fontWeight.normal,
+              color: theme.text.tertiary,
+              marginTop: '0.25rem',
+            }}>
+              Les compétences à mettre en avant
+            </span>
+          </label>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '0.75rem',
+          }}>
+            <input
+              type="text"
+              placeholder="Expertise 1"
+              value={formData.expertises[0] || ''}
+              onChange={(e) => updateExpertise(0, e.target.value)}
+              maxLength={50}
+              style={{
+                padding: '0.75rem 1rem',
+                border: `1px solid ${theme.border.default}`,
+                borderRadius: borderRadius.md,
+                fontSize: typography.fontSize.base,
+                backgroundColor: theme.bg.primary,
+                color: theme.text.primary,
+                transition: transitions.fast,
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Expertise 2"
+              value={formData.expertises[1] || ''}
+              onChange={(e) => updateExpertise(1, e.target.value)}
+              maxLength={50}
+              style={{
+                padding: '0.75rem 1rem',
+                border: `1px solid ${theme.border.default}`,
+                borderRadius: borderRadius.md,
+                fontSize: typography.fontSize.base,
+                backgroundColor: theme.bg.primary,
+                color: theme.text.primary,
+                transition: transitions.fast,
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Expertise 3"
+              value={formData.expertises[2] || ''}
+              onChange={(e) => updateExpertise(2, e.target.value)}
+              maxLength={50}
+              style={{
+                padding: '0.75rem 1rem',
+                border: `1px solid ${theme.border.default}`,
+                borderRadius: borderRadius.md,
+                fontSize: typography.fontSize.base,
+                backgroundColor: theme.bg.primary,
+                color: theme.text.primary,
+                transition: transitions.fast,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ========== SÉPARATEUR ========== */}
+      <div style={{
+        height: '1px',
+        background: `linear-gradient(90deg, transparent, ${theme.border.default}, transparent)`,
+        margin: '2rem 0',
+      }} />
+
+      {/* ========== IMPORT RÉALISATIONS ========== */}
+      <h2 style={{
+        fontSize: typography.fontSize.lg,
+        fontWeight: typography.fontWeight.semibold,
+        color: theme.text.primary,
+        marginBottom: '1rem',
+      }}>
+        Vos réalisations
+      </h2>
 
       {/* Zone d'import */}
       <div

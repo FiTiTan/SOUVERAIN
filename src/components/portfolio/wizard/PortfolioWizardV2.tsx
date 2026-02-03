@@ -30,7 +30,9 @@ const INITIAL_FORM_DATA: PortfolioFormDataV2 = {
     { platform: 'LinkedIn', url: 'https://linkedin.com/in/jean-dupont' },
     { platform: 'GitHub', url: 'https://github.com/jeandupont' },
   ],
-  // Services et valueProp sont maintenant générés automatiquement par DeepSeek (pas de step Expertise)
+  // Positionnement (guide DeepSeek pour générer Hero, About, Services)
+  valueProp: '',
+  expertises: ['', '', ''],
   realisations: [],
   templateId: '',
   imageAssignments: {},

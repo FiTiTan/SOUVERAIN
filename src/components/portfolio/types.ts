@@ -97,7 +97,9 @@ export interface PortfolioFormDataV2 {
   email?: string;
   openingHours?: string;
 
-  // Step 2 : Réalisations (plus de step Expertise - services générés auto par DeepSeek)
+  // Step 2 : Réalisations + Positionnement (plus de step Expertise - services générés auto par DeepSeek)
+  valueProp: string;           // Proposition de valeur (guide l'IA)
+  expertises: string[];        // 3 expertises clés (deviennent des Services)
   realisations: Realisation[];
 
   // Step 4 : Template
