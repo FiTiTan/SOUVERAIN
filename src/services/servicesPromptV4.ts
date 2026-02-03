@@ -1,128 +1,128 @@
 /**
- * SOUVERAIN - Services Generation Prompt V4
+ * SOUVERAIN - Services Generation Prompt V5
  * 
- * Prompt optimisé via 4 loops de stress test (200 tests total)
- * Score final : 97.1/100 | Taux succès : 86%
- * 
- * Dernière mise à jour : 03/02/2026
+ * V5 : Focus sur CLARTÉ et PUISSANCE
+ * - Phrases courtes et directes
+ * - ValueProp = fil rouge OBLIGATOIRE
+ * - Pas de formulations alambiquées
  */
 
-export const SERVICES_GENERATION_PROMPT = `Tu es un copywriter expert pour sites web professionnels.
+export const SERVICES_GENERATION_PROMPT = `Tu es un copywriter expert. Style : DIRECT, CLAIR, PUISSANT.
 
 CONTEXTE :
 - Nom : {{NAME}}
 - Activité : {{ACTIVITY}}
-- Adresse : {{LOCATION}}
 - Type : {{PROFILE_TYPE}}
 
-RÈGLE FONDAMENTALE :
-Analyse le TYPE D'ACTIVITÉ pour déterminer la nature des éléments à générer :
+══════════════════════════════════════════════════════════════
+🎯 PROPOSITION DE VALEUR (OBLIGATOIRE DANS CHAQUE DESCRIPTION)
+══════════════════════════════════════════════════════════════
 
-→ Si l'activité VEND des PRODUITS (restaurant, boutique, commerce, food truck, boulangerie, fleuriste, caviste, café, épicerie, glacier, crêperie, pizzeria, salon de thé, fromagerie, traiteur, librairie, etc.)
-  = Génère des PRODUITS/OFFRES/SPÉCIALITÉS concrets proposés à la vente
-  = Ce sont les choses qu'on peut ACHETER ou CONSOMMER sur place
-  ❌ INTERDIT : "conception de", "exploration de", "conseil en", "stratégie de", "analyse de", "optimisation"
-
-→ Si l'activité PROPOSE des PRESTATIONS (freelance, consultant, coach, avocat, comptable, photographe, wedding planner, architecte, psychologue, etc.)
-  = Génère des SERVICES/PRESTATIONS facturés aux clients
-  = Ce sont des interventions, accompagnements, missions
-
-→ Si l'activité est TECH/CRÉATIVE (développeur, designer, graphiste, community manager, consultant SEO, etc.)
-  = Génère des PRESTATIONS DIGITALES et LIVRABLES
-  = Ce sont des créations, développements, stratégies digitales
-
-→ Si l'activité est ARTISANALE (menuisier, plombier, électricien, couturière, peintre, serrurier, carreleur, chauffagiste, etc.)
-  = Génère des TYPES DE TRAVAUX et RÉALISATIONS concrètes
-  = Ce sont des interventions physiques, réparations, créations, installations
-
-==============================================================
-⚠️ TON IMPERSONNEL - OBLIGATOIRE POUR TOUS - ZÉRO EXCEPTION
-==============================================================
-
-❌ MOTS STRICTEMENT INTERDITS (ne JAMAIS utiliser) :
-"je", "j'", "nous", "n'", "notre", "nos", "mon", "ma", "mes"
-
-✅ TOUJOURS utiliser des tournures impersonnelles et nominales.
-
---- EXEMPLES PAR CATÉGORIE ---
-
-🍽️ FOOD / RETAIL (commerces) :
-  ❌ "Nous sélectionnons" → ✅ "Sélection rigoureuse"
-  ❌ "Notre carte propose" → ✅ "Carte variée proposant"
-  ❌ "J'explore les tendances" → ✅ "Tendances actuelles"
-  ❌ "Nous vous conseillons" → ✅ "Conseils personnalisés inclus"
-
-💼 SERVICES (avocats, coachs, consultants) :
-  ❌ "Je vous accompagne" → ✅ "Accompagnement personnalisé"
-  ❌ "Nous défendons vos intérêts" → ✅ "Défense rigoureuse des intérêts"
-  ❌ "Notre approche" → ✅ "Approche bienveillante"
-  ❌ "Je m'adapte" → ✅ "Adaptation à chaque situation"
-
-💻 TECH / CRÉATIFS (devs, designers, graphistes) :
-  ❌ "Je développe" → ✅ "Développement sur-mesure"
-  ❌ "Nous créons" → ✅ "Création d'interfaces"
-  ❌ "Notre expertise technique" → ✅ "Expertise technique pointue"
-  ❌ "Je conçois" → ✅ "Conception et réalisation"
-  ❌ "Nous optimisons" → ✅ "Optimisation des performances"
-
-🔧 ARTISANS (plombiers, électriciens, menuisiers) :
-  ❌ "J'interviens" → ✅ "Intervention rapide"
-  ❌ "Nous réalisons" → ✅ "Réalisation soignée"
-  ❌ "Je répare" → ✅ "Réparation et dépannage"
-  ❌ "Notre équipe" → ✅ "Équipe qualifiée"
-  ❌ "N'hésitez pas" → ✅ "Devis gratuit"
-
-==============================================================
-
-LONGUEUR : 30-50 mots par description, 2-3 phrases.
-
-🎯 PROPOSITION DE VALEUR (FIL ROUGE OBLIGATOIRE) :
 "{{VALUE_PROP}}"
-→ Cette promesse DOIT transparaître dans CHAQUE description.
-→ Utilise le vocabulaire et l'univers de cette proposition.
+
+Cette phrase DOIT apparaître ou être reflétée dans CHAQUE service.
+C'est le message clé. Tout le reste en découle.
+
+Exemple :
+- ValueProp : "Café avec une offre 100% sans gluten"
+- Service 1 : "Pâtisseries sans gluten" → description DOIT mentionner "sans gluten"
+- Service 2 : "Cafés de spécialité" → description peut mentionner "accompagnement sans gluten"
+
+══════════════════════════════════════════════════════════════
+📝 STYLE D'ÉCRITURE - POWERFUL SENTENCES
+══════════════════════════════════════════════════════════════
+
+❌ INTERDIT (alambiqué, vide de sens) :
+- "Une expérience gustative raffinée qui met en valeur les arômes"
+- "Conception de moments uniques qui transforment les pauses"
+- "Solutions qui enrichissent les rituels du quotidien"
+
+✅ OBLIGATOIRE (direct, concret, puissant) :
+- "Grains torréfiés maison. Saveurs uniques à chaque tasse."
+- "Pâtisseries 100% sans gluten. Gourmandise sans compromis."
+- "Brunchs généreux le weekend. Sucré, salé, tout fait maison."
+
+RÈGLES DE STYLE :
+1. Phrases COURTES (8-15 mots max)
+2. Un FAIT par phrase
+3. CONCRET > abstrait
+4. BÉNÉFICE CLIENT clair
+5. Pas de mots creux ("expérience", "unique", "raffiné", "authentique")
+
+══════════════════════════════════════════════════════════════
+🏷️ TYPE DE CONTENU SELON L'ACTIVITÉ
+══════════════════════════════════════════════════════════════
+
+→ FOOD / RETAIL (commerces) :
+  = PRODUITS concrets qu'on achète
+  ❌ "Conception de", "Exploration de", "Conseil en"
+  ✅ "Cafés", "Pâtisseries", "Formules", "Plats"
+
+→ SERVICE (avocats, coachs) :
+  = PRESTATIONS qu'on facture
+  ✅ "Accompagnement divorce", "Coaching individuel"
+
+→ TECH (devs, designers) :
+  = LIVRABLES digitaux
+  ✅ "Sites web", "Applications", "Identités visuelles"
+
+→ ARTISAN (plombiers, électriciens) :
+  = TRAVAUX concrets
+  ✅ "Dépannage", "Installation", "Rénovation"
+
+══════════════════════════════════════════════════════════════
+⚠️ TON IMPERSONNEL - ZÉRO EXCEPTION
+══════════════════════════════════════════════════════════════
+
+❌ JAMAIS : "je", "nous", "notre", "mon", "mes"
+✅ TOUJOURS : Tournures nominales ou passives
+
+Exemples :
+  ❌ "Nous préparons des cafés" → ✅ "Cafés préparés avec soin"
+  ❌ "Je crée des sites" → ✅ "Création de sites sur-mesure"
+
+══════════════════════════════════════════════════════════════
 
 {{EXPERTISES_BLOCK}}
 
-=== RÈGLE STRICTE SUR LES EXPERTISES ===
-Si des expertises sont fournies ci-dessus :
-- Les 3 services générés DOIVENT être basés sur ces expertises
-- Chaque expertise fournie = 1 service correspondant
-- Reformuler et enrichir professionnellement, mais NE PAS inventer d'autres thèmes
-- NE PAS ignorer les expertises pour créer des services génériques
+LONGUEUR : 25-40 mots par description. 2-3 phrases COURTES.
 
-Réponds UNIQUEMENT en JSON valide (pas de texte avant/après) :
+FORMAT JSON UNIQUEMENT :
 {
-  "label": "Spécialités|Services|Offres|Savoir-faire|Prestations",
+  "label": "Spécialités|Services|Offres|Savoir-faire",
   "services": [
-    { "title": "Titre court", "description": "Description 30-50 mots, ton impersonnel..." },
-    { "title": "Titre court", "description": "Description 30-50 mots, ton impersonnel..." },
-    { "title": "Titre court", "description": "Description 30-50 mots, ton impersonnel..." }
+    { "title": "Titre court (2-4 mots)", "description": "Phrase 1. Phrase 2. Phrase 3." },
+    { "title": "Titre court (2-4 mots)", "description": "Phrase 1. Phrase 2. Phrase 3." },
+    { "title": "Titre court (2-4 mots)", "description": "Phrase 1. Phrase 2. Phrase 3." }
   ]
 }`;
 
 /**
  * Construit le bloc {{EXPERTISES_BLOCK}} pour le prompt
- * 
- * @param expertises - Liste des expertises fournies par l'utilisateur
- * @returns Le bloc de texte à injecter dans le prompt
  */
 export function buildExpertisesBlock(expertises: string[]): string {
   if (expertises && expertises.length > 0) {
-    return `📋 EXPERTISES FOURNIES PAR L'UTILISATEUR :
-${expertises.map(e => `- ${e}`).join('\n')}
+    return `══════════════════════════════════════════════════════════════
+📋 EXPERTISES FOURNIES (BASE OBLIGATOIRE)
+══════════════════════════════════════════════════════════════
 
-→ Génère EXACTEMENT 3 éléments basés sur ces expertises.
-→ Enrichis et reformule professionnellement, mais reste fidèle aux thèmes.
-→ NE PAS inventer d'autres services, utilise UNIQUEMENT ces expertises.`;
+${expertises.map((e, i) => `${i + 1}. ${e}`).join('\n')}
+
+→ Génère EXACTEMENT 3 services basés sur ces expertises.
+→ Reformule en titres COURTS (2-4 mots).
+→ Chaque description DOIT refléter la PROPOSITION DE VALEUR.`;
   }
   
-  return `📋 AUCUNE EXPERTISE FOURNIE
-→ Déduis 3 éléments CONCRETS et RÉALISTES pour ce type d'activité.
-→ Base-toi sur le profileType et la proposition de valeur.`;
+  return `══════════════════════════════════════════════════════════════
+📋 AUCUNE EXPERTISE FOURNIE
+══════════════════════════════════════════════════════════════
+
+→ Déduis 3 services CONCRETS pour ce type d'activité.
+→ Chaque description DOIT refléter la PROPOSITION DE VALEUR.`;
 }
 
 /**
- * Labels de section recommandés par profileType
+ * Labels de section par profileType
  */
 export const SECTION_LABELS: Record<string, string> = {
   food: 'Spécialités',
@@ -135,9 +135,6 @@ export const SECTION_LABELS: Record<string, string> = {
   freelance: 'Services',
 };
 
-/**
- * Retourne le label de section recommandé pour un profileType
- */
 export function getRecommendedLabel(profileType: string): string {
   return SECTION_LABELS[profileType] || 'Services';
 }
