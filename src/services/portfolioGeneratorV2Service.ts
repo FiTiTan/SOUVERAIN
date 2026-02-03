@@ -1,6 +1,10 @@
 /**
  * SOUVERAIN - Portfolio Generator V2 Service
  * Adapte le nouveau wizard V2 vers le système de génération existant
+ * 
+ * FIX V4 (03/02/2026):
+ * - profileType garde les vraies valeurs (food, retail, tech, artisan, service, niche)
+ * - Ajout transmission des expertises à l'IA
  */
 
 import type { PortfolioFormDataV2 } from '../components/portfolio/types';
@@ -40,19 +44,44 @@ async function loadTemplateHTML(templateId: string): Promise<string> {
 }
 
 /**
- * Convertit les données du wizard V2 vers le format RawPortfolioData pour GROQ
+ * Convertit les données du wizard V2 vers le format RawPortfolioData pour l'IA
+ * 
+ * IMPORTANT: profileType doit garder les valeurs exactes pour que le prompt V4 fonctionne :
+ * - food: Restaurants, cafés, boulangeries, glaciers → génère des PRODUITS
+ * - retail: Boutiques, fleuristes, librairies → génère des OFFRES
+ * - service: Avocats, coachs, comptables → génère des PRESTATIONS
+ * - tech: Développeurs, designers, graphistes → génère des PRESTATIONS DIGITALES
+ * - artisan: Plombiers, électriciens, menuisiers → génère des TRAVAUX
+ * - niche: Tatoueurs, sophrologues, DJ → génère des SERVICES spécialisés
  */
 function convertToRawData(formData: PortfolioFormDataV2): RawPortfolioData {
+  // Mapping des profileContext vers les types attendus par le prompt V4
+  const profileTypeMapping: Record<string, string> = {
+    'junior': 'student',
+    'food': 'food',
+    'retail': 'retail', 
+    'artisan': 'artisan',
+    'service': 'service',
+    'tech': 'tech',
+    'niche': 'niche',
+    'creative': 'tech',      // Les créatifs utilisent le même prompt que tech
+    'consulting': 'service', // Les consultants utilisent le même prompt que service
+  };
+
+  const profileType = profileTypeMapping[formData.profileContext] || 'freelance';
+
+  console.log('[GeneratorV2] profileContext:', formData.profileContext, '→ profileType:', profileType);
+  console.log('[GeneratorV2] expertises:', formData.expertises);
+
   return {
     name: formData.name,
-    profileType: formData.profileContext === 'junior' ? 'student' : 
-                 formData.profileContext === 'food' ? 'commerce' :
-                 formData.profileContext === 'retail' ? 'commerce' :
-                 formData.profileContext === 'artisan' ? 'service' :
-                 formData.profileContext === 'service' ? 'service' :
-                 formData.profileContext === 'tech' ? 'freelance' : 'freelance',
+    profileType: profileType,
     tagline: formData.tagline,
-    services: [], // Services générés automatiquement par DeepSeek (plus saisis par l'user)
+    
+    // ✅ FIX: Transmettre les expertises à l'IA
+    expertises: formData.expertises || [],
+    
+    services: [], // Services générés automatiquement par DeepSeek
     valueProp: '', // Généré par DeepSeek
     email: formData.email || '',
     phone: formData.phone,
@@ -62,14 +91,14 @@ function convertToRawData(formData: PortfolioFormDataV2): RawPortfolioData {
     socialIsMain: false,
     projects: formData.realisations.map(r => ({
       title: r.title,
-      description: r.extractedContent || r.description, // ✅ Envoyer le contenu complet à GROQ
+      description: r.extractedContent || r.description,
       category: r.category,
     })),
   };
 }
 
 /**
- * Convertit les données du wizard V2 vers le format EnrichedPortfolioData (sans GROQ)
+ * Convertit les données du wizard V2 vers le format EnrichedPortfolioData (sans IA)
  */
 function convertToEnrichedData(formData: PortfolioFormDataV2): EnrichedPortfolioData {
   const labels = getLabels(formData.profileContext);
@@ -84,11 +113,11 @@ function convertToEnrichedData(formData: PortfolioFormDataV2): EnrichedPortfolio
     // About
     aboutText: `${formData.name} - ${formData.tagline}`,
     aboutImage: formData.imageAssignments.about,
-    valueProp: '', // Sera généré par DeepSeek
+    valueProp: '',
     
     // Services (seront générés par DeepSeek - fallback vide)
     services: [],
-    servicesLabel: 'Services', // Label par défaut
+    servicesLabel: labels.services || 'Services',
     
     // Projects/Réalisations
     projects: formData.realisations.map((r, index) => ({
@@ -142,7 +171,9 @@ export async function generatePortfolioFromWizardV2(
     onProgress?.('Préparation des données...', 40);
     const rawData = convertToRawData(formData);
     
-    // DEBUG LOG - À SUPPRIMER APRÈS FIX
+    // DEBUG LOG
+    console.log('[GeneratorV2] convertToRawData - profileType:', rawData.profileType);
+    console.log('[GeneratorV2] convertToRawData - expertises:', rawData.expertises);
     console.log('[GeneratorV2] convertToRawData - projects:', rawData.projects.map(p => ({
       title: p.title,
       descriptionLength: p.description?.length || 0,
@@ -151,24 +182,23 @@ export async function generatePortfolioFromWizardV2(
                          p.description?.length > 100 ? 'EXTRACTED_CONTENT' : 'FALLBACK_DESC'
     })));
     
-    // Étape 3 : Enrichissement par GROQ (IA séquencé)
+    // Étape 3 : Enrichissement par IA (séquencé)
     onProgress?.('Enrichissement du contenu par IA (1/3: Hero)...', 50);
     let enrichedData: EnrichedPortfolioData;
     
     try {
-      // Utilise la version séquencée pour éviter dépassement tokens
       const result = await enrichPortfolioDataSequenced(rawData, formData.portfolioId);
       onProgress?.('Enrichissement du contenu par IA (2/3: Services)...', 65);
       
       if (!result.success || !result.data) {
-        throw new Error('GROQ enrichment returned no data');
+        throw new Error('AI enrichment returned no data');
       }
       
       onProgress?.('Enrichissement du contenu par IA (3/3: Projects)...', 75);
       enrichedData = result.data;
-      console.log('[GeneratorV2] ✅ GROQ enrichment successful (sequenced)');
-    } catch (groqError) {
-      console.warn('[GeneratorV2] ⚠️ GROQ enrichment failed, fallback to basic data:', groqError);
+      console.log('[GeneratorV2] ✅ AI enrichment successful (sequenced)');
+    } catch (aiError) {
+      console.warn('[GeneratorV2] ⚠️ AI enrichment failed, fallback to basic data:', aiError);
       // Fallback: utiliser conversion basique sans IA
       enrichedData = convertToEnrichedData(formData);
     }

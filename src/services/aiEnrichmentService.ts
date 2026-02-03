@@ -1,583 +1,342 @@
 /**
- * SOUVERAIN - AI Enrichment Service (Multi-provider) - V4 FINAL
+ * SOUVERAIN - AI Enrichment Service V4
+ * Génération séquencée par section avec positionnement (valueProp + expertises)
  * 
- * Providers supportés :
- * - DeepSeek V3 (défaut) : Meilleure qualité, moins cher
- * - Groq Llama 3.3 (fallback) : Rapide, gratuit
- * 
- * Structure validée :
- * - heroSubtitle : 15-30 mots
- * - aboutText : 60-80 mots
- * - valueProp : 20-30 mots
- * - Service : 30-50 mots chacun
- * - Projet : 60-80 mots chacun (synthétique mais substantiel)
- * 
- * Ton : 100% impersonnel (freelances, agences, boutiques, lieux)
+ * Stratégie :
+ * 1. Hero + About → basé sur valueProp
+ * 2. Services → basé sur expertises (ou déduit des réalisations si vide)
+ * 3. Projets → descriptions enrichies avec référence au positionnement
  */
 
-import { detectAndAnonymize, deanonymize } from './anonymizationService';
-import { enrichServicesWithIcons } from '../utils/fallbackIcons';
 import type { RawPortfolioData, EnrichedPortfolioData } from './aiEnrichmentTypes';
+import { anonymizeObject, deanonymizeObject, type EntityMap } from './anonymizationServiceV3';
+import { enrichServicesWithIcons } from '../utils/fallbackIcons';
+import { SERVICES_GENERATION_PROMPT, buildExpertisesBlock } from './servicesPromptV4';
+import { generateServicesWithValidation } from './aiValidation';
 
 // ============================================================
-// GUIDELINES GLOBALES
+// CONFIGURATION
 // ============================================================
 
-const TONE_GUIDELINES = `
-TON IMPERSONNEL OBLIGATOIRE :
-- JAMAIS de "je", "nous", "notre", "mon", "mes"
-- Formulations : "Conception de...", "Spécialisé dans...", "Une approche..."
-- Fonctionne pour : freelances, agences, boutiques, restaurants, entreprises
-- Factuel, professionnel, orienté bénéfice client
+const DEEPSEEK_URL = 'https://api.deepseek.com/v1/chat/completions';
+const DEEPSEEK_MODEL = 'deepseek-chat';
 
-INTERDICTIONS :
-- Pas de clichés : "passionné", "innovant", "sur-mesure", "unique"
-- Pas de superlatifs sans preuve : "le meilleur", "expert reconnu"
-- Pas de phrases creuses : "solutions de qualité", "accompagnement personnalisé"
-`;
-
-const PLACEHOLDER_RULES = `
-PLACEHOLDERS - RÈGLES CRITIQUES :
-- Les tokens [PERSON_1], [COMPANY_1], [LOCATION_1] sont des données anonymisées
-- GARDE-LES EXACTEMENT tels quels, ils seront remplacés automatiquement
-- N'invente JAMAIS de nouveaux placeholders
-`;
-
-// ============================================================
-// AI PROVIDERS CONFIGURATION
-// ============================================================
-
-const PROVIDERS = {
-  deepseek: {
-    name: 'DeepSeek V3',
-    url: 'https://api.deepseek.com/v1/chat/completions',
-    model: 'deepseek-chat',
-    getKey: async () => {
-      try {
-        // @ts-ignore
-        const result = await window.electron.deepseek.getApiKey();
-        return result.success ? result.key : null;
-      } catch {
-        return null;
-      }
-    },
-  },
-  groq: {
-    name: 'Groq Llama 3.3',
-    url: 'https://api.groq.com/openai/v1/chat/completions',
-    model: 'llama-3.3-70b-versatile',
-    getKey: async () => {
-      try {
-        // @ts-ignore
-        const result = await window.electron.groq.getApiKey();
-        return result.success ? result.key : null;
-      } catch {
-        return null;
-      }
-    },
-  },
-};
-
-/**
- * Récupère le provider actif (DeepSeek prioritaire, fallback Groq)
- */
-async function getActiveProvider(): Promise<{ name: string; url: string; model: string; key: string }> {
-  // Essayer DeepSeek d'abord
-  const deepseekKey = await PROVIDERS.deepseek.getKey();
-  if (deepseekKey) {
-    console.log('[AI] Using DeepSeek V3 (primary provider)');
-    return { ...PROVIDERS.deepseek, key: deepseekKey };
+async function getDeepSeekKey(): Promise<string> {
+  try {
+    // @ts-ignore
+    const result = await window.electron.deepseek.getApiKey();
+    if (!result.success || !result.key) {
+      throw new Error('No DeepSeek API key configured');
+    }
+    return result.key;
+  } catch (error) {
+    throw new Error('DeepSeek API key not available');
   }
-  
-  // Fallback Groq
-  const groqKey = await PROVIDERS.groq.getKey();
-  if (groqKey) {
-    console.log('[AI] Using Groq Llama 3.3 (fallback provider)');
-    return { ...PROVIDERS.groq, key: groqKey };
-  }
-  
-  throw new Error('No AI provider configured. Please add DeepSeek or Groq API key in settings.');
 }
 
-/**
- * Appel générique au provider actif
- */
 async function callAI(systemPrompt: string, userPrompt: string, maxTokens: number = 1500): Promise<any> {
-  const provider = await getActiveProvider();
+  const apiKey = await getDeepSeekKey();
   
-  const response = await fetch(provider.url, {
+  const response = await fetch(DEEPSEEK_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${provider.key}`,
+      'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: provider.model,
+      model: DEEPSEEK_MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      temperature: 0.5,
+      temperature: 0.4,
       max_tokens: maxTokens,
-      response_format: { type: 'json_object' },
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error(`[AI] ${provider.name} API error:`, errorText);
-    throw new Error(`AI API error (${provider.name}): ${response.status}`);
+    throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
   }
 
   const result = await response.json();
   let content = result.choices[0].message.content;
-  
+
+  // Nettoyer les backticks si présents
   content = content.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim();
-  
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    content = jsonMatch[0];
-  }
-  
-  try {
-    return JSON.parse(content);
-  } catch (parseError) {
-    console.error('[AI] Failed to parse JSON:', content.substring(0, 200));
-    throw new Error(`Invalid JSON response: ${parseError.message}`);
-  }
+
+  return JSON.parse(content);
 }
 
 // ============================================================
-// UTILITAIRES
+// ENRICHISSEMENT SÉQUENCÉ
 // ============================================================
 
+interface PositioningData {
+  valueProp: string;
+  expertises: string[];
+}
+
 function cleanSvgQuotes(svg: string): string {
-  if (!svg) return svg;
-  return svg.replace(/(\w+)='([^']*)'/g, '$1="$2"');
+  if (!svg) return '';
+  return svg.replace(/'/g, '"');
 }
 
 function cleanOrphanPlaceholders(text: string): string {
-  if (!text) return text;
-  return text
-    .replace(/\s*\[PERSON_\d+\]\s*/g, ' ')
-    .replace(/\s*\[COMPANY_\d+\]\s*/g, ' ')
-    .replace(/\s*\[LOCATION_\d+\]\s*/g, ' ')
-    .replace(/\s*\[EMAIL_\d+\]\s*/g, ' ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+  if (!text) return '';
+  // Supprimer les placeholders isolés qui n'ont pas été désanonymisés
+  return text.replace(/\[PERSON_\d+\]|\[COMPANY_\d+\]/g, '');
 }
 
-function countWords(text: string): number {
-  if (!text) return 0;
-  return text.split(/\s+/).filter(w => w.length > 0).length;
-}
-
-// ============================================================
-// ÉTAPE 1 : HERO + ABOUT
-// ============================================================
-
+/**
+ * 1. HERO + ABOUT
+ */
 async function enrichHeroAndAbout(data: RawPortfolioData): Promise<any> {
+  const positioning = {
+    valueProp: data.valueProp || '',
+    expertises: data.expertises?.filter(e => e.trim() !== '') || [],
+  };
+
   const systemPrompt = `Tu es un copywriter expert pour portfolios professionnels haut de gamme.
 
-${TONE_GUIDELINES}
+TON IMPERSONNEL OBLIGATOIRE :
+- JAMAIS de "je", "nous", "notre", "mon", "mes"
+- Formulations : "Conception de...", "Spécialisé dans...", "Une approche..."
+- Factuel, professionnel, orienté bénéfice client
 
-${PLACEHOLDER_RULES}
+PLACEHOLDERS :
+- Les tokens [PERSON_1], [COMPANY_1] sont anonymisés, garde-les tels quels
 
 SECTIONS À GÉNÉRER :
 
-1. heroTitle : COPIE EXACTE du nom fourni, aucune modification
-2. heroSubtitle (15-30 mots) : Accroche percutante qui résume l'expertise et donne envie
-3. heroEyebrow (2-4 mots) : Rôle ou statut (ex: "Freelance", "Studio créatif", "Restaurant")
-4. heroCta (2-4 mots) : Call-to-action (ex: "Découvrir les projets", "Voir la carte")
-5. aboutText (60-80 mots) : Texte de présentation qui crée la confiance
+1. heroTitle : COPIE EXACTE du nom fourni
+2. heroSubtitle (15-30 mots) : Accroche basée sur la PROPOSITION DE VALEUR fournie
+3. heroEyebrow (2-4 mots) : Rôle ou statut
+4. heroCta (2-4 mots) : Call-to-action
+5. aboutText (60-80 mots, 3-4 phrases) :
+   - Phrase 1 : Positionnement basé sur la proposition de valeur
+   - Phrase 2 : Mention des expertises clés
+   - Phrase 3 : Référence à une réalisation concrète
+   - Phrase 4 : Bénéfice client
+6. valueProp (20-30 mots) : Reformulation de la proposition de valeur
 
-STRUCTURE aboutText (3-4 phrases max) :
-- Phrase 1 : Positionnement
-- Phrase 2 : Expertise démontrée (projet concret - utilise le contexte fourni)
-- Phrase 3 : Bénéfice client
-
-6. valueProp (20-30 mots) : La promesse client en 1-2 phrases. Répond à "Qu'est-ce que j'y gagne ?"
+IMPORTANT :
+- Utilise la PROPOSITION DE VALEUR fournie comme fil rouge
+- Les EXPERTISES doivent transparaître dans le texte
+- Reste cohérent avec les RÉALISATIONS listées
 
 Réponds UNIQUEMENT en JSON valide :
 {"heroTitle","heroSubtitle","heroEyebrow","heroCta","aboutText","valueProp"}`;
 
   const projectsContext = data.projects?.map(p => 
-    `- ${p.title}: ${(p.description || '').substring(0, 400)}`
+    `- ${p.title}: ${(p.description || '').substring(0, 300)}`
   ).join('\n') || 'Aucun projet';
 
   const userPrompt = `PROFIL :
-- Nom (à copier tel quel) : ${data.name}
+- Nom : ${data.name}
 - Type : ${data.profileType}
-- Tagline : ${data.tagline || 'À créer'}
-- Services : ${data.services?.join(', ') || 'Non spécifiés'}
 
-CONTEXTE PROJETS (utilise pour enrichir aboutText) :
+POSITIONNEMENT (À UTILISER COMME FIL ROUGE) :
+- Proposition de valeur : "${positioning.valueProp || 'À déduire des réalisations'}"
+- Expertises clés : ${positioning.expertises.length > 0 ? positioning.expertises.join(', ') : 'À déduire des réalisations'}
+
+RÉALISATIONS (contexte) :
 ${projectsContext}
 
-RAPPEL LONGUEURS :
-- heroSubtitle : 15-30 mots
-- aboutText : 60-80 mots (3-4 phrases max)
-- valueProp : 20-30 mots`;
+RAPPELS :
+- heroSubtitle : 15-30 mots, basé sur la proposition de valeur
+- aboutText : 60-80 mots, mentionne les expertises
+- Ton impersonnel`;
 
-  console.log('[AI] Step 1/3: Enriching hero & about...');
   return await callAI(systemPrompt, userPrompt, 1200);
 }
 
-// ============================================================
-// ÉTAPE 2 : SERVICES (GÉNÉRATION AUTOMATIQUE)
-// ============================================================
-
-// Labels dynamiques selon secteur
-const SERVICE_LABELS: Record<string, string> = {
-  tech: 'Services',
-  freelance: 'Services',
-  artisan: 'Savoir-faire',
-  food: 'Spécialités',
-  restaurant: 'Spécialités',
-  retail: 'Offres',
-  boutique: 'Offres',
-  service: 'Prestations',
-  default: 'Expertises',
-};
-
+/**
+ * 2. SERVICES (basé sur expertises) - PROMPT V4 OPTIMISÉ
+ */
 async function enrichServices(data: RawPortfolioData): Promise<any> {
-  const systemPrompt = `Tu es un copywriter expert pour portfolios professionnels.
-
-${TONE_GUIDELINES}
-
-${PLACEHOLDER_RULES}
-
-SERVICES - GÉNÉRATION AUTOMATIQUE
-
-Génère EXACTEMENT 3 services pertinents basés sur :
-- Type de profil : ${data.profileType}
-- Réalisations fournies
-- Secteur d'activité (à déduire du contexte)
-
-FORMAT JSON :
-{
-  "services": [
-    {
-      "title": "Nom du service",
-      "description": "35-45 mots. Ce que c'est + bénéfice client.",
-      "icon": "<svg viewBox='0 0 48 48' fill='none' stroke='currentColor' stroke-width='2'>...</svg>"
-    }
-  ],
-  "servicesLabel": "Services"
-}
-
-CONTRAINTES :
-- EXACTEMENT 3 services (ni plus, ni moins)
-- Déduits intelligemment du contexte (projets, profil, secteur)
-- Ton impersonnel obligatoire
-- Pas de clichés : "innovant", "sur-mesure", "passionné"
-- Label adapté au secteur :
-  * Tech/Freelance → "Services"
-  * Artisan → "Savoir-faire"
-  * Food/Restaurant → "Spécialités"
-  * Retail/Boutique → "Offres"
-  * Service → "Prestations"
-  * Défaut → "Expertises"
-
-STRUCTURE description (35-45 mots, 2-3 phrases) :
-- Phrase 1 : Ce que c'est concrètement
-- Phrase 2 : Le bénéfice client direct
-
-INTERDICTIONS ABSOLUES :
-- JAMAIS de noms de personnes
-- JAMAIS de placeholders [PERSON_X], [COMPANY_X]
-- JAMAIS de "je", "nous", "notre"
-
-EXEMPLES BONS :
-✅ "Conception de sites web optimisés pour la conversion. Navigation fluide et design moderne qui transforment les visiteurs en clients."
-✅ "Développement d'applications mobiles natives. Des apps performantes qui répondent aux attentes des utilisateurs exigeants."
-
-EXEMPLES MAUVAIS :
-❌ "Je crée des sites web pour mes clients..."
-❌ "Notre expertise en développement..."
-❌ "Solutions innovantes et sur-mesure..."
-
-Réponds UNIQUEMENT en JSON valide :
-{"services": [{"title","description","icon"}], "servicesLabel": "Services"}`;
-
-  const projectsSummary = data.projects?.map(p => 
-    `- ${p.title}: ${(p.description || '').substring(0, 200)}`
-  ).join('\n') || 'Aucun projet fourni';
-
-  const userPrompt = `PROFIL :
-- Type : ${data.profileType}
-- Nom : ${data.name}
-- Tagline : ${data.tagline || 'Non fourni'}
-
-CONTEXTE RÉALISATIONS (à utiliser pour déduire les services) :
-${projectsSummary}
-
-INSTRUCTIONS :
-- Génère EXACTEMENT 3 services pertinents basés sur ce contexte
-- Déduis le secteur d'activité (tech, food, retail, etc.)
-- Adapte le label en conséquence
-- Description : 35-45 mots par service
-- Ton impersonnel obligatoire`;
-
-  console.log('[AI] Step 2/3: Generating 3 services automatically...');
-  const result = await callAI(systemPrompt, userPrompt, 1500);
+  const expertises = data.expertises?.filter(e => e.trim() !== '') || [];
   
-  // Nettoyage et validation
+  // Construire le bloc expertises
+  const expertisesBlock = buildExpertisesBlock(expertises);
+  
+  // Construire le prompt système avec placeholders
+  const systemPrompt = SERVICES_GENERATION_PROMPT
+    .replace('{{NAME}}', data.name || '')
+    .replace('{{ACTIVITY}}', '') // Activity non utilisée dans ce contexte
+    .replace('{{LOCATION}}', '') // Location non utilisée
+    .replace('{{PROFILE_TYPE}}', data.profileType || '')
+    .replace('{{VALUE_PROP}}', data.valueProp || '')
+    .replace('{{EXPERTISES_BLOCK}}', expertisesBlock);
+
+  const userPrompt = `TYPE DE PROFIL : ${data.profileType}
+
+${expertises.length > 0 ? `EXPERTISES FOURNIES :
+${expertises.map((e, i) => `${i + 1}. ${e}`).join('\n')}` : `DÉDUIS les services basés sur le type de profil.`}
+
+RAPPELS :
+- EXACTEMENT 3 services
+- 30-50 mots par description
+- Ton impersonnel STRICT (pas de je/nous/notre)
+- Label de section adapté au profil`;
+
+  // Wrapper avec validation et retry
+  const result = await generateServicesWithValidation(
+    async (wizardData) => {
+      const rawResult = await callAI(systemPrompt, userPrompt, 1500);
+      return {
+        label: rawResult.label || rawResult.servicesLabel || 'Services',
+        services: rawResult.services || []
+      };
+    },
+    { ...data, profileType: data.profileType || 'service' },
+    2 // max 2 tentatives
+  );
+  
+  // Nettoyer les SVG et descriptions
   if (result.services) {
     result.services = result.services.map((service: any) => ({
       ...service,
+      title: service.title || '',
+      description: cleanOrphanPlaceholders(service.description || ''),
       icon: service.icon ? cleanSvgQuotes(service.icon) : null,
-      description: cleanOrphanPlaceholders(service.description),
     }));
   }
   
-  // Assurer exactement 3 services
-  if (!result.services || result.services.length !== 3) {
-    console.warn('[AI] ⚠️ Expected 3 services, got:', result.services?.length || 0);
-  }
-  
-  // Label par défaut si non fourni
-  if (!result.servicesLabel) {
-    result.servicesLabel = SERVICE_LABELS.default;
-  }
-  
-  return result; // Retourne {services: [...], servicesLabel: "..."}
+  return { servicesLabel: result.label, services: result.services };
 }
 
-// ============================================================
-// ÉTAPE 3 : PROJETS
-// ============================================================
-
+/**
+ * 3. PROJETS (enrichissement des descriptions)
+ */
 async function enrichProjects(data: RawPortfolioData): Promise<any[]> {
   if (!data.projects || data.projects.length === 0) {
     return [];
   }
 
-  console.log('[AI] Step 3/3: Enriching projects...');
-  
-  console.log('[AI] enrichProjects - input:', data.projects.map(p => ({
-    title: p.title,
-    descLength: p.description?.length || 0,
-  })));
+  const positioning = {
+    valueProp: data.valueProp || '',
+    expertises: data.expertises?.filter(e => e.trim() !== '') || [],
+  };
 
   const systemPrompt = `Tu es un copywriter expert pour portfolios professionnels.
 
-${TONE_GUIDELINES}
+TON IMPERSONNEL OBLIGATOIRE :
+- Formulations factuelles et orientées résultat
 
-${PLACEHOLDER_RULES}
+CONTEXTE POSITIONNEMENT :
+- Proposition de valeur : "${positioning.valueProp}"
+- Expertises : ${positioning.expertises.join(', ') || 'Non spécifiées'}
 
-SECTION PROJETS/RÉALISATIONS :
+RÈGLE : Les descriptions de projets doivent RENFORCER le positionnement.
+Mets en avant les aspects qui correspondent aux expertises.
 
-Objectif : Prouver l'expertise par des exemples concrets et donner envie d'en savoir plus
-
-Contraintes par projet :
-- title : Nom du projet (garder celui fourni)
-- description : 60-80 mots (4-6 lignes max) - SYNTHÉTIQUE mais SUBSTANTIEL
-- category : Type de projet (Application Mobile, Site Web, Branding, etc.)
-
-STRUCTURE description (4 phrases) :
+STRUCTURE PAR PROJET (60-80 mots, 4 phrases) :
 1. CONTEXTE : Quel problème ou besoin ? (1 phrase)
 2. SOLUTION : Quelle approche ou réalisation ? (1-2 phrases)
 3. RÉSULTAT : Quel impact ou bénéfice ? (1 phrase)
-4. POINT NOTABLE (optionnel) : Techno, chiffre clé, innovation
+4. POINT NOTABLE (optionnel) : Techno, chiffre clé
 
-CE QU'IL FAUT EXTRAIRE du contenu source :
-- Les enjeux business ou humains
-- Les chiffres clés s'il y en a
-- Les technologies ou méthodes utilisées
-- Les résultats ou impacts
-
-EXEMPLE BON (72 mots) :
-"Réponse au défi de maintenir une routine sportive sur le long terme. L'application s'inspire des mécaniques de progression des jeux RPG pour transformer l'effort physique en expérience engageante. Le système utilise le MET (Équivalent Métabolique) pour quantifier équitablement tout type d'activité. Objectif : rendre l'exercice addictif et créer des habitudes durables chez les utilisateurs."
-
-EXEMPLE MAUVAIS :
-"Une application innovante qui révolutionne le fitness avec une approche unique..." (trop vague, pas de substance)
+CATÉGORIES possibles :
+Application Mobile, Site Web, Branding, Business Plan, Design, E-commerce, etc.
 
 Réponds en JSON : {"projects": [{"title","description","category"}]}`;
 
-  const batchSize = 2;
+  // Traiter par batch de 3 projets pour limiter la taille du prompt
+  const projects = data.projects;
+  const batchSize = 3;
   const enrichedProjects: any[] = [];
 
-  for (let i = 0; i < data.projects.length; i += batchSize) {
-    const batch = data.projects.slice(i, i + batchSize);
+  for (let i = 0; i < projects.length; i += batchSize) {
+    const batch = projects.slice(i, i + batchSize);
     
-    const projectsDetails = batch.map(p => {
-      const desc = p.description || '';
-      // 2500 chars pour avoir assez de contexte
-      const truncatedDesc = desc.length > 2500 
-        ? desc.substring(0, 2500) + '...'
-        : desc;
-      
-      return `
-===== PROJET : ${p.title} =====
-Catégorie actuelle : ${p.category || 'À déterminer'}
+    const projectsPrompt = batch.map((p, idx) => {
+      const extractedText = p.extractedContent ? `\nCONTENU EXTRAIT:\n${p.extractedContent.substring(0, 1500)}` : '';
+      return `PROJET ${idx + 1}:
+Titre: ${p.title}
+Description initiale: ${p.description || 'Non fournie'}${extractedText}`;
+    }).join('\n\n');
 
-CONTENU SOURCE À SYNTHÉTISER :
-${truncatedDesc || 'Pas de contenu - génère une description générique'}
-`;
-    }).join('\n');
-
-    const userPrompt = `PROJETS À ENRICHIR :
-
-${projectsDetails}
+    const userPrompt = `${projectsPrompt}
 
 RAPPELS :
-- 60-80 mots par description (4-6 lignes)
-- Extraire les ENJEUX et ÉLÉMENTS CLÉS
-- Rester SYNTHÉTIQUE mais SUBSTANTIEL
-- Catégorie : Application Mobile, Site Web, Branding, Business Plan, etc.`;
+- 60-80 mots par description
+- Renforcer le positionnement : ${positioning.valueProp}
+- Ton impersonnel et factuel`;
 
     try {
-      const result = await callAI(systemPrompt, userPrompt, 1500);
-      
+      const result = await callAI(systemPrompt, userPrompt, 1200);
       if (result.projects && Array.isArray(result.projects)) {
-        const projectsWithDefaults = result.projects.map((p: any, idx: number) => ({
+        enrichedProjects.push(...result.projects.map((p: any) => ({
           ...p,
-          category: p.category || batch[idx]?.category || 'Projet',
-        }));
-        enrichedProjects.push(...projectsWithDefaults);
-      } else {
-        enrichedProjects.push(...batch.map(p => ({
-          title: p.title,
-          description: p.description?.substring(0, 300) || '',
-          category: p.category || 'Projet'
+          description: cleanOrphanPlaceholders(p.description),
         })));
       }
     } catch (error) {
-      console.warn(`[AI] Batch ${Math.floor(i / batchSize) + 1} failed:`, error);
+      console.error('[EnrichProjects] Batch error:', error);
+      // Fallback : garder les projets originaux
       enrichedProjects.push(...batch.map(p => ({
         title: p.title,
-        description: p.description?.substring(0, 300) || '',
-        category: p.category || 'Projet'
+        description: p.description || '',
+        category: '',
       })));
     }
   }
-  
+
   return enrichedProjects;
 }
 
-// ============================================================
-// SERVICE PRINCIPAL
-// ============================================================
-
+/**
+ * ORCHESTRATEUR PRINCIPAL
+ */
 export async function enrichPortfolioDataSequenced(
   rawData: RawPortfolioData,
   portfolioId: string
 ): Promise<{ success: boolean; data?: EnrichedPortfolioData; error?: string }> {
   
   try {
-    console.log('[AI] Starting sequenced enrichment V4...');
+    console.log('[AI V4] Starting sequenced enrichment...');
+    console.log('[AI V4] Positioning:', {
+      valueProp: rawData.valueProp,
+      expertises: rawData.expertises,
+    });
 
-    // Anonymisation
-    const dataString = JSON.stringify(rawData);
-    const anonymizedResult = await detectAndAnonymize(dataString, portfolioId);
-    const anonymizedData: RawPortfolioData = JSON.parse(anonymizedResult.anonymizedText);
-
-    // Étape 1 : Hero + About
-    const heroAbout = await enrichHeroAndAbout(anonymizedData);
-
-    // Étape 2 & 3 : Services (auto-générés) + Projects (parallèle)
-    const [servicesResult, enrichedProjects] = await Promise.all([
-      enrichServices(anonymizedData).catch(err => {
-        console.warn('[AI] Services generation failed:', err);
-        return { 
-          services: [], 
-          servicesLabel: 'Services' 
-        };
-      }),
-      enrichProjects(anonymizedData).catch(err => {
-        console.warn('[AI] Projects failed:', err);
-        return anonymizedData.projects || [];
-      }),
-    ]);
-
-    // Extraire services et label du résultat
-    const enrichedServices = servicesResult.services || [];
-    const servicesLabel = servicesResult.servicesLabel || 'Services';
-
-    // Icônes fallback
-    const servicesWithIcons = enrichServicesWithIcons(enrichedServices);
-
-    // Fusion
-    const merged: EnrichedPortfolioData = {
+    // 1. Anonymiser les données
+    const { anonymized, entityMap } = await anonymizeObject(rawData);
+    
+    // 2. Enrichir Hero + About
+    console.log('[AI V4] Enriching Hero + About...');
+    const heroAbout = await enrichHeroAndAbout(anonymized);
+    
+    // 3. Enrichir Services
+    console.log('[AI V4] Enriching Services...');
+    const servicesData = await enrichServices(anonymized);
+    
+    // 4. Enrichir Projets
+    console.log('[AI V4] Enriching Projects...');
+    const projects = await enrichProjects(anonymized);
+    
+    // 5. Désanonymiser le tout
+    const enrichedAnonymized = {
       ...heroAbout,
-      heroTitle: anonymizedData.name,
-      services: servicesWithIcons,
-      servicesLabel: servicesLabel, // Nouveau champ
-      projects: enrichedProjects.map((p: any, i: number) => ({
-        ...p,
-        category: p.category || 'Projet',
-        image: rawData.projects?.[i]?.image,
-        link: rawData.projects?.[i]?.link,
-      })),
-      testimonials: rawData.testimonials,
-      email: rawData.email,
-      phone: rawData.phone,
-      address: rawData.address,
-      openingHours: rawData.openingHours,
-      socialLinks: rawData.socialLinks,
-      socialIsMain: rawData.socialIsMain,
-      aboutImage: rawData.aboutImage,
-    };
-
-    // Dé-anonymisation
-    console.log('[AI] De-anonymizing...');
-    const finalDataString = JSON.stringify(merged);
-    const deanonymizedString = deanonymize(finalDataString, anonymizedResult.mappings);
-    const finalData: EnrichedPortfolioData = JSON.parse(deanonymizedString);
-
-    // Stats de validation
-    const stats = {
-      heroSubtitleWords: countWords(finalData.heroSubtitle),
-      aboutTextWords: countWords(finalData.aboutText),
-      valuePropWords: countWords(finalData.valueProp),
-      servicesCount: finalData.services?.length || 0,
-      avgServiceWords: Math.round((finalData.services?.reduce((acc, s) => acc + countWords(s.description), 0) || 0) / (finalData.services?.length || 1)),
-      projectsCount: finalData.projects?.length || 0,
-      avgProjectWords: Math.round((finalData.projects?.reduce((acc, p) => acc + countWords(p.description), 0) || 0) / (finalData.projects?.length || 1)),
+      servicesLabel: servicesData.servicesLabel,
+      services: servicesData.services,
+      projects,
     };
     
-    console.log('[AI] ✓ Complete. Stats:', stats);
+    const enrichedData = deanonymizeObject(enrichedAnonymized, entityMap);
     
-    // Warnings si hors limites
-    if (stats.heroSubtitleWords < 15 || stats.heroSubtitleWords > 30) {
-      console.warn(`[AI] ⚠️ heroSubtitle: ${stats.heroSubtitleWords} mots (attendu: 15-30)`);
-    }
-    if (stats.aboutTextWords < 60 || stats.aboutTextWords > 80) {
-      console.warn(`[AI] ⚠️ aboutText: ${stats.aboutTextWords} mots (attendu: 60-80)`);
-    }
-    if (stats.avgServiceWords < 30 || stats.avgServiceWords > 50) {
-      console.warn(`[AI] ⚠️ services avg: ${stats.avgServiceWords} mots (attendu: 30-50)`);
-    }
-    if (stats.avgProjectWords < 60 || stats.avgProjectWords > 80) {
-      console.warn(`[AI] ⚠️ projects avg: ${stats.avgProjectWords} mots (attendu: 60-80)`);
+    // 6. Enrichir les services avec icônes fallback si nécessaire
+    if (enrichedData.services) {
+      enrichedData.services = enrichServicesWithIcons(enrichedData.services);
     }
     
-    return { success: true, data: finalData };
+    console.log('[AI V4] ✓ Enrichment complete');
+    
+    return { success: true, data: enrichedData };
 
   } catch (error: any) {
-    console.error('[AI] Error:', error);
-    
-    // Fallback
-    const fallbackData: EnrichedPortfolioData = {
-      heroTitle: rawData.name,
-      heroSubtitle: rawData.tagline,
-      heroEyebrow: rawData.profileType === 'freelance' ? 'Freelance' : '',
-      heroCta: 'Me contacter',
-      aboutText: rawData.valueProp || rawData.tagline,
-      valueProp: rawData.valueProp,
-      services: rawData.services?.map(s => ({ title: s, description: '', icon: '' })) || [],
-      projects: rawData.projects?.map(p => ({ ...p, category: p.category || 'Projet' })) || [],
-      testimonials: rawData.testimonials || [],
-      email: rawData.email,
-      phone: rawData.phone,
-      address: rawData.address,
-      openingHours: rawData.openingHours,
-      socialLinks: rawData.socialLinks,
-      socialIsMain: rawData.socialIsMain,
-      aboutImage: rawData.aboutImage,
-    };
-    
-    return { success: false, data: fallbackData, error: error.message };
+    console.error('[AI V4] Error:', error);
+    return { success: false, error: error.message };
   }
 }

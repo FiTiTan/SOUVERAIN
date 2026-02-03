@@ -1,7 +1,7 @@
 /**
- * SOUVERAIN - Prompt de génération des services V4 (Production)
+ * SOUVERAIN - Services Generation Prompt V4
  * 
- * Optimisé via 4 loops de stress test (50 tests/loop)
+ * Prompt optimisé via 4 loops de stress test (200 tests total)
  * Score final : 97.1/100 | Taux succès : 86%
  * 
  * Dernière mise à jour : 03/02/2026
@@ -101,14 +101,43 @@ Réponds UNIQUEMENT en JSON valide (pas de texte avant/après) :
 }`;
 
 /**
- * Construit le bloc expertises conditionnel
+ * Construit le bloc {{EXPERTISES_BLOCK}} pour le prompt
+ * 
+ * @param expertises - Liste des expertises fournies par l'utilisateur
+ * @returns Le bloc de texte à injecter dans le prompt
  */
 export function buildExpertisesBlock(expertises: string[]): string {
   if (expertises && expertises.length > 0) {
     return `📋 EXPERTISES FOURNIES PAR L'UTILISATEUR :
 ${expertises.map(e => `- ${e}`).join('\n')}
+
 → Génère EXACTEMENT 3 éléments basés sur ces expertises.
-→ Enrichis et reformule professionnellement, mais reste fidèle.`;
+→ Enrichis et reformule professionnellement, mais reste fidèle aux thèmes.
+→ NE PAS inventer d'autres services, utilise UNIQUEMENT ces expertises.`;
   }
-  return `Aucune expertise fournie → Déduis 3 éléments CONCRETS et RÉALISTES pour cette activité.`;
+  
+  return `📋 AUCUNE EXPERTISE FOURNIE
+→ Déduis 3 éléments CONCRETS et RÉALISTES pour ce type d'activité.
+→ Base-toi sur le profileType et la proposition de valeur.`;
+}
+
+/**
+ * Labels de section recommandés par profileType
+ */
+export const SECTION_LABELS: Record<string, string> = {
+  food: 'Spécialités',
+  retail: 'Nos produits',
+  service: 'Services',
+  tech: 'Prestations',
+  artisan: 'Savoir-faire',
+  niche: 'Services',
+  student: 'Compétences',
+  freelance: 'Services',
+};
+
+/**
+ * Retourne le label de section recommandé pour un profileType
+ */
+export function getRecommendedLabel(profileType: string): string {
+  return SECTION_LABELS[profileType] || 'Services';
 }
