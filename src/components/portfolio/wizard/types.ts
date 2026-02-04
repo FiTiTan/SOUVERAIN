@@ -14,8 +14,8 @@ export type ProfileType = 'person' | 'place';
 
 // Options de sélection pour ProfileType
 export const PROFILE_TYPES = [
-  { id: 'person', label: 'Une personne', icon: '👤' },
-  { id: 'place', label: 'Un lieu / Une entreprise', icon: '📍' },
+  { id: 'person', label: 'Une personne', icon: '👤', hint: 'Freelance, salarié, artisan...' },
+  { id: 'place', label: 'Un lieu / Une entreprise', icon: '📍', hint: 'Restaurant, boutique, cabinet...' },
 ];
 
 // Contexte de profil détaillé (détecté automatiquement par IA)
@@ -231,4 +231,148 @@ export const validateStepRealisations = (data: PortfolioFormDataV2): boolean => 
 
 export const validateStepTemplate = (data: PortfolioFormDataV2): boolean => {
   return data.templateId !== null;
+};
+
+// ============================================
+// HELPERS - LABELS & PLACEHOLDERS
+// ============================================
+
+export const getServiceLabel = (profileType: string | null): string => {
+  const labels: Record<string, string> = {
+    // Anciens types (V1)
+    freelance: 'Services',
+    commerce: 'Spécialités',
+    creative: 'Spécialités',
+    student: 'Compétences',
+    employee: "Domaines d'expertise",
+    // Nouveaux types (V2)
+    person: 'Services',
+    place: 'Spécialités',
+  };
+  return profileType ? labels[profileType] : 'Services';
+};
+
+export const getServicePlaceholder = (profileType: string | null, index: number): string => {
+  const placeholders: Record<string, string[]> = {
+    // Anciens types (V1)
+    freelance: ['Design UX', 'Développement web', 'Conseil stratégique'],
+    commerce: ['Cafés de spécialité', 'Pâtisseries maison', 'Brunchs'],
+    creative: ['Photo portrait', 'Vidéo corporate', 'Montage'],
+    student: ['Python', 'Marketing digital', 'Anglais courant'],
+    employee: ['Management', 'Finance', 'Stratégie'],
+    // Nouveaux types (V2)
+    person: ['Design UX', 'Développement web', 'Conseil stratégique'],
+    place: ['Cafés de spécialité', 'Pâtisseries maison', 'Brunchs'],
+  };
+  return profileType ? (placeholders[profileType]?.[index] || '') : '';
+};
+
+// ============================================
+// LABELS DYNAMIQUES SELON PROFILE CONTEXT
+// (pour le wizard V2 avec détection auto)
+// ============================================
+
+export const getContextLabels = (context: ProfileContext | null, isPlace: boolean = false) => {
+  const labels: Record<ProfileContext, {
+    activityLabel: string;
+    activityPlaceholder: string;
+    expertisesLabel: string;
+    expertisesHelper: string;
+    expertisesPlaceholders: string[];
+  }> = {
+    food: {
+      activityLabel: 'Type de lieu',
+      activityPlaceholder: 'Ex: Coffee shop, Restaurant, Boulangerie',
+      expertisesLabel: 'Spécialités',
+      expertisesHelper: 'Ce que vous proposez à la carte',
+      expertisesPlaceholders: ['Cafés de spécialité', 'Pâtisseries maison', 'Brunchs'],
+    },
+    retail: {
+      activityLabel: 'Type de lieu',
+      activityPlaceholder: 'Ex: Boutique vêtements, Fleuriste, Librairie',
+      expertisesLabel: 'Types de produits',
+      expertisesHelper: "Ce qu'on trouve chez vous",
+      expertisesPlaceholders: ['Robes de mariée', 'Accessoires', 'Sur-mesure'],
+    },
+    artisan: {
+      activityLabel: 'Métier',
+      activityPlaceholder: 'Ex: Plombier, Électricien, Menuisier',
+      expertisesLabel: 'Savoir-faire',
+      expertisesHelper: 'Ce que vous savez faire',
+      expertisesPlaceholders: ['Dépannage urgent', 'Installation', 'Rénovation'],
+    },
+    service: {
+      activityLabel: 'Métier',
+      activityPlaceholder: 'Ex: Avocat, Coach sportif, Photographe',
+      expertisesLabel: 'Domaines',
+      expertisesHelper: "Vos domaines d'intervention",
+      expertisesPlaceholders: ['Divorce amiable', "Garde d'enfants", 'Médiation'],
+    },
+    tech: {
+      activityLabel: 'Métier',
+      activityPlaceholder: 'Ex: Développeur web, Designer UI/UX, Graphiste',
+      expertisesLabel: 'Expertises',
+      expertisesHelper: 'Vos compétences clés',
+      expertisesPlaceholders: ['React / Vue.js', 'API Node.js', 'E-commerce'],
+    },
+    niche: {
+      activityLabel: 'Métier',
+      activityPlaceholder: 'Ex: Tatoueur, Sophrologue, DJ',
+      expertisesLabel: 'Spécialités',
+      expertisesHelper: 'Ce que vous proposez',
+      expertisesPlaceholders: ['Tatouage réaliste', 'Cover-up', 'Dotwork'],
+    },
+  };
+
+  // Fallback si context null
+  if (!context) {
+    return isPlace ? labels.food : labels.service;
+  }
+
+  return labels[context];
+};
+
+// ============================================
+// LABELS POUR SECTIONS DU PORTFOLIO
+// ============================================
+
+export const getSectionLabels = (context: ProfileContext | null) => {
+  const labels: Record<ProfileContext, {
+    services: string;
+    realisations: string;
+    about: string;
+  }> = {
+    food: {
+      services: 'Notre carte',
+      realisations: 'Nos créations',
+      about: 'Notre histoire',
+    },
+    retail: {
+      services: 'Nos produits',
+      realisations: 'Nos collections',
+      about: 'Notre boutique',
+    },
+    artisan: {
+      services: 'Prestations',
+      realisations: 'Réalisations',
+      about: 'Mon parcours',
+    },
+    service: {
+      services: 'Services',
+      realisations: 'Références',
+      about: 'À propos',
+    },
+    tech: {
+      services: 'Prestations',
+      realisations: 'Projets',
+      about: 'À propos',
+    },
+    niche: {
+      services: 'Services',
+      realisations: 'Portfolio',
+      about: 'À propos',
+    },
+  };
+
+  return context ? labels[context] : labels.service;
 };
