@@ -36,22 +36,11 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
   const [detectedContext, setDetectedContext] = useState<ProfileContext | null>(null);
   const [contextLabels, setContextLabels] = useState(getContextLabels('service', false));
 
-  // Détection automatique du contexte AU MONTAGE (1 seule fois)
+  // Détection automatique du contexte AU MONTAGE
   useEffect(() => {
     const detectContext = async () => {
       if (!formData.title || formData.title.length < 3) {
         console.log('[WizardStepRealisations] No activity to detect');
-        return;
-      }
-
-      // Skip si déjà détecté
-      if (formData.profileContext) {
-        console.log('[WizardStepRealisations] Context already detected:', formData.profileContext);
-        setDetectedContext(formData.profileContext as ProfileContext);
-        setContextLabels(getContextLabels(
-          formData.profileContext as ProfileContext,
-          formData.profileType === 'place'
-        ));
         return;
       }
 
@@ -77,7 +66,7 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
     };
 
     detectContext();
-  }, []); // Uniquement au montage
+  }, []); // Uniquement au montage - force detection même si profileContext existe
 
   // Handlers expertises
   const expertises = formData.expertises || ['', '', ''];
@@ -322,8 +311,14 @@ export const WizardStepRealisations: React.FC<WizardStepProps> = ({
         {/* Expertises */}
         <div style={formGroupStyle}>
           <label style={labelStyle}>
-            {contextLabels.expertisesLabel}
-            <span style={helperStyle}>{contextLabels.expertisesHelper}</span>
+            {formData.profileType === 'place' 
+              ? 'Vos 3 prestations clés' 
+              : 'Vos 3 compétences clés'}
+            <span style={helperStyle}>
+              {formData.profileType === 'place' 
+                ? 'Ce que vous proposez' 
+                : 'Vos expertises principales'}
+            </span>
           </label>
           <div style={expertisesGridStyle}>
             {expertises.map((expertise, index) => (
