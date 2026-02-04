@@ -46,7 +46,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
   const [contextLabels, setContextLabels] = useState(getContextLabels('service', false));
 
   // Debounce l'activité pour la détection auto
-  const debouncedActivity = useDebounce(formData.title || '', 800);
+  const debouncedActivity = useDebounce(formData.title || '', 500);
 
   // Détection automatique du profileContext quand l'activité change
   useEffect(() => {
