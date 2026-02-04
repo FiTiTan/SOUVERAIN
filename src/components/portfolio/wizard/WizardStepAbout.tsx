@@ -1,11 +1,14 @@
 /**
  * SOUVERAIN - Wizard Step 1: Informations de base
  * 
- * Contenu :
- * - Nom
- * - Type (person/place)
- * - Métier / Type de lieu
- * - Réseaux sociaux
+ * Ordre des champs :
+ * 1. Type (person/place) avec icônes SVG + checkmark
+ * 2. Nom
+ * 3. Métier / Type de lieu
+ * 4. Email (requis)
+ * 5. Téléphone (optionnel)
+ * 6. Adresse + Horaires (si lieu uniquement)
+ * 7. Réseaux sociaux
  * 
  * Note: Expertises, slogan et détection de contexte déplacés en Step 2
  */
@@ -85,13 +88,13 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
   const typeCardStyle = (selected: boolean): React.CSSProperties => ({
     padding: '1.5rem',
-    background: selected ? theme.primary + '15' : theme.surface,
-    border: `3px solid ${selected ? theme.primary : theme.border}`,
+    background: selected ? theme.primary + '10' : theme.surface,
+    border: `2px solid ${selected ? theme.primary : theme.border}`,
     borderRadius: borderRadius.lg,
     cursor: 'pointer',
     transition: transitions.default,
     textAlign: 'center',
-    boxShadow: selected ? `0 0 0 1px ${theme.primary}40` : 'none',
+    position: 'relative',
   });
 
   const buttonContainerStyle: React.CSSProperties = {
@@ -121,6 +124,83 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         <p style={subtitleStyle}>Commencez par nous dire qui vous êtes</p>
       </div>
 
+      {/* Type de profil */}
+      <div style={formGroupStyle}>
+        <label style={labelStyle}>Vous êtes... *</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div
+            onClick={() => handleProfileTypeChange('person')}
+            style={typeCardStyle(formData.profileType === 'person')}
+          >
+            {/* Checkmark si sélectionné */}
+            {formData.profileType === 'person' && (
+              <div style={{
+                position: 'absolute',
+                top: '0.5rem',
+                right: '0.5rem',
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: theme.primary,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+            )}
+            {/* Icon User SVG */}
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ margin: '0 auto 0.5rem' }}>
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <div style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
+              Une personne
+            </div>
+            <div style={{ fontSize: typography.fontSize.xs, color: theme.text.secondary, marginTop: '0.25rem' }}>
+              Freelance, salarié, artisan...
+            </div>
+          </div>
+          <div
+            onClick={() => handleProfileTypeChange('place')}
+            style={typeCardStyle(formData.profileType === 'place')}
+          >
+            {/* Checkmark si sélectionné */}
+            {formData.profileType === 'place' && (
+              <div style={{
+                position: 'absolute',
+                top: '0.5rem',
+                right: '0.5rem',
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: theme.primary,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+            )}
+            {/* Icon MapPin SVG */}
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ margin: '0 auto 0.5rem' }}>
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            <div style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
+              Un lieu / Une entreprise
+            </div>
+            <div style={{ fontSize: typography.fontSize.xs, color: theme.text.secondary, marginTop: '0.25rem' }}>
+              Restaurant, boutique, cabinet...
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Nom */}
       <div style={formGroupStyle}>
         <label style={labelStyle}>
@@ -133,37 +213,6 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
           placeholder=""
           style={inputStyle}
         />
-      </div>
-
-      {/* Type de profil */}
-      <div style={formGroupStyle}>
-        <label style={labelStyle}>Vous êtes... *</label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div
-            onClick={() => handleProfileTypeChange('person')}
-            style={typeCardStyle(formData.profileType === 'person')}
-          >
-            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>👤</div>
-            <div style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-              Une personne
-            </div>
-            <div style={{ fontSize: typography.fontSize.xs, color: theme.text.secondary, marginTop: '0.25rem' }}>
-              Freelance, salarié, artisan...
-            </div>
-          </div>
-          <div
-            onClick={() => handleProfileTypeChange('place')}
-            style={typeCardStyle(formData.profileType === 'place')}
-          >
-            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📍</div>
-            <div style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: theme.text.primary }}>
-              Un lieu / Une entreprise
-            </div>
-            <div style={{ fontSize: typography.fontSize.xs, color: theme.text.secondary, marginTop: '0.25rem' }}>
-              Restaurant, boutique, cabinet...
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Type de lieu / Métier */}
