@@ -366,3 +366,46 @@ export const validateStepRealisations = (data: PortfolioFormDataV2): boolean => 
 export const validateStepTemplate = (data: PortfolioFormDataV2): boolean => {
   return data.templateId !== null;
 };
+
+// ============================================
+// VALIDATION PAR ÉTAPE (WIZARD)
+// ============================================
+
+export const validateStep1 = (data: any): boolean => {
+  // Step1Identity: profileType, name, title
+  return !!(
+    data.profileType &&
+    data.name?.trim() &&
+    data.title?.trim()
+  );
+};
+
+export const validateStep2 = (data: any): boolean => {
+  // Step2Offer: expertises (au moins 1)
+  return data.expertises && data.expertises.filter((e: string) => e.trim()).length > 0;
+};
+
+export const validateStep3 = (data: any): boolean => {
+  // Step3Contact: email OU phone requis
+  return !!(data.email?.trim() || data.phone?.trim());
+};
+
+export const validateStep4 = (data: any): boolean => {
+  // Step4Documents: optionnel
+  return true;
+};
+
+export const validateStep5 = (data: any): boolean => {
+  // Step5Social: optionnel
+  return true;
+};
+
+export const validateStep6 = (data: any): boolean => {
+  // Step6Media: skippé, toujours valide
+  return true;
+};
+
+export const validateStep7 = (data: any): boolean => {
+  // Step7Template: templateId requis
+  return data.templateId !== null;
+};
