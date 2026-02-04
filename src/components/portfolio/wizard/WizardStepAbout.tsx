@@ -43,6 +43,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
   const [importError, setImportError] = useState<string | null>(null);
   const [isEnhancingTagline, setIsEnhancingTagline] = useState(false);
   const [isDetectingContext, setIsDetectingContext] = useState(false);
+  const [detectedContext, setDetectedContext] = useState<ProfileContext | null>(null);
   const [contextLabels, setContextLabels] = useState(getContextLabels('service', false));
 
   // Debounce l'activité pour la détection auto
@@ -64,11 +65,16 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         const result = await detectProfileContext(debouncedActivity);
         console.log('[WizardStepAbout] Detected context:', result);
         
+        // Mettre à jour le state local pour l'affichage
+        setDetectedContext(result.context);
+        
         // Mettre à jour le formData avec le contexte détecté
-        onUpdate({ 
+        const updates = { 
           profileContext: result.context,
           profileType: result.isPlace ? 'place' : 'person',
-        });
+        };
+        console.log('[WizardStepAbout] Calling onUpdate with:', updates);
+        onUpdate(updates);
         
         // Mettre à jour les labels
         setContextLabels(getContextLabels(result.context, result.isPlace));
@@ -388,7 +394,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
               alignItems: 'center',
               gap: '0.25rem',
             }}>
-              ✓ Catégorie détectée : {formData.profileContext}
+              ✓ Catégorie détectée : {detectedContext || formData.profileContext}
             </div>
           )}
         </div>
