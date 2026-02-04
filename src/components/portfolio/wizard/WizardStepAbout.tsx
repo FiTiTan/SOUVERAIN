@@ -50,9 +50,15 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
   // Détection automatique du profileContext quand l'activité change
   useEffect(() => {
-    if (!debouncedActivity || debouncedActivity.length < 3) return;
+    console.log('[WizardStepAbout] debouncedActivity changed:', debouncedActivity);
+    
+    if (!debouncedActivity || debouncedActivity.length < 3) {
+      console.log('[WizardStepAbout] Skipping detection (too short)');
+      return;
+    }
 
     const detectContext = async () => {
+      console.log('[WizardStepAbout] Starting context detection for:', debouncedActivity);
       setIsDetectingContext(true);
       try {
         const result = await detectProfileContext(debouncedActivity);
@@ -74,7 +80,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     };
 
     detectContext();
-  }, [debouncedActivity]);
+  }, [debouncedActivity, onUpdate]);
 
   // Mettre à jour les labels quand profileContext change
   useEffect(() => {
