@@ -31,7 +31,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
   const canProceed = 
     formData.name.trim().length > 0 && 
     formData.title.trim().length > 0 &&
-    formData.email.trim().length > 0;
+    (formData.email || '').trim().length > 0;
 
   // ============================================
   // STYLES
@@ -185,7 +185,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         <label style={labelStyle}>Email *</label>
         <input
           type="email"
-          value={formData.email}
+          value={formData.email || ''}
           onChange={(e) => onUpdate({ email: e.target.value })}
           placeholder=""
           style={inputStyle}
@@ -197,7 +197,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         <label style={labelStyle}>Téléphone (optionnel)</label>
         <input
           type="tel"
-          value={formData.phone}
+          value={formData.phone || ''}
           onChange={(e) => onUpdate({ phone: e.target.value })}
           placeholder=""
           style={inputStyle}
@@ -211,7 +211,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
             <label style={labelStyle}>Adresse</label>
             <input
               type="text"
-              value={formData.address}
+              value={formData.address || ''}
               onChange={(e) => onUpdate({ address: e.target.value })}
               placeholder=""
               style={inputStyle}
@@ -222,7 +222,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
             <label style={labelStyle}>Horaires d'ouverture (optionnel)</label>
             <input
               type="text"
-              value={formData.openingHours}
+              value={formData.openingHours || ''}
               onChange={(e) => onUpdate({ openingHours: e.target.value })}
               placeholder=""
               style={inputStyle}
