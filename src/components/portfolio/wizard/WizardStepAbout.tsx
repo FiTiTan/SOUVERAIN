@@ -110,13 +110,15 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
   const typeCardStyle = (selected: boolean): React.CSSProperties => ({
     padding: '1.5rem',
-    background: selected ? theme.primary + '08' : theme.surface,
-    border: `1px solid ${selected ? theme.primary : theme.border}`,
+    background: selected ? theme.primary + '15' : theme.surface,
+    border: `2px solid ${selected ? theme.primary : theme.border}`,
     borderRadius: borderRadius.lg,
     cursor: 'pointer',
     transition: transitions.default,
     textAlign: 'center',
     position: 'relative',
+    boxShadow: selected ? `0 0 0 3px ${theme.primary}20` : 'none',
+    transform: selected ? 'scale(1.02)' : 'scale(1)',
   });
 
   const buttonContainerStyle: React.CSSProperties = {
