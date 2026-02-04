@@ -12,6 +12,12 @@ export const DEV_MODE = true;
 // Type de profil simple (personne ou lieu)
 export type ProfileType = 'person' | 'place';
 
+// Options de sélection pour ProfileType
+export const PROFILE_TYPES = [
+  { id: 'person', label: 'Une personne', icon: '👤' },
+  { id: 'place', label: 'Un lieu / Une entreprise', icon: '📍' },
+];
+
 // Contexte de profil détaillé (détecté automatiquement par IA)
 export type ProfileContext = 
   | 'food'      // Restaurant, café, boulangerie...
