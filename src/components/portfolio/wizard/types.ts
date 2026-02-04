@@ -7,7 +7,7 @@
  */
 
 // ⚡ DEV MODE - Set to false for production
-export const DEV_MODE = true;
+export const DEV_MODE = false;
 
 // Type de profil simple (personne ou lieu)
 export type ProfileType = 'person' | 'place';
@@ -183,16 +183,7 @@ export const getRealisationsLabel = (context: ProfileContext | null): string => 
 
 // Placeholders pour les services selon le profileType
 export const getServicePlaceholder = (profileType: string | null, index: number): string => {
-  const placeholders: Record<string, string[]> = {
-    freelance: ['Design UX', 'Développement web', 'Conseil stratégique'],
-    commerce: ['Cafés de spécialité', 'Pâtisseries maison', 'Brunchs'],
-    creative: ['Photo portrait', 'Vidéo corporate', 'Montage'],
-    student: ['Python', 'Marketing digital', 'Anglais courant'],
-    employee: ['Management', 'Finance', 'Stratégie'],
-    person: ['Design UX', 'Développement web', 'Conseil stratégique'],
-    place: ['Cafés de spécialité', 'Pâtisseries maison', 'Brunchs'],
-  };
-  return profileType ? (placeholders[profileType]?.[index] || '') : '';
+  return '';
 };
 
 // Labels dynamiques selon le ProfileContext (pour wizard V2)
@@ -206,45 +197,45 @@ export const getContextLabels = (context: ProfileContext | null, isPlace: boolea
   }> = {
     food: {
       activityLabel: 'Type de lieu',
-      activityPlaceholder: 'Ex: Coffee shop, Restaurant, Boulangerie',
+      activityPlaceholder: '',
       expertisesLabel: 'Spécialités',
       expertisesHelper: 'Ce que vous proposez à la carte',
-      expertisesPlaceholders: ['Cafés de spécialité', 'Pâtisseries maison', 'Brunchs'],
+      expertisesPlaceholders: ['', '', ''],
     },
     retail: {
       activityLabel: 'Type de lieu',
-      activityPlaceholder: 'Ex: Boutique vêtements, Fleuriste, Librairie',
+      activityPlaceholder: '',
       expertisesLabel: 'Types de produits',
       expertisesHelper: "Ce qu'on trouve chez vous",
-      expertisesPlaceholders: ['Robes de mariée', 'Accessoires', 'Sur-mesure'],
+      expertisesPlaceholders: ['', '', ''],
     },
     artisan: {
       activityLabel: 'Métier',
-      activityPlaceholder: 'Ex: Plombier, Électricien, Menuisier',
+      activityPlaceholder: '',
       expertisesLabel: 'Savoir-faire',
       expertisesHelper: 'Ce que vous savez faire',
-      expertisesPlaceholders: ['Dépannage urgent', 'Installation', 'Rénovation'],
+      expertisesPlaceholders: ['', '', ''],
     },
     service: {
       activityLabel: 'Métier',
-      activityPlaceholder: 'Ex: Avocat, Coach sportif, Photographe',
+      activityPlaceholder: '',
       expertisesLabel: 'Domaines',
       expertisesHelper: "Vos domaines d'intervention",
-      expertisesPlaceholders: ['Divorce amiable', "Garde d'enfants", 'Médiation'],
+      expertisesPlaceholders: ['', '', ''],
     },
     tech: {
       activityLabel: 'Métier',
-      activityPlaceholder: 'Ex: Développeur web, Designer UI/UX, Graphiste',
+      activityPlaceholder: '',
       expertisesLabel: 'Expertises',
       expertisesHelper: 'Vos compétences clés',
-      expertisesPlaceholders: ['React / Vue.js', 'API Node.js', 'E-commerce'],
+      expertisesPlaceholders: ['', '', ''],
     },
     niche: {
       activityLabel: 'Métier',
-      activityPlaceholder: 'Ex: Tatoueur, Sophrologue, DJ',
+      activityPlaceholder: '',
       expertisesLabel: 'Spécialités',
       expertisesHelper: 'Ce que vous proposez',
-      expertisesPlaceholders: ['Tatouage réaliste', 'Cover-up', 'Dotwork'],
+      expertisesPlaceholders: ['', '', ''],
     },
   };
 

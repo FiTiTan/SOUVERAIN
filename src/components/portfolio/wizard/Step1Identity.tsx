@@ -76,7 +76,7 @@ export const Step1Identity: React.FC<Step1IdentityProps> = ({ data, onChange }) 
         <GlassInput
           value={data.name}
           onChange={handleNameChange}
-          placeholder="Jean Dupont"
+          placeholder=""
           style={{ width: '100%' }}
         />
       </div>
@@ -169,7 +169,7 @@ export const Step1Identity: React.FC<Step1IdentityProps> = ({ data, onChange }) 
         <GlassTextArea
           value={data.tagline}
           onChange={handleTaglineChange}
-          placeholder="J'aide les startups à créer des produits digitaux qui cartonnent"
+          placeholder=""
           rows={3}
           style={{ width: '100%' }}
         />

@@ -323,7 +323,7 @@ export const Step4Documents: React.FC<Step4DocumentsProps> = ({ data, onChange }
           type="text"
           value={data.notionData}
           onChange={(e) => onChange({ notionData: e.target.value })}
-          placeholder="https://notion.so/..."
+          placeholder=""
           style={{
             width: '100%',
             padding: '0.875rem 1rem',

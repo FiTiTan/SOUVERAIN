@@ -61,7 +61,7 @@ export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) =>
             type="email"
             value={data.email}
             onChange={(e) => onChange({ email: e.target.value })}
-            placeholder="contact@exemple.com"
+            placeholder=""
             style={{ width: '100%' }}
           />
         </div>
@@ -81,7 +81,7 @@ export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) =>
             type="tel"
             value={data.phone}
             onChange={(e) => onChange({ phone: e.target.value })}
-            placeholder="06 12 34 56 78"
+            placeholder=""
             style={{ width: '100%' }}
           />
         </div>
@@ -119,7 +119,7 @@ export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) =>
             <GlassInput
               value={data.address}
               onChange={(e) => onChange({ address: e.target.value })}
-              placeholder="12 rue des Lilas, 75011 Paris"
+              placeholder=""
               style={{ width: '100%' }}
             />
           </div>
@@ -138,7 +138,7 @@ export const Step3Contact: React.FC<Step3ContactProps> = ({ data, onChange }) =>
             <GlassInput
               value={data.openingHours}
               onChange={(e) => onChange({ openingHours: e.target.value })}
-              placeholder="Lun-Ven : 9h-18h"
+              placeholder=""
               style={{ width: '100%' }}
             />
           </div>

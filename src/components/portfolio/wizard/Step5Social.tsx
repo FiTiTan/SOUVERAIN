@@ -156,7 +156,7 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
                     type="text"
                     value={link.label || ''}
                     onChange={(e) => handleUpdateLink(index, link.url, e.target.value)}
-                    placeholder="Nom du réseau"
+                    placeholder=""
                     style={{
                       width: '100%',
                       padding: '0.75rem',
@@ -174,7 +174,7 @@ export const Step5Social: React.FC<Step5SocialProps> = ({ data, onChange }) => {
                   type="text"
                   value={link.url}
                   onChange={(e) => handleUpdateLink(index, e.target.value, link.label)}
-                  placeholder={platformInfo?.placeholder || 'URL'}
+                  placeholder=""
                   style={{
                     width: '100%',
                     padding: '0.75rem',

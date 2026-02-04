@@ -199,7 +199,7 @@ export const Step2Offer: React.FC<Step2OfferProps> = ({ data, onChange }) => {
         <GlassTextArea
           value={data.valueProp}
           onChange={handleValuePropChange}
-          placeholder="J'accompagne mes clients de l'idée au produit fini, avec une approche centrée utilisateur."
+          placeholder=""
           rows={4}
           style={{ width: '100%' }}
         />
