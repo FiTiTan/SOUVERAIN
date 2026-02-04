@@ -88,8 +88,8 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
   const typeCardStyle = (selected: boolean): React.CSSProperties => ({
     padding: '1.5rem',
-    background: selected ? theme.primary + '10' : theme.surface,
-    border: `2px solid ${selected ? theme.primary : theme.border}`,
+    background: selected ? theme.primary + '08' : theme.surface,
+    border: `1px solid ${selected ? theme.primary : theme.border}`,
     borderRadius: borderRadius.lg,
     cursor: 'pointer',
     transition: transitions.default,
@@ -99,20 +99,23 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
   const buttonContainerStyle: React.CSSProperties = {
     display: 'flex',
-    gap: '1rem',
-    marginTop: '2rem',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: '3rem',
   };
 
-  const buttonStyle = (variant: 'primary' | 'secondary'): React.CSSProperties => ({
-    flex: 1,
-    padding: '0.75rem 1.5rem',
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: variant === 'primary' ? '#fff' : theme.text.primary,
-    background: variant === 'primary' ? theme.primary : theme.surface,
-    border: `1px solid ${variant === 'primary' ? theme.primary : theme.border}`,
-    borderRadius: borderRadius.md,
-    cursor: 'pointer',
+  const iconButtonStyle = (variant: 'back' | 'next', disabled: boolean = false): React.CSSProperties => ({
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: variant === 'next' ? theme.primary : theme.surface,
+    border: `1px solid ${variant === 'next' ? theme.primary : theme.border}`,
+    color: variant === 'next' ? '#fff' : theme.text.primary,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.4 : 1,
     transition: transitions.default,
   });
 
@@ -291,19 +294,24 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
       {/* Boutons navigation */}
       <div style={buttonContainerStyle}>
-        <button onClick={onBack} style={buttonStyle('secondary')}>
-          Retour
+        <button 
+          onClick={onBack} 
+          style={iconButtonStyle('back')}
+          title="Retour"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </button>
         <button
           onClick={onNext}
           disabled={!canProceed}
-          style={{
-            ...buttonStyle('primary'),
-            opacity: canProceed ? 1 : 0.5,
-            cursor: canProceed ? 'pointer' : 'not-allowed',
-          }}
+          style={iconButtonStyle('next', !canProceed)}
+          title="Suivant"
         >
-          Suivant
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
         </button>
       </div>
     </div>
