@@ -45,9 +45,10 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
   const [isDetectingContext, setIsDetectingContext] = useState(false);
   const [detectedContext, setDetectedContext] = useState<ProfileContext | null>(null);
   const [contextLabels, setContextLabels] = useState(getContextLabels('service', false));
+  const [lastDetectedActivity, setLastDetectedActivity] = useState<string>('');
 
-  // Debounce l'activité pour la détection auto
-  const debouncedActivity = useDebounce(formData.title || '', 500);
+  // Debounce l'activité pour la détection auto (1200ms = économie tokens)
+  const debouncedActivity = useDebounce(formData.title || '', 1200);
 
   // Détection automatique du profileContext quand l'activité change
   useEffect(() => {
@@ -58,12 +59,21 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
       return;
     }
 
+    // Cache: ne pas redemander si c'est la même activité
+    if (debouncedActivity.toLowerCase().trim() === lastDetectedActivity.toLowerCase().trim()) {
+      console.log('[WizardStepAbout] Skipping detection (already detected for this activity)');
+      return;
+    }
+
     const detectContext = async () => {
       console.log('[WizardStepAbout] Starting context detection for:', debouncedActivity);
       setIsDetectingContext(true);
       try {
         const result = await detectProfileContext(debouncedActivity);
         console.log('[WizardStepAbout] Detected context:', result);
+        
+        // Sauvegarder l'activité détectée pour éviter les appels API en double
+        setLastDetectedActivity(debouncedActivity);
         
         // Mettre à jour le state local pour l'affichage
         setDetectedContext(result.context);
