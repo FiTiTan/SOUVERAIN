@@ -28,7 +28,10 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     onUpdate({ profileType: type });
   };
 
-  const canProceed = formData.name.trim().length > 0 && formData.title.trim().length > 0;
+  const canProceed = 
+    formData.name.trim().length > 0 && 
+    formData.title.trim().length > 0 &&
+    formData.email.trim().length > 0;
 
   // ============================================
   // STYLES
@@ -179,9 +182,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
       {/* Email */}
       <div style={formGroupStyle}>
-        <label style={labelStyle}>
-          Email {formData.profileType === 'place' ? '' : '(optionnel)'}
-        </label>
+        <label style={labelStyle}>Email *</label>
         <input
           type="email"
           value={formData.email}
