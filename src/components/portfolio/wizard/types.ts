@@ -42,6 +42,23 @@ export type SocialPlatform =
   | 'medium'
   | 'other';
 
+// Liste des plateformes sociales disponibles
+export const SOCIAL_PLATFORMS: { id: SocialPlatform; label: string }[] = [
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'tiktok', label: 'TikTok' },
+  { id: 'youtube', label: 'YouTube' },
+  { id: 'behance', label: 'Behance' },
+  { id: 'github', label: 'GitHub' },
+  { id: 'dribbble', label: 'Dribbble' },
+  { id: 'twitter', label: 'Twitter' },
+  { id: 'facebook', label: 'Facebook' },
+  { id: 'malt', label: 'Malt' },
+  { id: 'pinterest', label: 'Pinterest' },
+  { id: 'medium', label: 'Medium' },
+  { id: 'other', label: 'Autre' },
+];
+
 export interface SocialLink {
   platform: string;
   url: string;
