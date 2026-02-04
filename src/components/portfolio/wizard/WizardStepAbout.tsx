@@ -31,6 +31,28 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
     onUpdate({ profileType: type });
   };
 
+  // Placeholders dynamiques selon le type
+  const placeholders = {
+    person: {
+      name: 'Ex: Marie Dubois',
+      title: 'Ex: Avocate en droit de la famille',
+      email: 'Ex: contact@marie-dubois.fr',
+      phone: 'Ex: 06 12 34 56 78',
+    },
+    place: {
+      name: 'Ex: Le Café des Arts',
+      title: 'Ex: Coffee shop & brunch',
+      email: 'Ex: bonjour@lecafedesarts.fr',
+      phone: 'Ex: 01 42 34 56 78',
+      address: 'Ex: 12 rue des Lilas, 75011 Paris',
+      hours: 'Ex: Lun-Ven 8h-19h, Sam-Dim 9h-18h',
+    },
+  };
+
+  const currentPlaceholders = formData.profileType === 'place' 
+    ? placeholders.place 
+    : placeholders.person;
+
   const canProceed = 
     formData.name.trim().length > 0 && 
     formData.title.trim().length > 0 &&
@@ -213,7 +235,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
           type="text"
           value={formData.name}
           onChange={(e) => onUpdate({ name: e.target.value })}
-          placeholder=""
+          placeholder={currentPlaceholders.name}
           style={inputStyle}
         />
       </div>
@@ -227,7 +249,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
           type="text"
           value={formData.title}
           onChange={(e) => onUpdate({ title: e.target.value })}
-          placeholder=""
+          placeholder={currentPlaceholders.title}
           style={inputStyle}
         />
       </div>
@@ -239,7 +261,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
           type="email"
           value={formData.email || ''}
           onChange={(e) => onUpdate({ email: e.target.value })}
-          placeholder=""
+          placeholder={currentPlaceholders.email}
           style={inputStyle}
         />
       </div>
@@ -251,7 +273,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
           type="tel"
           value={formData.phone || ''}
           onChange={(e) => onUpdate({ phone: e.target.value })}
-          placeholder=""
+          placeholder={currentPlaceholders.phone}
           style={inputStyle}
         />
       </div>
@@ -265,7 +287,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
               type="text"
               value={formData.address || ''}
               onChange={(e) => onUpdate({ address: e.target.value })}
-              placeholder=""
+              placeholder={placeholders.place.address}
               style={inputStyle}
             />
           </div>
@@ -276,7 +298,7 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
               type="text"
               value={formData.openingHours || ''}
               onChange={(e) => onUpdate({ openingHours: e.target.value })}
-              placeholder=""
+              placeholder={placeholders.place.hours}
               style={inputStyle}
             />
           </div>
