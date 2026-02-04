@@ -82,12 +82,13 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
 
   const typeCardStyle = (selected: boolean): React.CSSProperties => ({
     padding: '1.5rem',
-    background: selected ? theme.primary + '20' : theme.surface,
-    border: `2px solid ${selected ? theme.primary : theme.border}`,
+    background: selected ? theme.primary + '15' : theme.surface,
+    border: `3px solid ${selected ? theme.primary : theme.border}`,
     borderRadius: borderRadius.lg,
     cursor: 'pointer',
     transition: transitions.default,
     textAlign: 'center',
+    boxShadow: selected ? `0 0 0 1px ${theme.primary}40` : 'none',
   });
 
   const buttonContainerStyle: React.CSSProperties = {
@@ -176,9 +177,62 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         />
       </div>
 
+      {/* Email */}
+      <div style={formGroupStyle}>
+        <label style={labelStyle}>
+          Email {formData.profileType === 'place' ? '' : '(optionnel)'}
+        </label>
+        <input
+          type="email"
+          value={formData.email}
+          onChange={(e) => onUpdate({ email: e.target.value })}
+          placeholder=""
+          style={inputStyle}
+        />
+      </div>
+
+      {/* Téléphone */}
+      <div style={formGroupStyle}>
+        <label style={labelStyle}>Téléphone (optionnel)</label>
+        <input
+          type="tel"
+          value={formData.phone}
+          onChange={(e) => onUpdate({ phone: e.target.value })}
+          placeholder=""
+          style={inputStyle}
+        />
+      </div>
+
+      {/* Champs spécifiques aux lieux */}
+      {formData.profileType === 'place' && (
+        <>
+          <div style={formGroupStyle}>
+            <label style={labelStyle}>Adresse</label>
+            <input
+              type="text"
+              value={formData.address}
+              onChange={(e) => onUpdate({ address: e.target.value })}
+              placeholder=""
+              style={inputStyle}
+            />
+          </div>
+
+          <div style={formGroupStyle}>
+            <label style={labelStyle}>Horaires d'ouverture (optionnel)</label>
+            <input
+              type="text"
+              value={formData.openingHours}
+              onChange={(e) => onUpdate({ openingHours: e.target.value })}
+              placeholder=""
+              style={inputStyle}
+            />
+          </div>
+        </>
+      )}
+
       {/* Réseaux sociaux */}
       <div style={formGroupStyle}>
-        <label style={labelStyle}>Réseaux sociaux (optionnel)</label>
+        <label style={labelStyle}>Réseaux sociaux à afficher sur le portfolio</label>
         <SocialLinksGrid
           selectedLinks={formData.socialLinks || []}
           onUpdate={(links) => onUpdate({ socialLinks: links })}
