@@ -1,14 +1,19 @@
 /**
  * SOUVERAIN - Wizard Step 1: Informations de base
  * 
- * Simplifié : Nom + Type de lieu uniquement
- * La détection de contexte et les expertises sont déplacées en Step 2
+ * Contenu :
+ * - Nom
+ * - Type (person/place)
+ * - Métier / Type de lieu
+ * - Réseaux sociaux
+ * 
+ * Note: Expertises, slogan et détection de contexte déplacés en Step 2
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useTheme } from '../../../ThemeContext';
 import { typography, borderRadius, transitions } from '../../../design-system';
-import type { WizardStepProps, ProfileType, ImportSource } from '../types';
+import type { WizardStepProps, ProfileType } from '../types';
 import { SocialLinksGrid } from './SocialLinksGrid';
 
 export const WizardStepAbout: React.FC<WizardStepProps> = ({
@@ -18,39 +23,9 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
   onBack,
 }) => {
   const { theme } = useTheme();
-  const [isImporting, setIsImporting] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
 
   const handleProfileTypeChange = (type: ProfileType) => {
     onUpdate({ profileType: type });
-  };
-
-  const handleImportSuccess = async (source: ImportSource) => {
-    setIsImporting(true);
-    setImportError(null);
-
-    try {
-      const updatedSources = [...formData.importSources, source];
-      
-      if (source.extractedData) {
-        const extracted = source.extractedData;
-        onUpdate({
-          importSources: updatedSources,
-          name: extracted.name || formData.name,
-          title: extracted.title || formData.title,
-          email: extracted.email || formData.email,
-          phone: extracted.phone || formData.phone,
-          address: extracted.address || formData.address,
-        });
-      } else {
-        onUpdate({ importSources: updatedSources });
-      }
-    } catch (error: any) {
-      console.error('[WizardStepAbout] Import error:', error);
-      setImportError(error.message || 'Erreur lors de l\'import');
-    } finally {
-      setIsImporting(false);
-    }
   };
 
   const canProceed = formData.name.trim().length > 0 && formData.title.trim().length > 0;
@@ -201,18 +176,13 @@ export const WizardStepAbout: React.FC<WizardStepProps> = ({
         />
       </div>
 
-      {/* Import de sources */}
+      {/* Réseaux sociaux */}
       <div style={formGroupStyle}>
-        <label style={labelStyle}>Importer depuis une source (optionnel)</label>
+        <label style={labelStyle}>Réseaux sociaux (optionnel)</label>
         <SocialLinksGrid
-          sources={formData.importSources}
-          onImportSuccess={handleImportSuccess}
+          selectedLinks={formData.socialLinks || []}
+          onUpdate={(links) => onUpdate({ socialLinks: links })}
         />
-        {importError && (
-          <div style={{ color: theme.error, fontSize: typography.fontSize.sm, marginTop: '0.5rem' }}>
-            {importError}
-          </div>
-        )}
       </div>
 
       {/* Boutons navigation */}
