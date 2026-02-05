@@ -9,7 +9,7 @@
   "scripts": {
     "start": "concurrently \"npm run vite:dev\" \"wait-on http://localhost:5173 && npm run electron:dev\"",
     "vite:dev": "vite",
-    "electron:dev": "electron .",
+    "electron:dev": "electron . --no-sandbox",
     "build": "vite build && electron-builder",
     "postinstall": "electron-rebuild",
     "preview": "vite preview"
